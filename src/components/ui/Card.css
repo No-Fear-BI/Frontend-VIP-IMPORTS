@@ -1,0 +1,16 @@
+.cartao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+  border-radius: var(--raio);
+}
+
+.cartao--borda {
+  padding: var(--espaco-4);
+  border: var(--borda-fina) solid var(--cor-borda);
+  transition: border-color var(--duracao-rapida) var(--curva-padrao);
+}
+
+a.cartao--borda:hover {
+  border-color: var(--cor-primaria);
+}

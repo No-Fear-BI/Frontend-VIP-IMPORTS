@@ -1,0 +1,218 @@
+.barra-aviso {
+  padding-block: var(--espaco-2);
+}
+
+.barra-aviso p {
+  color: var(--cor-sobre-primaria-suave);
+}
+
+.cabecalho {
+  position: sticky;
+  top: 0;
+  z-index: var(--camada-cabecalho);
+  background: var(--cor-superficie);
+  border-bottom: var(--borda-fina) solid transparent;
+  transition: border-color var(--duracao-rapida) var(--curva-padrao);
+  /* Entrada da página, uma vez. `backwards` para não deixar
+     transform no elemento sticky depois que a animação termina. */
+  animation: cabecalho-entra var(--duracao-lenta) var(--curva-suave) backwards;
+}
+
+@keyframes cabecalho-entra {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-1 * var(--espaco-2)));
+  }
+}
+
+.cabecalho--rolou {
+  border-bottom-color: var(--cor-borda);
+}
+
+.cabecalho__topo {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--espaco-10);
+  min-height: var(--altura-cabecalho);
+}
+
+.cabecalho__nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-1) var(--espaco-4);
+}
+
+.cabecalho__link {
+  display: inline-block;
+  padding-block: var(--espaco-2);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: var(--borda-fina);
+  text-underline-offset: var(--sublinhado-afastamento);
+  transition: text-decoration-color var(--duracao-rapida) var(--curva-padrao);
+}
+
+.cabecalho__link:hover,
+.cabecalho__link.active {
+  text-decoration-color: currentColor;
+}
+
+.cabecalho__acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-1);
+}
+
+.cabecalho__icone {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--altura-controle-compacto);
+  height: var(--altura-controle-compacto);
+}
+
+.cabecalho__icone svg {
+  width: var(--icone-md);
+  height: var(--icone-md);
+}
+
+/* Depois de .cabecalho__icone de propósito: as duas regras têm a mesma especificidade. */
+.cabecalho__icone.cabecalho__menu {
+  display: none;
+}
+
+/* Selo de contagem: ponto = círculo. */
+.selo-contagem {
+  position: absolute;
+  top: var(--espaco-1);
+  right: calc(var(--espaco-1) / 2);
+  display: grid;
+  place-items: center;
+  min-width: var(--selo-tamanho);
+  height: var(--selo-tamanho);
+  padding-inline: var(--espaco-1);
+  border-radius: var(--raio-circulo);
+  background: var(--cor-primaria);
+  color: var(--cor-sobre-primaria);
+  font-size: var(--texto-xs);
+  font-feature-settings: 'tnum' 1;
+  line-height: 1;
+}
+
+.selo-contagem--pulando {
+  animation: selo-pula var(--duracao-media) var(--curva-suave);
+}
+
+@keyframes selo-pula {
+  50% {
+    transform: scale(var(--escala-pulo));
+  }
+}
+
+.barra-busca {
+  border-top: var(--borda-fina) solid var(--cor-borda);
+  background: var(--cor-superficie);
+}
+
+.barra-busca__form {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-4);
+  min-height: var(--altura-cabecalho-compacta);
+}
+
+.barra-busca__icone {
+  width: var(--icone-md);
+  height: var(--icone-md);
+  flex: none;
+}
+
+.barra-busca__campo {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  padding-block: var(--espaco-2);
+}
+
+.barra-busca__campo::placeholder {
+  color: var(--cor-texto-suave);
+}
+
+.barra-busca__campo:focus-visible {
+  outline: none;
+}
+
+.barra-busca__form {
+  border-bottom: var(--borda-grossa) solid transparent;
+}
+
+.barra-busca__form:focus-within {
+  border-bottom-color: var(--cor-primaria);
+}
+
+/* ---- Até 1240px: menu vira gaveta ---- */
+@media (max-width: 1240px) {
+  .cabecalho__topo {
+    grid-template-columns: 1fr auto 1fr;
+    gap: var(--espaco-4);
+    min-height: var(--altura-cabecalho-compacta);
+  }
+
+  .cabecalho__icone.cabecalho__menu {
+    display: grid;
+    justify-self: start;
+  }
+
+  .cabecalho__nav {
+    display: none;
+  }
+
+  /* Wordmark centralizado no cabeçalho do celular. */
+  .cabecalho__logo {
+    justify-self: center;
+  }
+
+  .cabecalho__acoes {
+    justify-self: end;
+  }
+}
+
+@media (max-width: 480px) {
+  .cabecalho__acoes a[aria-label='Minha conta'] {
+    display: none;
+  }
+}
+
+.menu-celular {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-6);
+}
+
+.menu-celular__logo {
+  margin-bottom: var(--espaco-4);
+}
+
+.menu-celular ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+}
+
+.menu-celular__link {
+  display: block;
+  padding-block: var(--espaco-1);
+}
+
+.menu-celular__link.active {
+  text-decoration: underline;
+  text-decoration-thickness: var(--borda-fina);
+  text-underline-offset: var(--sublinhado-afastamento);
+}
+
+.menu-celular .filete {
+  align-self: stretch;
+}

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VIP Imports — Comparação de direção visual</title>
+<style>
+  @font-face { font-family: 'Bodoni Moda'; src: url(fontes/bodoni-moda-latin-opsz-normal-X2BzlAjV.woff2) format('woff2-variations'); font-weight: 400 900; }
+  @font-face { font-family: 'Jost'; src: url(fontes/jost-latin-wght-normal-ObQm3Zd1.woff2) format('woff2-variations'); font-weight: 100 900; }
+  :root { --verde: #28361f; --creme: #fceab3; --papel: #fefaee; --muted: #606955; --filete: #d3d3c5; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--papel); color: var(--verde); font-family: 'Jost', Futura, sans-serif; font-size: 15px; line-height: 1.55; }
+  header { padding: 32px clamp(16px, 4vw, 48px) 24px; display: grid; gap: 12px; border-bottom: 1px solid var(--filete); }
+  .rotulo { font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
+  h1 { margin: 0; font-family: 'Bodoni Moda', Didot, Georgia, serif; font-weight: 400; font-size: clamp(28px, 4vw, 44px); line-height: 1.1; }
+  p { margin: 0; max-width: 72ch; }
+  .muted { color: var(--muted); }
+  .controles { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .controles button { font: inherit; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 12px 18px; border: 1px solid #79806e; background: var(--papel); color: var(--verde); cursor: pointer; }
+  .controles button[aria-pressed='true'] { background: var(--verde); color: var(--creme); border-color: var(--verde); }
+  main { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 24px clamp(16px, 4vw, 48px) 48px; }
+  .opcao { display: grid; gap: 12px; align-content: start; min-width: 0; }
+  .opcao h2 { margin: 0; font-family: 'Bodoni Moda', Didot, Georgia, serif; font-weight: 400; font-size: 26px; }
+  .opcao ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+  .moldura { position: relative; width: 100%; overflow: hidden; border: 1px solid var(--filete); background: #fff; }
+  .moldura iframe { border: 0; transform-origin: 0 0; display: block; }
+  .moldura--celular { max-width: 390px; }
+  .abrir { color: inherit; justify-self: start; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: underline; text-underline-offset: 4px; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+  <header>
+    <p class="rotulo muted">VIP Imports · proposta de direção visual</p>
+    <h1>Duas homes, o mesmo conteúdo</h1>
+    <p>As duas usam só a paleta oficial da marca (verde, creme e branco), as mesmas fontes, as mesmas peças e o mesmo botão <strong>Comprar no WhatsApp</strong>. O que muda é o jeito de apresentar. As imagens são ilustrações provisórias: no site de verdade entram as fotos das peças.</p>
+    <p class="muted">Role dentro de cada quadro para ver a página inteira. Os links não navegam: é só para comparar a aparência.</p>
+    <div class="controles" role="group" aria-label="Tamanho de tela">
+      <button type="button" data-modo="desktop" aria-pressed="true">Computador</button>
+      <button type="button" data-modo="celular" aria-pressed="false">Celular</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="opcao">
+      <p class="rotulo muted">Opção 1 · a que está construída</p>
+      <h2>Editorial + etiqueta</h2>
+      <ul>
+        <li>Revista de moda com etiqueta de alfaiataria: título serifado grande e o código da peça tratado como etiqueta creme.</li>
+        <li>Faixas verdes cheias (topo e fechamento) e peças na vitrine branca, com filetes finos no lugar de caixas.</li>
+        <li><strong>Ganha:</strong> presença de marca forte e leitura rápida no celular; funciona bem mesmo com fotos de qualidade variada.</li>
+        <li><strong>Abre mão de:</strong> densidade (4 peças por linha) e um pouco da sensação de "silêncio" de grife.</li>
+      </ul>
+      <a class="abrir" href="opcao-1-editorial/index.html" target="_blank">Abrir em tela cheia</a>
+      <div class="moldura" data-quadro><iframe src="opcao-1-editorial/index.html" title="Home — opção 1, Editorial + etiqueta"></iframe></div>
+    </section>
+
+    <section class="opcao">
+      <p class="rotulo muted">Opção 2 · só para comparação</p>
+      <h2>Luxo minimalista</h2>
+      <ul>
+        <li>Linha The Row, Celine e Jil Sander: fundo branco, verde só no texto, nenhuma faixa, borda ou botão cheio.</li>
+        <li>Margens enormes, três peças por linha em grade desencontrada, categorias como palavras grandes, sem foto.</li>
+        <li><strong>Ganha:</strong> sensação máxima de exclusividade e de loja "de hora marcada".</li>
+        <li><strong>Abre mão de:</strong> clareza do botão de compra, quantidade de peças por tela e tolerância a foto ruim: sem fotos excelentes, a página parece vazia.</li>
+      </ul>
+      <a class="abrir" href="opcao-2-luxo-minimalista/index.html" target="_blank">Abrir em tela cheia</a>
+      <div class="moldura" data-quadro><iframe src="opcao-2-luxo-minimalista/index.html" title="Home — opção 2, Luxo minimalista"></iframe></div>
+    </section>
+  </main>
+
+  <script>
+    // Cada quadro mostra a página numa largura real (1440px no computador, 390px no celular),
+    // reduzida proporcionalmente para caber na coluna.
+    const quadros = document.querySelectorAll('[data-quadro]');
+    let modo = 'desktop';
+    function ajustar() {
+      const largura = modo === 'desktop' ? 1440 : 390;
+      const altura = modo === 'desktop' ? 900 : 780;
+      quadros.forEach((q) => {
+        q.classList.toggle('moldura--celular', modo === 'celular');
+        const iframe = q.querySelector('iframe');
+        const escala = Math.min(1, q.clientWidth / largura);
+        iframe.style.width = largura + 'px';
+        iframe.style.height = altura + 'px';
+        iframe.style.transform = 'scale(' + escala + ')';
+        q.style.height = altura * escala + 'px';
+      });
+    }
+    document.querySelectorAll('[data-modo]').forEach((b) =>
+      b.addEventListener('click', () => {
+        modo = b.dataset.modo;
+        document.querySelectorAll('[data-modo]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        ajustar();
+      }),
+    );
+    window.addEventListener('resize', ajustar);
+    ajustar();
+  </script>
+</body>
+</html>

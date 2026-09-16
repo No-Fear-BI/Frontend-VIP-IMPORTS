@@ -1,0 +1,72 @@
+.rodape {
+  padding-block: var(--espaco-secao) var(--espaco-6);
+  /* Separa o rodapé do CTA final quando os dois verdes se encostam. */
+  border-top: var(--borda-fina) solid var(--cor-borda-sobre-primaria);
+}
+
+.rodape__grade {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: var(--espaco-10) var(--calha);
+  padding-bottom: var(--espaco-secao);
+}
+
+.rodape__marca {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-6);
+}
+
+.rodape__texto {
+  max-width: var(--medida-curta);
+}
+
+.rodape__coluna {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.rodape__coluna ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.rodape__coluna a {
+  font-size: var(--texto-sm);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: var(--sublinhado-afastamento);
+  transition: text-decoration-color var(--duracao-rapida) var(--curva-padrao);
+}
+
+.rodape__coluna a:hover {
+  text-decoration-color: currentColor;
+}
+
+.rodape__whats {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+}
+
+.rodape__whats svg {
+  width: var(--icone-sm);
+  height: var(--icone-sm);
+}
+
+.rodape__legal {
+  padding-top: var(--espaco-6);
+}
+
+@media (max-width: 1023px) {
+  .rodape__grade {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .rodape__marca {
+    grid-column: 1 / -1;
+  }
+}

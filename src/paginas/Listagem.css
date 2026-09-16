@@ -1,0 +1,166 @@
+.listagem {
+  padding-bottom: var(--espaco-secao);
+}
+
+.listagem__barra {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--espaco-4);
+  padding-block: var(--espaco-4);
+  margin-bottom: var(--espaco-10);
+  border-block: var(--borda-fina) solid var(--cor-borda);
+}
+
+.listagem__abrir-filtros {
+  display: none;
+}
+
+.listagem__ordem {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  margin-left: auto;
+}
+
+.listagem__ordem select {
+  height: var(--altura-controle-compacto);
+  padding-inline: var(--espaco-2);
+  border: var(--borda-fina) solid var(--cor-borda-forte);
+  border-radius: var(--raio);
+  background: var(--cor-fundo-foto);
+  font-size: var(--texto-sm);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.listagem__corpo {
+  display: grid;
+  grid-template-columns: var(--largura-lateral) minmax(0, 1fr);
+  gap: var(--espaco-10);
+  align-items: start;
+}
+
+.grade-produtos--listagem {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.listagem__mais {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-4);
+  margin-top: var(--espaco-secao);
+  padding-top: var(--espaco-6);
+  border-top: var(--borda-fina) solid var(--cor-borda);
+}
+
+@media (max-width: 1023px) {
+  .listagem__corpo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .listagem__lateral {
+    display: none;
+  }
+
+  .listagem__abrir-filtros {
+    display: inline-flex;
+    order: -1;
+  }
+
+  .listagem__total {
+    display: none;
+  }
+
+  .listagem__ordem {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  .grade-produtos--listagem {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .listagem__ordem > span {
+    display: none;
+  }
+}
+
+.listagem__gaveta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-6);
+}
+
+/* ---- Filtros ---- */
+
+.filtros {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-10);
+}
+
+.filtros__grupo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.filtros__grupo legend {
+  padding: 0 0 var(--espaco-2);
+  margin-bottom: var(--espaco-2);
+  width: 100%;
+  border-bottom: var(--borda-fina) solid var(--cor-borda);
+}
+
+.filtros__limpar {
+  align-self: flex-start;
+}
+
+.opcao-filtro {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--espaco-2);
+  min-height: var(--altura-opcao-lista);
+  font-size: var(--texto-sm);
+  cursor: pointer;
+}
+
+.opcao-filtro input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Marcador quadrado (raio 0). Ativo = verde cheio. */
+.opcao-filtro__marcador {
+  width: var(--icone-sm);
+  height: var(--icone-sm);
+  border: var(--borda-fina) solid var(--cor-borda-forte);
+  background: var(--cor-fundo-foto);
+  transition:
+    background-color var(--duracao-rapida) var(--curva-padrao),
+    border-color var(--duracao-rapida) var(--curva-padrao);
+}
+
+.opcao-filtro--ativa .opcao-filtro__marcador {
+  background: var(--cor-primaria);
+  border-color: var(--cor-primaria);
+}
+
+.opcao-filtro input:focus-visible + .opcao-filtro__marcador {
+  outline: var(--borda-grossa) solid var(--cor-primaria);
+  outline-offset: var(--foco-afastamento);
+}
+
+.opcao-filtro:hover .opcao-filtro__texto {
+  text-decoration: underline;
+  text-underline-offset: var(--sublinhado-afastamento);
+}

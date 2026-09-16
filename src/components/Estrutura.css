@@ -1,0 +1,50 @@
+.conteudo {
+  min-height: var(--altura-minima-conteudo);
+}
+
+.pular-para-conteudo {
+  position: absolute;
+  left: var(--espaco-4);
+  top: var(--espaco-4);
+  transform: translateY(calc(-100% - var(--espaco-10)));
+  z-index: var(--camada-pular-conteudo);
+  padding: var(--espaco-2) var(--espaco-4);
+  background: var(--cor-primaria);
+  color: var(--cor-sobre-primaria);
+}
+
+.pular-para-conteudo:focus {
+  transform: none;
+}
+
+.aviso-regiao {
+  position: fixed;
+  left: var(--espaco-4);
+  right: var(--espaco-4);
+  bottom: var(--espaco-4);
+  z-index: var(--camada-aviso);
+  display: flex;
+  justify-content: flex-start;
+  pointer-events: none;
+}
+
+.aviso {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-6);
+  max-width: var(--largura-formulario);
+  padding: var(--espaco-4);
+  background: var(--cor-primaria);
+  color: var(--cor-superficie);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  pointer-events: auto;
+  animation: aviso-entra var(--duracao-media) var(--curva-suave);
+}
+
+@keyframes aviso-entra {
+  from {
+    opacity: 0;
+    transform: translateY(var(--espaco-2));
+  }
+}

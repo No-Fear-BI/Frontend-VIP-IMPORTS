@@ -1,0 +1,39 @@
+/* Wordmark provisório em texto até chegar o SVG oficial. Medidas em tokens.css › Logo. */
+.logo {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+
+.logo--verde {
+  color: var(--cor-primaria);
+}
+
+.logo--creme {
+  color: var(--cor-sobre-primaria);
+}
+
+.logo__vip {
+  font-family: var(--fonte-titulo);
+  font-size: var(--logo-tamanho);
+  letter-spacing: var(--logo-tracking);
+  line-height: 0.9;
+}
+
+.logo__filete {
+  display: block;
+  width: 100%;
+  height: var(--borda-fina);
+  margin-block: var(--espaco-1);
+  background: currentColor;
+}
+
+.logo__imports {
+  font-family: var(--fonte-texto);
+  font-size: var(--logo-tamanho-assinatura);
+  font-weight: var(--peso-regular);
+  letter-spacing: var(--logo-tracking-assinatura);
+  margin-right: calc(-1 * var(--logo-tracking-assinatura));
+  text-transform: uppercase;
+}

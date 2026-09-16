@@ -1,0 +1,106 @@
+/* Blocos de página compartilhados. Só var() de tokens.css. */
+
+.secao {
+  padding-block: var(--espaco-secao);
+}
+
+.secao--proxima {
+  padding-top: var(--espaco-10);
+}
+
+.secao--respiro {
+  padding-top: var(--espaco-secao-grande);
+}
+
+.cabecalho-secao {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--espaco-4) var(--espaco-6);
+  padding-bottom: var(--espaco-6);
+  margin-bottom: var(--espaco-10);
+}
+
+/* O filete se desenha da esquerda para a direita na primeira vez que a seção aparece
+  . É o traço do logo entre "VIP" e "IMPORTS". */
+.cabecalho-secao__filete {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--borda-fina);
+  background: var(--cor-borda);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--duracao-muito-lenta) var(--curva-suave);
+}
+
+.cabecalho-secao--visivel .cabecalho-secao__filete {
+  transform: scaleX(1);
+}
+
+.cabecalho-secao__textos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.cabecalho-secao .link-caps {
+  margin-bottom: var(--espaco-2);
+}
+
+/* Cabeçalho de página (listagens, conta, seleção) */
+.topo-pagina {
+  padding-block: var(--espaco-10) var(--espaco-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.trilha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+  color: var(--cor-texto-suave);
+}
+
+.trilha a:hover {
+  color: var(--cor-texto);
+  text-decoration: underline;
+  text-underline-offset: var(--sublinhado-afastamento);
+}
+
+.texto-corrido {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+  max-width: var(--medida-texto);
+}
+
+.texto-corrido h2 {
+  margin-top: var(--espaco-10);
+}
+
+.lista-contato {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-6);
+  padding-block: var(--espaco-6);
+  border-block: var(--borda-fina) solid var(--cor-borda);
+}
+
+.lista-contato li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-2);
+}
+
+.lista-botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-4);
+  margin-top: var(--espaco-2);
+}

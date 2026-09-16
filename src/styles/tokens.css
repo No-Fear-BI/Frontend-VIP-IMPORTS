@@ -1,0 +1,190 @@
+/*
+ * CONTRATO DE TOKENS — VIP Imports
+ *
+ * Os VALORES deste arquivo são PROVISÓRIOS. O cliente ainda não escolheu a direção
+ * visual (16/09/2026), então ainda não existe DESIGN.md. Quando ele decidir, a skill
+ * design-md-planner gera o DESIGN.md e todos os valores abaixo são substituídos pelos
+ * valores de lá.
+ *
+ * Os NOMES são DEFINITIVOS. Nenhum nome é renomeado ou removido na troca de estilo,
+ * então nenhum componente precisa ser reescrito quando os valores mudarem.
+ *
+ * Regra para todo componente, página e CSS fora deste arquivo: nenhum hex, rgb(),
+ * px de espaçamento, tamanho de fonte, família de fonte ou duração solta.
+ * Tudo sai de var(--token). Precisa de um valor que não existe? Crie o token aqui,
+ * nomeado pela FUNÇÃO (--cor-borda), nunca pela aparência (--verde-escuro).
+ *
+ * Exceção única: pontos de quebra. CSS não aceita var() dentro de @media, então as
+ * larguras abaixo são escritas literalmente nas media queries. Use só estas:
+ *   480px (celular pequeno) · 767px (celular) · 1023px (tablet) · 1240px (menu vira gaveta)
+ *
+ * Paleta oficial do manual da marca: #28361F (verde), #FCEAB3 (creme), #FFFFFF (branco).
+ * Os neutros abaixo são misturas dessas três, com a proporção anotada.
+ */
+
+:root {
+  /* ---------- Cores ---------- */
+
+  --cor-primaria: #28361f;                 /* verde oficial */
+  --cor-primaria-hover: #414c31;           /* verde 88% + creme 12% */
+  --cor-sobre-primaria: #fceab3;           /* creme oficial: texto e ícone sobre a primária */
+  --cor-sobre-primaria-suave: #c1b88a;     /* creme 72% sobre verde */
+  --cor-borda-sobre-primaria: #4a5337;     /* creme 16% sobre verde */
+
+  --cor-secundaria: #fceab3;               /* creme oficial */
+  --cor-sobre-secundaria: #28361f;
+
+  --cor-superficie: #fefaee;               /* fundo da página: creme 22% + branco */
+  --cor-fundo-foto: #ffffff;               /* branco oficial: atrás da foto do produto */
+  --cor-fundo-campo: #ffffff;              /* branco oficial: input, select */
+
+  --cor-texto: #28361f;
+  --cor-texto-suave: #606955;              /* verde 74% sobre a superfície */
+
+  --cor-borda: #d3d3c5;                    /* verde 20% sobre a superfície */
+  --cor-borda-forte: #79806e;              /* verde 62% sobre a superfície */
+
+  --cor-erro: #28361f;                     /* a paleta não tem vermelho: erro = ícone + frase + traço */
+
+  --cor-veu: rgb(40 54 31 / 0.4);          /* atrás do modal */
+  --degrade-sobre-foto: linear-gradient(to top, rgb(40 54 31 / 0.85) 0%, rgb(40 54 31 / 0.35) 45%, rgb(40 54 31 / 0) 75%);
+  --brilho-botao-primario: linear-gradient(105deg, transparent 20%, rgb(252 234 179 / 0.22) 50%, transparent 80%);
+  --brilho-botao-sobre-primaria: linear-gradient(105deg, transparent 20%, rgb(255 255 255 / 0.55) 50%, transparent 80%);
+
+  /* ---------- Tipografia ---------- */
+
+  /* Fallback de sistema até a direção visual definir as fontes. */
+  --fonte-titulo: Georgia, 'Times New Roman', Times, serif;
+  --fonte-texto: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  --texto-xs: 12px;
+  --texto-sm: 14px;
+  --texto-md: 16px;                        /* nunca abaixo disso em input: o iOS dá zoom */
+  --texto-lg: 18px;
+  --texto-xl: 22px;
+  --texto-2xl: clamp(26px, 4vw, 34px);
+  --texto-3xl: clamp(36px, 7vw, 60px);
+
+  --altura-linha-titulo: 1.12;
+  --altura-linha-texto: 1.6;
+  --altura-linha-compacta: 1.3;
+
+  --tracking-titulo: -0.01em;
+  --tracking-versalete: 0.14em;
+  --tracking-codigo: 0.08em;
+
+  --peso-regular: 400;
+  --peso-forte: 600;
+
+  /* ---------- Espaço (base 4px) ---------- */
+
+  --espaco-1: 4px;
+  --espaco-2: 8px;
+  --espaco-3: 12px;
+  --espaco-4: 16px;
+  --espaco-5: 20px;
+  --espaco-6: 24px;
+  --espaco-7: 28px;
+  --espaco-8: 32px;
+  --espaco-9: 36px;
+  --espaco-10: 40px;
+  --espaco-11: 44px;
+  --espaco-12: 48px;
+
+  --espaco-secao: 64px;                    /* entre blocos grandes de página */
+  --espaco-secao-grande: 104px;
+
+  /* ---------- Layout ---------- */
+
+  --container-largura: 1320px;
+  --container-margem: 48px;
+  --container-margem-celular: 20px;
+  --calha: 24px;                           /* vão entre colunas de grade */
+
+  --medida-texto: 64ch;                    /* largura máxima de texto corrido */
+  --medida-curta: 48ch;
+  --medida-titulo: 16ch;
+
+  --largura-lateral: 240px;                /* coluna de filtros */
+  --largura-formulario: 480px;
+  --largura-modal: 560px;
+  --largura-gaveta: 360px;
+  --largura-miniatura: 88px;
+  --largura-miniatura-grande: 140px;
+
+  --altura-minima-conteudo: 60vh;
+  --altura-cabecalho: 84px;
+  --altura-cabecalho-compacta: 72px;
+  --altura-hero: clamp(460px, 72vh, 720px);
+  --altura-painel-colecao: clamp(320px, 42vw, 560px);
+  --altura-cartao-marca: 120px;
+
+  /* ---------- Controles e ícones ---------- */
+
+  --altura-controle: 52px;                 /* botão, input */
+  --altura-controle-compacto: 44px;        /* seletor de variação, botão só de ícone (alvo de toque mínimo) */
+  --altura-opcao-lista: 36px;              /* linha de filtro */
+
+  --icone-sm: 16px;
+  --icone-md: 20px;
+  --icone-lg: 28px;
+  --selo-tamanho: 18px;                    /* contador da seleção no cabeçalho */
+
+  /* ---------- Forma ---------- */
+
+  --raio: 2px;
+  --raio-circulo: 9999px;
+  --sombra: 0 8px 24px rgb(40 54 31 / 0.12);   /* só em camada flutuante: modal e aviso */
+
+  --borda-fina: 1px;
+  --borda-grossa: 2px;
+  --foco-espessura: 2px;
+  --foco-afastamento: 2px;
+  --sublinhado-afastamento: 4px;
+
+  /* ---------- Logo (wordmark provisório em texto, até chegar o SVG oficial) ---------- */
+
+  --logo-tamanho: 34px;
+  --logo-tamanho-assinatura: 8px;        /* "IMPORTS" */
+  --logo-tracking: 0.04em;
+  --logo-tracking-assinatura: 0.5em;
+
+  /* ---------- Camadas ---------- */
+
+  --camada-cabecalho: 20;
+  --camada-aviso: 40;
+  --camada-pular-conteudo: 50;
+
+  /* ---------- Movimento ---------- */
+
+  --curva-padrao: ease-out;
+  --curva-suave: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --duracao-rapida: 120ms;                 /* hover, troca de cor */
+  --duracao-media: 220ms;                  /* modal, aviso, seta do link */
+  --duracao-lenta: 700ms;                  /* hero, brilho do botão, entrada do cabeçalho */
+  --duracao-muito-lenta: 1000ms;           /* zoom da foto, filete da seção */
+  --duracao-carrossel: 7000ms;             /* tempo de cada slide do hero */
+  --atraso-cascata: 90ms;
+
+  --deslocamento-entrada: 16px;
+  --deslocamento-seta: 4px;
+  --escala-hover: 1.04;
+  --escala-destaque: 1.06;
+  --escala-pulo: 1.25;
+  --escala-pressionado: 0.985;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duracao-rapida: 0ms;
+    --duracao-media: 0ms;
+    --duracao-lenta: 0ms;
+    --duracao-muito-lenta: 0ms;
+    --deslocamento-entrada: 0px;
+    --deslocamento-seta: 0px;
+    --escala-hover: 1;
+    --escala-destaque: 1;
+    --escala-pulo: 1;
+  }
+}

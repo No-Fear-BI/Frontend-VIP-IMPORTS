@@ -1,0 +1,51 @@
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+/* --texto-md: abaixo disso o iOS dá zoom ao focar o campo. */
+.campo__input {
+  height: var(--altura-controle);
+  padding-inline: var(--espaco-3);
+  border: var(--borda-fina) solid var(--cor-borda-forte);
+  border-radius: var(--raio);
+  background: var(--cor-fundo-campo);
+  color: var(--cor-texto);
+  font-size: var(--texto-md);
+}
+
+.campo__input::placeholder {
+  color: var(--cor-texto-suave);
+}
+
+.campo__input:focus-visible {
+  outline-offset: 0;
+}
+
+/* Borda mais grossa no erro; o padding compensa para o texto não pular. */
+.campo--erro .campo__input {
+  border: var(--borda-grossa) solid var(--cor-erro);
+  padding-inline: calc(var(--espaco-3) - (var(--borda-grossa) - var(--borda-fina)));
+}
+
+.campo__erro,
+.erro-geral {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaco-2);
+  color: var(--cor-erro);
+}
+
+.campo__erro svg,
+.erro-geral svg {
+  width: var(--icone-sm);
+  height: var(--icone-sm);
+  flex: none;
+  margin-top: calc(var(--espaco-1) / 2);
+}
+
+.erro-geral {
+  padding: var(--espaco-2) 0 var(--espaco-2) var(--espaco-4);
+  border-left: var(--borda-grossa) solid var(--cor-erro);
+}

@@ -1,0 +1,355 @@
+/* ---- Hero ---- */
+
+.hero {
+  position: relative;
+  min-height: var(--altura-hero);
+  overflow: hidden;
+  display: grid;
+}
+
+.hero__slide {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--duracao-lenta) ease-in-out,
+    visibility 0s linear var(--duracao-lenta);
+}
+
+.hero__slide--ativo {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity var(--duracao-lenta) ease-in-out;
+}
+
+.hero__imagem {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Zoom lento enquanto o slide está ativo. */
+.hero__slide--ativo .hero__imagem {
+  animation: hero-zoom var(--duracao-carrossel) linear both;
+}
+
+/* Texto do slide entra em cascata: legenda, título, link. */
+.hero__slide--ativo .hero__texto > * {
+  animation: hero-texto var(--duracao-lenta) var(--curva-suave) both;
+}
+
+.hero__slide--ativo .hero__texto > :nth-child(2) {
+  animation-delay: var(--atraso-cascata);
+}
+
+.hero__slide--ativo .hero__texto > :nth-child(3) {
+  animation-delay: calc(2 * var(--atraso-cascata));
+}
+
+.hero--pausado .hero__imagem,
+.hero--pausado .hero__progresso-barra {
+  animation-play-state: paused;
+}
+
+@keyframes hero-zoom {
+  from {
+    transform: scale(var(--escala-destaque));
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes hero-texto {
+  from {
+    opacity: 0;
+    transform: translateY(var(--deslocamento-entrada));
+  }
+}
+
+/* Degradê só de verde, nunca preto. */
+.hero__degrade {
+  position: absolute;
+  inset: 0;
+  background: var(--degrade-sobre-foto);
+}
+
+.hero__texto {
+  position: relative;
+  align-self: end;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-4);
+  padding-bottom: calc(var(--espaco-secao) + var(--espaco-10));
+}
+
+.hero--sem-banner .hero__texto,
+.hero[aria-busy='true'] .hero__texto {
+  padding-bottom: var(--espaco-secao);
+}
+
+.hero__titulo {
+  max-width: var(--medida-titulo);
+  color: var(--cor-sobre-primaria);
+}
+
+.hero .link-caps {
+  margin-top: var(--espaco-2);
+}
+
+.hero__controles {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: var(--espaco-6);
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+}
+
+.hero__contador {
+  margin-right: var(--espaco-2);
+  color: var(--cor-sobre-primaria-suave);
+}
+
+/* Linha de progresso do slide: se enche em --duracao-carrossel e, ao terminar, avança o carrossel. */
+.hero__progresso {
+  position: relative;
+  width: var(--espaco-secao);
+  height: var(--borda-fina);
+  margin-right: var(--espaco-4);
+  background: var(--cor-borda-sobre-primaria);
+  overflow: hidden;
+}
+
+.hero__progresso-barra {
+  position: absolute;
+  inset: 0;
+  background: var(--cor-sobre-primaria);
+  transform-origin: left center;
+  animation: hero-progresso var(--duracao-carrossel) linear both;
+}
+
+@keyframes hero-progresso {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.hero__seta {
+  display: grid;
+  place-items: center;
+  width: var(--altura-controle-compacto);
+  height: var(--altura-controle-compacto);
+  border: var(--borda-fina) solid var(--cor-borda-sobre-primaria);
+  color: var(--cor-sobre-primaria);
+  transition: border-color var(--duracao-rapida) var(--curva-padrao);
+}
+
+.hero__seta:hover {
+  border-color: var(--cor-sobre-primaria);
+}
+
+.hero__seta svg {
+  width: var(--icone-md);
+  height: var(--icone-md);
+}
+
+.hero__esqueleto {
+  display: block;
+  background: var(--cor-borda-sobre-primaria);
+}
+
+.hero__esqueleto--rotulo {
+  width: 20%;
+  height: var(--espaco-3);
+}
+
+.hero__esqueleto--titulo {
+  width: 80%;
+  height: var(--texto-3xl);
+}
+
+.hero__esqueleto--curto {
+  width: 55%;
+}
+
+/* ---- Coleções ---- */
+
+.colecoes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--calha);
+}
+
+@media (max-width: 767px) {
+  .colecoes {
+    grid-template-columns: 1fr;
+    gap: var(--espaco-4);
+  }
+}
+
+/* Sem foto: creme com texto verde (combinação oficial "verde sobre creme").
+   Com foto: degradê verde e texto creme. */
+.painel-colecao {
+  position: relative;
+  display: grid;
+  align-items: end;
+  min-height: var(--altura-painel-colecao);
+  padding: var(--espaco-10);
+  overflow: hidden;
+  background: var(--cor-secundaria);
+  color: var(--cor-primaria);
+}
+
+.painel-colecao--foto {
+  background: var(--cor-primaria);
+  color: var(--cor-sobre-primaria);
+}
+
+.painel-colecao__imagem {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--duracao-muito-lenta) var(--curva-suave);
+}
+
+.painel-colecao:hover .painel-colecao__imagem {
+  transform: scale(var(--escala-hover));
+}
+
+.painel-colecao__degrade {
+  position: absolute;
+  inset: 0;
+  background: var(--degrade-sobre-foto);
+}
+
+.painel-colecao__texto {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-2);
+}
+
+.painel-colecao--foto .painel-colecao__rotulo {
+  color: var(--cor-sobre-primaria-suave);
+}
+
+.painel-colecao .link-caps {
+  margin-top: var(--espaco-2);
+}
+
+.painel-colecao:hover .link-caps {
+  text-decoration-thickness: var(--borda-grossa);
+}
+
+/* ---- Categorias ---- */
+
+.grade-categorias {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--espaco-10) var(--calha);
+}
+
+@media (max-width: 767px) {
+  .grade-categorias {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--espaco-6) var(--espaco-4);
+  }
+}
+
+.cartao-categoria {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+}
+
+.cartao-categoria__foto {
+  aspect-ratio: 1 / 1;
+  margin-bottom: var(--espaco-2);
+}
+
+.cartao-categoria__foto img {
+  object-fit: cover;
+}
+
+.cartao-categoria:hover .t-headline-sm {
+  text-decoration: underline;
+  text-decoration-thickness: var(--borda-fina);
+  text-underline-offset: var(--sublinhado-afastamento);
+}
+
+.esqueleto--quadrado {
+  aspect-ratio: 1 / 1;
+}
+
+/* ---- Marcas ---- */
+
+.grade-marcas {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--espaco-4);
+}
+
+@media (max-width: 1023px) {
+  .grade-marcas {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .grade-marcas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--espaco-2);
+  }
+}
+
+/* Nome centralizado no cartão de marca. Borda e hover vêm do Card (ui/Card.css). */
+.cartao-marca {
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaco-1);
+  min-height: var(--altura-cartao-marca);
+  text-align: center;
+}
+
+/* ---- CTA final ---- */
+
+.cta-final {
+  margin-top: var(--espaco-secao-grande);
+}
+
+.cta-final__conteudo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-4);
+  padding-block: var(--espaco-secao) var(--espaco-secao);
+}
+
+.cta-final__titulo {
+  max-width: var(--medida-titulo);
+}
+
+.cta-final__texto {
+  max-width: var(--medida-curta);
+}
+
+.cta-final__botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-4);
+  margin-top: var(--espaco-4);
+}

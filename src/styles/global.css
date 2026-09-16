@@ -1,0 +1,469 @@
+/*
+ * Estilos globais: reset, tipografia, layout, botões e os três estados de tela.
+ * Só var() de tokens.css — nenhum valor solto (ver o cabeçalho de tokens.css).
+ * Importado em main.jsx ANTES do App, para o CSS de cada componente poder refinar estas classes.
+ */
+
+@import './tokens.css';
+
+/* ---------- Reset ---------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-md);
+  font-weight: var(--peso-regular);
+  line-height: var(--altura-linha-texto);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+ul,
+ol,
+figure,
+dl,
+dd {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: var(--foco-espessura) solid var(--cor-primaria);
+  outline-offset: var(--foco-afastamento);
+}
+
+.faixa-primaria :focus-visible {
+  outline-color: var(--cor-sobre-primaria);
+}
+
+.visualmente-oculto {
+  position: absolute !important;
+  width: var(--borda-fina);
+  height: var(--borda-fina);
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- Layout ---------- */
+
+.container {
+  width: 100%;
+  max-width: calc(var(--container-largura) + 2 * var(--container-margem));
+  margin-inline: auto;
+  padding-inline: var(--container-margem);
+}
+
+@media (max-width: 767px) {
+  .container {
+    padding-inline: var(--container-margem-celular);
+  }
+}
+
+.faixa-primaria {
+  background: var(--cor-primaria);
+  color: var(--cor-sobre-primaria);
+}
+
+.medida {
+  max-width: var(--medida-texto);
+}
+
+/* ---------- Tipografia ---------- */
+
+.t-display,
+.t-headline-lg,
+.t-headline-md,
+.t-headline-sm {
+  font-family: var(--fonte-titulo);
+  font-weight: var(--peso-regular);
+  line-height: var(--altura-linha-titulo);
+  letter-spacing: var(--tracking-titulo);
+}
+
+.t-display {
+  font-size: var(--texto-3xl);
+}
+
+.t-headline-lg,
+.t-headline-md {
+  font-size: var(--texto-2xl);
+}
+
+.t-headline-sm {
+  font-size: var(--texto-xl);
+}
+
+.t-display em,
+.t-headline-lg em,
+.t-headline-md em {
+  font-style: italic;
+}
+
+.t-body-lg {
+  font-size: var(--texto-lg);
+  line-height: var(--altura-linha-texto);
+}
+
+.t-body-sm {
+  font-size: var(--texto-sm);
+  line-height: var(--altura-linha-texto);
+}
+
+.t-label-caps,
+.t-label-caps-sm {
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-xs);
+  line-height: var(--altura-linha-compacta);
+  letter-spacing: var(--tracking-versalete);
+  text-transform: uppercase;
+  font-feature-settings: 'case' 1;
+}
+
+.t-label-caps {
+  font-weight: var(--peso-forte);
+}
+
+.t-label-caps-sm {
+  font-weight: var(--peso-regular);
+}
+
+.t-codigo {
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-sm);
+  line-height: var(--altura-linha-compacta);
+  letter-spacing: var(--tracking-codigo);
+  text-transform: uppercase;
+  font-feature-settings: 'tnum' 1, 'case' 1;
+}
+
+.t-muted {
+  color: var(--cor-texto-suave);
+}
+
+.faixa-primaria .t-muted {
+  color: var(--cor-sobre-primaria-suave);
+}
+
+/* ---------- Botões (componente: src/components/ui/Button.jsx) ---------- */
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaco-2);
+  min-height: var(--altura-controle);
+  padding-inline: var(--espaco-6);
+  border: var(--borda-fina) solid transparent;
+  border-radius: var(--raio);
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-forte);
+  letter-spacing: var(--tracking-versalete);
+  line-height: 1;
+  text-transform: uppercase;
+  font-feature-settings: 'case' 1;
+  white-space: nowrap;
+  transition:
+    background-color var(--duracao-rapida) var(--curva-padrao),
+    border-color var(--duracao-rapida) var(--curva-padrao),
+    color var(--duracao-rapida) var(--curva-padrao);
+}
+
+.botao:disabled,
+.botao[aria-disabled='true'] {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.botao svg {
+  width: var(--icone-sm);
+  height: var(--icone-sm);
+  flex: none;
+}
+
+.botao:active:not(:disabled) {
+  transform: scale(var(--escala-pressionado));
+}
+
+/* Brilho diagonal no hover dos botões cheios. */
+.botao--primaria,
+.botao--sobre-primaria {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.botao--primaria::before,
+.botao--sobre-primaria::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--brilho-botao-primario);
+  transform: translateX(-115%);
+  transition: transform var(--duracao-lenta) var(--curva-suave);
+  pointer-events: none;
+}
+
+.botao--sobre-primaria::before {
+  background: var(--brilho-botao-sobre-primaria);
+}
+
+.botao--primaria:hover:not(:disabled)::before,
+.botao--sobre-primaria:hover:not(:disabled)::before {
+  transform: translateX(115%);
+}
+
+.botao--primaria {
+  background: var(--cor-primaria);
+  color: var(--cor-sobre-primaria);
+}
+
+.botao--primaria:hover:not(:disabled) {
+  background: var(--cor-primaria-hover);
+}
+
+.botao--secundaria {
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  border-color: var(--cor-borda-forte);
+}
+
+.botao--secundaria:hover:not(:disabled) {
+  border-color: var(--cor-primaria);
+}
+
+/* Botão cheio dentro de uma faixa primária. */
+.botao--sobre-primaria {
+  background: var(--cor-secundaria);
+  color: var(--cor-sobre-secundaria);
+}
+
+.botao--sobre-primaria:hover:not(:disabled) {
+  background: var(--cor-superficie);
+}
+
+.botao--contorno-sobre-primaria {
+  background: transparent;
+  color: var(--cor-sobre-primaria);
+  border-color: var(--cor-sobre-primaria);
+}
+
+.botao--contorno-sobre-primaria:hover:not(:disabled) {
+  background: var(--cor-borda-sobre-primaria);
+}
+
+/* Variante texto: ícone + versalete, sem fundo nem borda. */
+.botao.botao--texto {
+  justify-content: flex-start;
+  min-height: var(--altura-controle-compacto);
+  padding-inline: 0;
+  background: transparent;
+  color: var(--cor-texto);
+  line-height: var(--altura-linha-compacta);
+  white-space: normal;
+  text-align: left;
+}
+
+.botao--texto > span {
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: var(--borda-fina);
+  text-underline-offset: var(--sublinhado-afastamento);
+  transition: text-decoration-color var(--duracao-rapida) var(--curva-padrao);
+}
+
+.botao--texto:hover > span {
+  text-decoration-color: currentColor;
+}
+
+.botao--largo {
+  width: 100%;
+}
+
+/* ---------- Link versalete ---------- */
+
+.link-caps {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-1);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-forte);
+  letter-spacing: var(--tracking-versalete);
+  line-height: var(--altura-linha-compacta);
+  text-transform: uppercase;
+  font-feature-settings: 'case' 1;
+  text-decoration: underline;
+  text-decoration-thickness: var(--borda-fina);
+  text-underline-offset: var(--sublinhado-afastamento);
+  transition: text-decoration-thickness var(--duracao-rapida) var(--curva-padrao);
+}
+
+.link-caps:hover {
+  text-decoration-thickness: var(--borda-grossa);
+}
+
+.link-caps svg {
+  width: var(--icone-sm);
+  height: var(--icone-sm);
+  transition: transform var(--duracao-media) var(--curva-suave);
+}
+
+.link-caps:hover svg,
+a:hover > .link-caps svg {
+  transform: translateX(var(--deslocamento-seta));
+}
+
+/* ---------- Filete ---------- */
+
+.filete {
+  height: var(--borda-fina);
+  border: 0;
+  margin: 0;
+  background: var(--cor-borda);
+}
+
+.faixa-primaria .filete {
+  background: var(--cor-borda-sobre-primaria);
+}
+
+/* ---------- Os três estados de toda tela que busca dado ----------
+ * Componentes prontos em src/components/Estados.jsx; o hook é src/hooks/useRequisicao.js.
+ *   carregando → .estado-carregando + .esqueleto*   (nunca tela branca)
+ *   vazio      → .estado .estado--vazio             (sempre com uma saída: limpar filtros, ver novidades…)
+ *   erro       → .estado .estado--erro              (sempre com "Tentar de novo")
+ */
+
+.estado {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-4);
+  padding-block: var(--espaco-secao);
+  max-width: var(--medida-texto);
+}
+
+.estado__texto {
+  color: var(--cor-texto-suave);
+}
+
+.estado .botao {
+  margin-top: var(--espaco-2);
+}
+
+/* A paleta não tem vermelho: o erro é ícone + frase + traço. */
+.estado--erro {
+  padding-left: var(--espaco-6);
+  border-left: var(--borda-grossa) solid var(--cor-erro);
+}
+
+.estado__icone {
+  width: var(--icone-lg);
+  height: var(--icone-lg);
+}
+
+.estado-carregando {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  width: 100%;
+}
+
+/* Esqueleto estático, sem brilho correndo. */
+.esqueleto {
+  display: block;
+  background: var(--cor-borda);
+  border-radius: var(--raio);
+}
+
+.esqueleto-cartao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.esqueleto--foto {
+  aspect-ratio: 4 / 5;
+  margin-bottom: var(--espaco-2);
+}
+
+.esqueleto--quadrado {
+  aspect-ratio: 1 / 1;
+}
+
+.esqueleto--linha {
+  height: var(--espaco-3);
+  width: 70%;
+}
+
+.esqueleto--titulo {
+  height: var(--espaco-6);
+  width: 60%;
+}
+
+.esqueleto--controle {
+  height: var(--altura-controle);
+  width: 100%;
+}
+
+.esqueleto--controle-compacto {
+  height: var(--altura-controle-compacto);
+  width: 80%;
+}
+
+.esqueleto--bloco {
+  height: var(--altura-cartao-marca);
+  width: 100%;
+}
+
+.esqueleto--curta {
+  width: 35%;
+}
