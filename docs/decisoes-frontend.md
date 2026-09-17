@@ -6,7 +6,7 @@ Quem mexe no código (pessoa, Claude Code ou Codex) lê este arquivo junto com `
 
 ---
 
-## 1. Direção visual: "Vitrine Reservada" (15/09/2026) — SUSPENSA em 16/09, ver seção 8
+## 1. Direção visual: "Vitrine Reservada" (15/09/2026) — SUSPENSA em 16/09, RETOMADA e definitiva em 17/09, ver seção 9
 
 **Decidido:** editorial de moda cruzado com etiqueta de alfaiataria, com pegada de exclusividade. O pedido do time foi "opção 1, com uma pegada de algo exclusivo". A especificação completa está em `DESIGN.md`, gerado pela skill `design-md-planner` e auditado com `@google/design.md lint`: 0 erros e 0 avisos já na primeira passada.
 
@@ -84,3 +84,15 @@ Fluxo (`src/contexto/CompraWhatsApp.jsx`):
 **Escolhas de rota:** `/carrinho` redireciona para `/selecao` (na tela o nome é "seleção"); `/favoritos` redireciona para `/conta`, onde os favoritos já estão; `/categorias/:categoria` exige `?colecao=` porque o slug de categoria só é único dentro da coleção, e sem ela volta para `/categorias`.
 
 **Para reabrir:** quando o cliente escolher, rode a skill `design-md-planner`, gere `DESIGN.md` na raiz, audite com `npm run lint:design` e substitua os valores de `tokens.css`. Se a direção pedir algo que nenhum token cobre, crie token novo; não renomeie os existentes.
+
+## 9. Direção visual definitiva: "Vitrine Reservada" (17/09/2026)
+
+**Decidido:** o cliente escolheu a opção 1 ("Vitrine Reservada", editorial de moda cruzado com etiqueta de alfaiataria — a mesma da seção 1, retomada da suspensão da seção 8). Não houve nova entrevista de gosto: a especificação já existia em `docs/propostas/DESIGN-opcao-1-vitrine-reservada.md` (auditada com 0 erros/0 avisos em 15/09) e foi copiada para `DESIGN.md` na raiz sem alterações de conteúdo. `npm run lint:design` continua fechando com 0 erros e 0 avisos.
+
+**Fontes viraram dependência de verdade.** `@fontsource-variable/bodoni-moda` e `@fontsource-variable/jost` (licença SIL OFL, permite redistribuir) voltaram para `package.json` e são importadas em `src/main.jsx` (`opsz.css` + `opsz-italic.css` da Bodoni Moda; `wght.css` do Jost — os arquivos hospedados antes em `docs/comparacao/fontes/` vieram exatamente desse pacote, mesmo hash). `--fonte-titulo` e `--fonte-texto` em `tokens.css` apontam para elas.
+
+**`tokens.css` recebeu os valores do `DESIGN.md`, sem mudar nome nenhum.** A maior parte já batia (a paleta de cor, curvas, durações e medidas de layout já vinham dessa mesma especificação desde a seção 8). O que mudou de fato: `--fonte-titulo`/`--fonte-texto` (fontes reais), `--texto-2xl` e `--texto-3xl` (escala grande do editorial), `--raio` (2px → 0px: a direção não tem canto arredondado) e `--sombra` (removida: "não existe sombra no sistema" — a profundidade do modal já vem do filete + véu que `Modal.css` já usava).
+
+**Onde a escala de `tokens.css` é mais grossa que o `DESIGN.md` e por quê ficou assim:** o contrato tem 7 tamanhos de texto e uma altura/tracking de título só, mas o DESIGN.md nomeia 11 papéis de tipografia com valores próprios. Isso obriga a dividir um token entre papéis (`--texto-2xl` serve `headline-lg` e `headline-md`; `--altura-linha-titulo`/`--tracking-titulo` servem os quatro tamanhos de título). Escolhi o valor mais carregado/mais usado em cada caso e documentei o desvio exato como comentário em cada token de `tokens.css`. Abrir tokens novos por papel resolveria isso, mas essa decisão fica para o time (ver `docs/pendencias-frontend.md`) porque o pedido desta rodada foi só trocar valores, não nomes.
+
+**Removido:** `docs/comparacao/` inteira (as duas homes estáticas de comparação e as imagens/fontes que só existiam para elas). Já cumpriu o papel de mostrar as opções ao cliente; a especificação da opção escolhida sobrevive em `docs/propostas/` e agora em `DESIGN.md`.

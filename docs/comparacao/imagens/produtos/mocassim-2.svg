@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000"><g transform="translate(800 0) scale(-1 1)">
-    <ellipse cx="400" cy="780" rx="310" ry="12" fill="#FCEAB3" opacity="0.7"/>
-    <path d="M110 760 Q100 650 230 620 Q380 590 470 540 Q560 500 650 520 Q715 540 712 640 L708 760 Z" fill="#28361F"/>
-    <rect x="105" y="745" width="610" height="30" fill="#414C31"/>
-    <path d="M300 615 Q380 570 470 548 L500 600 Q400 640 320 660 Z" fill="#414C31"/>
-    <rect x="360" y="596" width="90" height="16" fill="#FCEAB3" transform="rotate(-14 405 604)"/></g></svg>
