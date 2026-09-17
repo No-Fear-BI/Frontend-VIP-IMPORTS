@@ -8,7 +8,8 @@
     "dev:exemplo": "vite --mode exemplo",
     "build": "vite build",
     "preview": "vite preview",
-    "lint:design": "npx -y -p @google/design.md@latest designmd lint DESIGN.md"
+    "lint:design": "npx -y -p @google/design.md@latest designmd lint DESIGN.md",
+    "check:tokens": "node scripts/checar-tokens.mjs"
   },
   "dependencies": {
     "@fontsource-variable/bodoni-moda": "^5.3.0",

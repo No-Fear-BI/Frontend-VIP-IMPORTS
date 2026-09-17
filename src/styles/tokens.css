@@ -55,35 +55,53 @@
   --fonte-titulo: 'Bodoni Moda Variable', 'Didot', 'Bodoni 72', Georgia, serif;
   --fonte-texto: 'Jost Variable', 'Futura', 'Century Gothic', 'Avenir Next', sans-serif;
 
-  /* texto-xs cobre label-caps (12px, exato); label-caps-sm (11px) e o texto do botão (13px)
-     dividem esta mesma faixa porque a escala de tokens.css não tem uma parada para cada um. */
+  /* Escala genérica de tamanho — continua servindo texto que não é um papel nomeado do
+     DESIGN.md (select de ordenação, opção de filtro, link do rodapé, número do selo de
+     contagem). Não renomear nem remover: são os nomes que o resto do projeto já usa. */
   --texto-xs: 12px;
-  /* texto-sm cobre body-sm (14px, exato); o código do produto (`codigo`, 13px no DESIGN.md)
-     também usa esta faixa, 1px acima do especificado. */
   --texto-sm: 14px;
   --texto-md: 16px;                        /* nunca abaixo disso em input: o iOS dá zoom */
   --texto-lg: 18px;
   --texto-xl: 22px;                        /* headline-sm, exato */
-  /* texto-2xl serve tanto headline-lg (clamp(30px,5vw,44px), normativo no DESIGN.md) quanto
-     headline-md (30px fixo no DESIGN.md) — usei o valor de headline-lg, então headline-md
-     passa a crescer até 44px em telas largas em vez de ficar fixo em 30px. */
+  /* Mantido por compatibilidade — headline-lg e headline-md agora têm token próprio abaixo
+     (--texto-headline-lg / --texto-headline-md); nada mais deve passar a usar este daqui pra
+     frente para título grande. */
   --texto-2xl: clamp(30px, 5vw, 44px);
   --texto-3xl: clamp(40px, 8vw, 72px);     /* display, exato e normativo */
 
+  /* Tamanho por papel do DESIGN.md, para os casos em que a escala genérica acima não tinha
+     uma parada exata para o papel (headline-lg e headline-md dividiam --texto-2xl; label-caps,
+     label-caps-sm e button dividiam --texto-xs; codigo dividia --texto-sm com body-sm). */
+  --texto-headline-lg: clamp(30px, 5vw, 44px);   /* normativo no DESIGN.md */
+  --texto-headline-md: 30px;
+  --texto-label-caps: 12px;
+  --texto-label-caps-sm: 11px;
+  --texto-botao: 13px;
+  --texto-codigo: 13px;
+
   /* Uma só razão de altura de linha para display/headline-lg/headline-md/headline-sm, que no
      DESIGN.md são 1.02/1.08/1.15/1.2 (a régua é "inversa ao tamanho"; tokens.css não tem uma
-     parada por tamanho). 1.1 é o meio do intervalo. */
+     parada por tamanho). 1.1 é o meio do intervalo. Fora de escopo desta rodada — ver
+     docs/pendencias-frontend.md. */
   --altura-linha-titulo: 1.1;
   --altura-linha-texto: 1.6;
   --altura-linha-compacta: 1.3;
 
-  /* Mesma mistura de headline-md (-0.01em); display (-0.02em) fica menos apertado do que o
-     DESIGN.md pede e headline-sm (0, sem tracking negativo) ganha um pouco que não deveria. */
+  /* Tracking genérico — mantido por compatibilidade, mesmo motivo do --texto-2xl acima. */
   --tracking-titulo: -0.01em;
-  /* Já é o valor exato de label-caps-sm; label-caps (0.16em) e o texto do botão (0.12em)
-     ficam a 0.02em de distância. */
   --tracking-versalete: 0.14em;
-  --tracking-codigo: 0.08em;                /* exato */
+  --tracking-codigo: 0.08em;                /* exato, único papel que usava --tracking-codigo */
+
+  /* Tracking por papel do DESIGN.md. Uma Didone quer tracking cada vez mais negativo conforme
+     o tamanho cresce (title grande) e cada vez mais positivo em rótulo versalete pequeno — um
+     valor médio (--tracking-titulo/--tracking-versalete acima) erra nos dois extremos. */
+  --tracking-display: -0.02em;
+  --tracking-headline-lg: -0.015em;
+  --tracking-headline-md: -0.01em;
+  --tracking-headline-sm: 0em;              /* DESIGN.md não pede tracking negativo neste tamanho */
+  --tracking-label-caps: 0.16em;
+  --tracking-label-caps-sm: 0.14em;
+  --tracking-botao: 0.12em;
 
   --peso-regular: 400;
   --peso-forte: 600;
@@ -186,8 +204,10 @@
   --duracao-muito-lenta: 1000ms;
   --duracao-carrossel: 7000ms;             /* tempo de cada slide do hero */
   --atraso-cascata: 90ms;
-  /* Sem token para a saída do modal/gaveta (160ms ease-in no DESIGN.md) — Modal.css hoje só
-     anima a entrada, então isso também é um item para Modal.css, não só para tokens.css. */
+
+  /* Saída do modal/gaveta (DESIGN.md: "saem em 160ms ease-in"). Usados em Modal.jsx/Modal.css. */
+  --duracao-saida: 160ms;
+  --curva-saida: ease-in;
 
   --deslocamento-entrada: 16px;
   --deslocamento-seta: 4px;
@@ -203,6 +223,7 @@
     --duracao-media: 0ms;
     --duracao-lenta: 0ms;
     --duracao-muito-lenta: 0ms;
+    --duracao-saida: 0ms;
     --deslocamento-entrada: 0px;
     --deslocamento-seta: 0px;
     --escala-hover: 1;

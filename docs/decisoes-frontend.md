@@ -96,3 +96,22 @@ Fluxo (`src/contexto/CompraWhatsApp.jsx`):
 **Onde a escala de `tokens.css` é mais grossa que o `DESIGN.md` e por quê ficou assim:** o contrato tem 7 tamanhos de texto e uma altura/tracking de título só, mas o DESIGN.md nomeia 11 papéis de tipografia com valores próprios. Isso obriga a dividir um token entre papéis (`--texto-2xl` serve `headline-lg` e `headline-md`; `--altura-linha-titulo`/`--tracking-titulo` servem os quatro tamanhos de título). Escolhi o valor mais carregado/mais usado em cada caso e documentei o desvio exato como comentário em cada token de `tokens.css`. Abrir tokens novos por papel resolveria isso, mas essa decisão fica para o time (ver `docs/pendencias-frontend.md`) porque o pedido desta rodada foi só trocar valores, não nomes.
 
 **Removido:** `docs/comparacao/` inteira (as duas homes estáticas de comparação e as imagens/fontes que só existiam para elas). Já cumpriu o papel de mostrar as opções ao cliente; a especificação da opção escolhida sobrevive em `docs/propostas/` e agora em `DESIGN.md`.
+
+## 10. Tokens de tipografia por papel, sem renomear os existentes (17/09/2026)
+
+**Decidido:** fechar a maior parte dos desvios registrados na seção 9 (`--texto-2xl` dividido entre `headline-lg`/`headline-md`, `--tracking-titulo` como média de quatro tamanhos, `--texto-xs`/`--texto-sm` divididos entre `label-caps`/`label-caps-sm`/`button`/`codigo`) **acrescentando token novo por papel, sem renomear nem remover nenhum token existente** — Rauhan estava escrevendo telas do painel sobre este arquivo ao mesmo tempo, e um rename quebraria o trabalho dele sem avisar.
+
+**Tokens novos em `tokens.css`:**
+- Tamanho: `--texto-headline-lg` (`clamp(30px,5vw,44px)`), `--texto-headline-md` (`30px`), `--texto-label-caps` (`12px`), `--texto-label-caps-sm` (`11px`), `--texto-botao` (`13px`), `--texto-codigo` (`13px`).
+- Tracking: `--tracking-display` (`-0.02em`), `--tracking-headline-lg` (`-0.015em`), `--tracking-headline-md` (`-0.01em`), `--tracking-headline-sm` (`0`), `--tracking-label-caps` (`0.16em`), `--tracking-label-caps-sm` (`0.14em`), `--tracking-botao` (`0.12em`).
+- Movimento: `--duracao-saida` (`160ms`) e `--curva-saida` (`ease-in`), para a saída do modal/gaveta.
+
+`--texto-2xl`, `--texto-xs`, `--texto-sm`, `--tracking-titulo` e `--tracking-versalete` continuam existindo com o mesmo valor de antes — só pararam de ser usados pelos papéis que ganharam token próprio. `body-sm` não ganhou token novo porque `--texto-sm` (14px) já era o valor exato do DESIGN.md para esse papel.
+
+**`global.css` religado aos papéis certos:** `.t-headline-lg`/`.t-headline-md` (antes um único bloco em `--texto-2xl`), `.t-label-caps`/`.t-label-caps-sm` (tamanho e tracking, mantendo o peso que já estava certo), `.t-codigo`, `.botao` e `.link-caps` (que no DESIGN.md usa a mesma tipografia de `label-caps`).
+
+**Modal ganhou saída de verdade.** `Modal.jsx` não fechava mais o `<dialog>` na hora: agora aplica a classe `.modal--fechando`, espera `--duracao-saida` (lido do próprio `tokens.css` via `getComputedStyle`, não duplicado como número mágico em JS) e só então chama `.close()`. `Modal.css` ganhou `@keyframes modal-sai`/`gaveta-sai`. Isolado a dois arquivos que o painel ainda não usa (`grep` confirmou: nada em `src/paginas/admin` importa `Modal`).
+
+**Ficou de fora, de propósito (ver `docs/pendencias-frontend.md`):** `--altura-linha-titulo` continua uma média única para os quatro tamanhos de título — só o tracking entrou no pedido desta rodada — e `--medida-titulo` continua um só valor para hero (14ch) e CTA final (18ch).
+
+**Conferência:** `scripts/checar-tokens.mjs` (novo, `npm run check:tokens`) varre todo `var(--token)` em `src/**/*.css` contra as definições de `tokens.css`; rodado antes e depois desta mudança, 0 referências penduradas nas duas vezes. `--sombra` não foi removida na rodada anterior (só teve o valor trocado para `none`), então nunca existiu risco de referência pendurada por causa dela.
