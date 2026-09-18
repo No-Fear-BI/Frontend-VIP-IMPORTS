@@ -55,6 +55,10 @@ export function ProvedorSessaoCliente({ children }) {
   }, []);
 
   useEffect(() => {
+    if (window.location.pathname.startsWith('/admin')) {
+      setVerificando(false);
+      return undefined;
+    }
     clienteService.eu()
       .then((dados) => {
         setCliente(dados);

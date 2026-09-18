@@ -13,6 +13,7 @@ import './EstruturaAdmin.css';
 const MENU_ADMIN = [
   { rotulo: 'Resumo', para: 'resumo' },
   { rotulo: 'Produtos', para: 'produtos' },
+  { rotulo: 'Revisão', para: 'revisao' },
   { rotulo: 'Marcas', para: 'marcas' },
   { rotulo: 'Categorias', para: 'categorias' },
   { rotulo: 'Banners', para: 'banners' },
