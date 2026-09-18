@@ -19,6 +19,9 @@ export const catalogoService = {
    */
   produtos: (filtros, sinal) => requisitar('GET', '/produtos', { query: filtros, sinal }),
 
+  /** Produtos da fila de fornecedores que já passaram pela revisão interna. */
+  produtosAprovados: (sinal) => requisitar('GET', '/produtos-aprovados', { sinal }),
+
   /** GET /produtos/:codigo — obterProduto. Não traz `capa`: use `imagens` (já ordenado). */
   produto: (codigo, sinal) => requisitar('GET', `/produtos/${encodeURIComponent(codigo)}`, { sinal }),
 

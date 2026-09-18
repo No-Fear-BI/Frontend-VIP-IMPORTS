@@ -48,6 +48,14 @@
   gap: var(--espaco-2);
 }
 
+.admin__formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+  max-width: var(--largura-formulario);
+  margin-top: var(--espaco-4);
+}
+
 @media (max-width: 1023px) {
   .admin {
     grid-template-columns: minmax(0, 1fr);

@@ -13,6 +13,8 @@ import './Home.css';
 
 export default function Home() {
   const { dados, erro, carregando, recarregar } = useRequisicao((sinal) => catalogoService.home(sinal), []);
+  const aprovados = useRequisicao((sinal) => catalogoService.produtosAprovados(sinal), []);
+  const destaques = [...(dados?.destaques || []), ...(aprovados.dados || [])];
 
   if (erro) {
     return (
@@ -35,7 +37,7 @@ export default function Home() {
         />
         {carregando ? (
           <EsqueletoGrade quantidade={8} />
-        ) : dados.destaques.length === 0 ? (
+        ) : destaques.length === 0 ? (
           <EstadoVazio
             titulo="Nenhum destaque no momento."
             texto="As peças novas continuam chegando na página de novidades."
@@ -43,7 +45,7 @@ export default function Home() {
           />
         ) : (
           <div className="grade-produtos">
-            {dados.destaques.map((produto, i) => (
+            {destaques.slice(0, 12).map((produto, i) => (
               <CartaoProduto key={produto.id} produto={produto} carregamento={i < 4 ? 'eager' : 'lazy'} />
             ))}
           </div>
