@@ -1,0 +1,51 @@
+# CI do frontend — trilha de DevOps (Dev 4), tarefa 13.
+#
+# Não há suíte de testes no frontend ainda. O que existe para verificar é se o
+# projeto CONSTRÓI: dependência faltando, import errado e erro de sintaxe param
+# o `vite build`, e é melhor parar aqui do que na hora de publicar.
+#
+# `npm run lint:design` fica de fora de propósito: ele falha hoje, e é esperado
+# — o DESIGN.md definitivo depende do cliente escolher a direção visual (ver o
+# aviso no topo do README). Colocar no CI seria vermelho permanente, e CI
+# sempre vermelho vira CI que ninguém olha.
+
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  vite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Instalar dependências
+        # `npm ci` e não `npm install`: instala exatamente o que está no lock.
+        # É o que faz o build daqui e o do servidor darem o mesmo resultado.
+        run: npm ci
+
+      - name: Construir
+        run: npm run build
+
+      - name: Conferir o que saiu
+        # Um build "bem-sucedido" que produz dist vazio existe, e passa
+        # despercebido até o site subir em branco.
+        run: |
+          set -euo pipefail
+          test -f dist/index.html || { echo "::error::dist/index.html não foi gerado"; exit 1; }
+          echo "Tamanho do build:"
+          du -sh dist
+          du -ah dist | sort -rh | head -15
