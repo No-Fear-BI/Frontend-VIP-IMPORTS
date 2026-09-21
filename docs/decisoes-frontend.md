@@ -156,3 +156,9 @@ Além disso, a base de acesso dele não tem rota protegida, não separa 401 de 4
 **Testado contra a API real (21/09):** criar ("Lilás Teste" → slug `lilas-teste`), editar (renomear mantendo o slug, esconder → some de `GET /cores`), excluir cor sem peça, excluir cor em uso (botão desabilitado; DELETE forçado → 409 com `totalProdutos: 774`, cor intacta), gaveta de peças e `/feminino?cor=preta,bege` (873 peças, igual à API).
 
 **Limitação conhecida:** a gaveta "peças nesta cor" mostra só as 50 primeiras, sem paginação.
+
+## 14. `/todos`: o catálogo inteiro no menu (21/09/2026)
+
+**Decidido:** pedido do cliente. `/todos` é a `Listagem` em `modo="todos"`: `GET /produtos` sem filtro fixo, com todos os filtros da lateral (coleção, categoria, marca, cor) e os três estados da listagem. Entra no menu entre Marcas e Novidades — não vem da referência base44, que tem 8 itens.
+
+**Conferido:** com 9 itens, o menu cabe numa linha na menor largura em que ele aparece inteiro (1241px; abaixo de 1240px vira gaveta). Três estados checados no modo exemplo (`?exemplo=lento|vazio|erro`).

@@ -25,7 +25,7 @@ const COLECOES = [
 ];
 
 /**
- * @param {{ modo: 'colecao'|'novidades'|'busca'|'marca', colecaoFixa?: string }} props
+ * @param {{ modo: 'colecao'|'todos'|'novidades'|'busca'|'marca', colecaoFixa?: string }} props
  */
 export default function Listagem({ modo, colecaoFixa }) {
   const { slug: marcaDaRota } = useParams();
@@ -243,6 +243,7 @@ function tituloDaPagina(modo, filtros, nomeMarca) {
     const nome = COLECOES.find((c) => c.slug === filtros.colecao)?.nome || '';
     return { principal: `Coleção ${nome}`, trilha: nome === 'Feminina' ? 'Feminino' : 'Masculino' };
   }
+  if (modo === 'todos') return { principal: 'Todas as peças', trilha: 'Todos' };
   if (modo === 'novidades') return { principal: 'Novidades', trilha: 'Novidades' };
   if (modo === 'marca') return { principal: nomeMarca || 'Marca', trilha: 'Marcas' };
   if (filtros.busca) return { principal: `Resultados para "${filtros.busca}"`, trilha: 'Busca' };

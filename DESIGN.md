@@ -264,7 +264,7 @@ Grade de **12 colunas**, gutter de 24px, margem externa de 48px no desktop e 20p
 **Ritmo de seção variado, não uniforme.** Seções que se completam ficam próximas (`spacing.xl` 40px entre destaques e os banners de coleção). Mudança de assunto ganha respiro (`spacing.3xl` 104px antes do CTA final). Faixa verde encosta nas bordas da tela (sangria total), e seção de papel respeita o container.
 
 **Estrutura da home**, na ordem da referência (vip-imports.base44.app), que já corresponde ao que `GET /home` devolve:
-1. Barra fina verde no topo (aviso de atendimento) + cabeçalho em papel com os 8 itens de menu (Início, Feminino, Masculino, Categorias, Marcas, Novidades, Sobre, Contato) e os ícones de busca, conta e seleção à direita.
+1. Barra fina verde no topo (aviso de atendimento) + cabeçalho em papel com os itens de menu (Início, Feminino, Masculino, Categorias, Marcas, Todos, Novidades, Sobre, Contato) e os ícones de busca, conta e seleção à direita.
 2. **Hero em carrossel** (`banners`, até 4): foto cheia, texto sobre um degradê **só de verde** (verde 0% → 85% de baixo para cima, nunca preto), legenda versalete em `on-primary-muted` acima de título Bodoni em creme.
 3. **Destaques** (`destaques`, até 12): grade de 4 colunas de produto isolado na vitrine branca.
 4. **Duas coleções lado a lado** (Feminina / Masculina): foto cheia, degradê verde, link versalete sublinhado.
