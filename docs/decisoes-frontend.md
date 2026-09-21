@@ -115,3 +115,31 @@ Fluxo (`src/contexto/CompraWhatsApp.jsx`):
 **Ficou de fora, de propósito (ver `docs/pendencias-frontend.md`):** `--altura-linha-titulo` continua uma média única para os quatro tamanhos de título — só o tracking entrou no pedido desta rodada — e `--medida-titulo` continua um só valor para hero (14ch) e CTA final (18ch).
 
 **Conferência:** `scripts/checar-tokens.mjs` (novo, `npm run check:tokens`) varre todo `var(--token)` em `src/**/*.css` contra as definições de `tokens.css`; rodado antes e depois desta mudança, 0 referências penduradas nas duas vezes. `--sombra` não foi removida na rodada anterior (só teve o valor trocado para `none`), então nunca existiu risco de referência pendurada por causa dela.
+
+## 11. Acesso ao painel: sessão própria, rota protegida, login e sair (21/09/2026)
+
+**Decidido:** antes de qualquer tela do painel, a base de acesso. `/admin/*` abria sem login porque nada checava sessão.
+
+- **`GET /admin/eu` foi conferido no código do backend** (`rotas/admin_painel.py`, esquema `AdminEu`), porque não está no contrato v1.0 — só em `para-o-frontend.md`. Devolve `{ id, nome, email, ultimoLoginEm, criadoEm }`, igual ao `POST /admin/sessao`.
+- **Contexto separado** (`src/contexto/SessaoAdmin.jsx`), montado só em `/admin/*`. Não reaproveita nada de `SessaoCliente`: no backend são cookies e prazos diferentes (12h sem renovar × sessão do cliente que se estende).
+- **401 e 403 levam a lugares diferentes.** 401 `NAO_IDENTIFICADO` → `/admin/login`, guardando a página de origem para voltar depois de entrar. 403 `SEM_PERMISSAO` → tela "Esta área é restrita à equipe da loja." SEM redirecionar: o backend só devolve 403 quando o navegador tem sessão de CLIENTE e nenhuma de admin, e mandar essa pessoa ao login a faria tentar uma senha que não tem. Há um link discreto "Sou da equipe: entrar no painel" para quem é da equipe e também está identificado como cliente — com as duas sessões, o backend faz valer a de admin.
+- **Sessão vencida no meio do uso é tratada num lugar só.** `requisitarAdmin` (`src/lib/apiAdmin.js`) avisa o contexto em qualquer 401/403 de rota do painel; a rota protegida reage, e o login mostra "Sua sessão expirou. Faça login de novo." (mensagem do backend). Nenhuma tela do painel trata sessão vencida na mão.
+- **Login** mostra uma frase só para `CREDENCIAIS_INVALIDAS` — "E-mail ou senha inválidos." — como o backend pede (e-mail inexistente, senha errada e conta desativada são a mesma resposta de propósito). 429 usa a mensagem do backend.
+- **Sair** só tira a pessoa do painel depois que o `DELETE /admin/sessao` confirma. Se a chamada falhar, o cookie pode continuar valendo; a tela mostra o erro em vez de fingir que saiu.
+- **Modo exemplo** simula a sessão do admin (qualquer e-mail, senha `exemplo`), com a mesma regra de 401/403, para o painel continuar navegável sem backend.
+
+**Descartado:** checar sessão só no `EstruturaAdmin` (o login ficaria com menu lateral e a proteção dependeria de cada página nova ficar dentro dele sem estar explícito em `App.jsx`); tratar 401 em cada tela (cada página nova do painel teria de lembrar).
+
+**Conflito conhecido:** o branch remoto `feature/aprovacao-produtos` (não mergeado) cria outro `src/services/adminService.js` (funções soltas `entrarAdmin`/`obterAdminAtual`/`sairAdmin`) e outro `Login.jsx`. No merge, fica a versão desta seção (objeto `adminService`, padrão dos outros services) e a página `Revisao` passa a usar `requisitarAdmin` e a entrar no grupo protegido.
+
+## 12. Branch `feature/aprovacao-produtos` não entra como está (21/09/2026)
+
+**Decidido:** a base do painel que fica é a da seção 11. Nada do branch remoto `feature/aprovacao-produtos` (commit `2f98f09`, do Rauhan) é mergeado como está: nem a tela `Revisao` / `revisaoService`, nem a mudança na `Home.jsx` que chama `catalogoService.produtosAprovados`. Três motivos:
+
+1. **Rotas que não existem no backend.** `/admin/revisao/*` e `/produtos-aprovados` respondem 404: não estão em nenhum branch do backend, nem no contrato v1.0, nem em `para-o-frontend.md`. A tela não funciona contra a API real.
+2. **404 na home da loja.** A `Home.jsx` dele chama `/produtos-aprovados` em toda visita e mistura o resultado com os destaques, engolindo o erro sem aviso. A loja passa a fazer uma chamada quebrada por visita.
+3. **Valores soltos fora da paleta.** `Revisao.css` não usa nenhum `var(--token)`: hex fora das três cores oficiais (incluindo o vermelho `#9a4c43`), fontes que não existem no projeto (Cormorant Garamond, Manrope), `px` de espaçamento e tamanho, quebras de 900px e 520px. O `check:tokens` só passa ali porque não há `var()` para conferir.
+
+Além disso, a base de acesso dele não tem rota protegida, não separa 401 de 403 e não trata a sessão de 12h (comparação completa na conversa de 21/09; conflito de merge sobre a base atual: `adminService.js`, `Login.jsx`, `App.jsx` e `DESIGN.md`, este só por fim de linha).
+
+**Para a `Revisao` voltar:** o backend precisa ter as rotas (ou elas precisam estar acordadas com o time do backend), a tela precisa ser reescrita com tokens, os três estados e `requisitarAdmin`, entrar no grupo `<RotaAdminProtegida>` e sair da `Home` da loja. Aí o conflito se reduz à linha da rota e ao item de menu.

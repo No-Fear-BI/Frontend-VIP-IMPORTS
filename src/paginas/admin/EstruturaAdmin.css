@@ -54,3 +54,23 @@
     padding: var(--espaco-6) var(--container-margem-celular);
   }
 }
+
+/* Quem entrou + Sair, no pé da lateral. */
+.admin__sessao {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-2);
+  margin-top: auto;
+  padding-top: var(--espaco-6);
+  border-top: var(--borda-fina) solid var(--cor-borda-sobre-primaria);
+  width: 100%;
+}
+
+.admin__sessao .botao {
+  margin-top: var(--espaco-2);
+}
+
+.admin__sessao-detalhe {
+  color: var(--cor-sobre-primaria-suave);
+}

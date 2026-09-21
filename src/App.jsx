@@ -1,5 +1,7 @@
-import { Navigate, Route, Routes, useParams, useSearchParams } from 'react-router-dom';
+import { Navigate, Outlet, Route, Routes, useParams, useSearchParams } from 'react-router-dom';
 import Estrutura from './components/Estrutura.jsx';
+import { ProvedorSessaoAdmin } from './contexto/SessaoAdmin.jsx';
+import RotaAdminProtegida from './paginas/admin/Acesso.jsx';
 import AdminBanners from './paginas/admin/Banners.jsx';
 import AdminCategorias from './paginas/admin/Categorias.jsx';
 import AdminClientes from './paginas/admin/Clientes.jsx';
@@ -22,8 +24,10 @@ import Selecao from './paginas/Selecao.jsx';
 /*
  * Mapa de rotas.
  * - Loja: dentro de <Estrutura> (cabeçalho, rodapé, sessão do CLIENTE).
- * - Painel: /admin/*, dentro de <EstruturaAdmin>, FORA da estrutura da loja. A sessão do painel
- *   é outro cookie (vip_sessao_admin) e não lê nada de SessaoCliente.
+ * - Painel: /admin/*, FORA da estrutura da loja, dentro de <ProvedorSessaoAdmin> (cookie
+ *   vip_sessao_admin, não lê nada de SessaoCliente). /admin/login fica aberto; todo o resto passa
+ *   por <RotaAdminProtegida> antes de chegar à <EstruturaAdmin>. Página nova do painel entra
+ *   DENTRO do grupo protegido — fora dele, abre sem login.
  */
 export default function App() {
   return (
@@ -51,19 +55,33 @@ export default function App() {
         <Route path="*" element={<NaoEncontrada />} />
       </Route>
 
-      <Route path="admin" element={<EstruturaAdmin />}>
-        <Route index element={<Navigate to="resumo" replace />} />
+      <Route path="admin" element={<PainelComSessao />}>
         <Route path="login" element={<AdminLogin />} />
-        <Route path="resumo" element={<AdminResumo />} />
-        <Route path="produtos" element={<AdminProdutos />} />
-        <Route path="marcas" element={<AdminMarcas />} />
-        <Route path="categorias" element={<AdminCategorias />} />
-        <Route path="banners" element={<AdminBanners />} />
-        <Route path="destaques" element={<AdminDestaques />} />
-        <Route path="selecoes" element={<AdminSelecoes />} />
-        <Route path="clientes" element={<AdminClientes />} />
+        <Route element={<RotaAdminProtegida />}>
+          <Route element={<EstruturaAdmin />}>
+            <Route index element={<Navigate to="resumo" replace />} />
+            <Route path="resumo" element={<AdminResumo />} />
+            <Route path="produtos" element={<AdminProdutos />} />
+            <Route path="marcas" element={<AdminMarcas />} />
+            <Route path="categorias" element={<AdminCategorias />} />
+            <Route path="banners" element={<AdminBanners />} />
+            <Route path="destaques" element={<AdminDestaques />} />
+            <Route path="selecoes" element={<AdminSelecoes />} />
+            <Route path="clientes" element={<AdminClientes />} />
+            <Route path="*" element={<Navigate to="resumo" replace />} />
+          </Route>
+        </Route>
       </Route>
     </Routes>
+  );
+}
+
+/** A sessão do painel só existe dentro de /admin/*: a loja nunca chama GET /admin/eu. */
+function PainelComSessao() {
+  return (
+    <ProvedorSessaoAdmin>
+      <Outlet />
+    </ProvedorSessaoAdmin>
   );
 }
 

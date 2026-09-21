@@ -15,6 +15,7 @@ Instruções para agentes de código (Codex e outros). O Claude Code lê `CLAUDE
 - Sem dourado, sem vermelho.
 - A loja não vende direto. Não existe preço nem checkout. O botão de compra é sempre "Comprar no WhatsApp" (ou "Consultar disponibilidade" para esgotado) e usa `useCompra().comprar({ produto, par })`. **Nunca monte link `wa.me` de compra nem guarde o número da loja no frontend**: o link vem de `POST /selecoes`.
 - Toda chamada de API passa por `src/services/*` (que usam `src/lib/apiClient.js`). Botão, campo, cartão e modal: `src/components/ui/` (`Button`, `Field`, `Card`, `Modal`). Trate erro lendo `ErroApi` (`codigo`, `mensagem`, `campos`, `detalhes`).
+- Painel (`/admin/*`): service novo usa `requisitarAdmin` (`src/lib/apiAdmin.js`), não `requisitar`. Página nova entra DENTRO do grupo `<RotaAdminProtegida>` em `App.jsx` — fora dele abre sem login. 401 em rota de painel é sessão vencida (volta ao login), 403 é sessão de cliente (mensagem própria, nunca manda ao login). Sessão do painel e do cliente são independentes: `useSessaoAdmin()` × `useSessaoCliente()`.
 - `PATCH /carrinho/:itemId` recebe sempre `variacaoTamanhoId` **e** `variacaoCorId`. Listas de variações, destaques e ordens do painel substituem o conjunto inteiro.
 - Toda tela que busca dado tem os três estados: carregando (esqueleto), vazio (com saída) e erro ("Tentar de novo"). Use `useRequisicao`, `components/Estados.jsx` e as classes de estado de `styles/global.css`.
 - Código, nomes e rotas em português.

@@ -7,11 +7,15 @@
 //   ?exemplo=lento  → toda resposta demora 4s (estado carregando)
 //   ?exemplo=vazio  → listagens voltam vazias (estado vazio)
 //   ?exemplo=erro   → toda leitura (GET) falha com 500 (estado de erro)
+//
+// Painel: entra com qualquer e-mail e a senha "exemplo" (outra senha → CREDENCIAIS_INVALIDAS).
+// Como no backend, a sessão do admin vale mais que a do cliente; só cliente → 403 SEM_PERMISSAO.
 
 import { ErroApi } from '../apiClient.js';
 import { banners, categorias, colecoes, marcas, produtos, WHATSAPP_EXEMPLO } from './catalogoExemplo.js';
 
 const CHAVE = 'vip-exemplo-estado';
+const SENHA_ADMIN_EXEMPLO = 'exemplo';
 
 function lerEstado() {
   try {
@@ -22,7 +26,7 @@ function lerEstado() {
 }
 
 function estadoInicial() {
-  return { cliente: null, carrinho: [], favoritos: [], selecoes: [], proximoItem: 1 };
+  return { cliente: null, admin: null, carrinho: [], favoritos: [], selecoes: [], proximoItem: 1 };
 }
 
 function gravar(estado) {
@@ -97,6 +101,29 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
   const estado = lerEstado();
   const rota = `${metodo} ${caminho}`;
   let m;
+
+  if (rota === 'POST /admin/sessao') {
+    if (corpo?.senha !== SENHA_ADMIN_EXEMPLO) {
+      throw erro(401, 'CREDENCIAIS_INVALIDAS', 'E-mail ou senha inválidos.');
+    }
+    const agora = new Date().toISOString();
+    estado.admin = { id: 1, nome: 'Equipe VIP (exemplo)', email: corpo.email, ultimoLoginEm: agora, criadoEm: agora };
+    gravar(estado);
+    return estado.admin;
+  }
+
+  if (rota === 'DELETE /admin/sessao') {
+    gravar({ ...estado, admin: null });
+    return { ok: true };
+  }
+
+  if (caminho.startsWith('/admin/')) {
+    if (!estado.admin && estado.cliente) {
+      throw erro(403, 'SEM_PERMISSAO', 'Esta área é restrita à equipe da loja.');
+    }
+    if (!estado.admin) throw erro(401, 'NAO_IDENTIFICADO', 'Faça login para acessar o painel.');
+    if (rota === 'GET /admin/eu') return estado.admin;
+  }
 
   if (rota === 'GET /home') {
     const visiveis = vazio ? [] : produtos;
