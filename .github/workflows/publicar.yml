@@ -31,6 +31,11 @@ on:
         default: homologacao
         type: choice
         options: [homologacao, producao]
+      confirmar:
+        description: "Para publicar em PRODUÇÃO, digite PUBLICAR. Ignorado em homologação."
+        required: false
+        default: ""
+        type: string
 
 concurrency:
   group: publicar-frontend
@@ -50,6 +55,22 @@ jobs:
       name: ${{ github.event_name == 'push' && 'homologacao' || inputs.ambiente }}
       url: https://${{ vars.DOMINIO }}
     steps:
+      # O ambiente "producao" existe em Settings > Environments, mas a
+      # proteção "Required reviewers" NÃO ESTÁ VALENDO: a organização está no
+      # GitHub Free e, no Free, ela só é aplicada em repositório PÚBLICO. Em
+      # repositório privado fica "Not enforced" — pior que não ter, porque
+      # parece que tem. Enquanto isso, a trava é a confirmação digitada.
+      - name: Conferir a confirmação
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.ambiente == 'producao' }}
+        run: |
+          set -euo pipefail
+          if [ "${{ inputs.confirmar }}" != "PUBLICAR" ]; then
+            echo "::error::Para publicar em produção, preencha o campo 'confirmar' com PUBLICAR."
+            echo "Nada foi publicado. O site continua na versão anterior."
+            exit 1
+          fi
+          echo "Confirmado. Publicando em produção."
+
       - uses: actions/checkout@v4
 
       - name: Definir ambiente e versão
@@ -102,4 +123,5 @@ jobs:
           usuario: ${{ secrets.SSH_USUARIO }}
           chave: ${{ secrets.SSH_CHAVE }}
           hosts_conhecidos: ${{ secrets.SSH_HOSTS_CONHECIDOS }}
+          porta: ${{ vars.SSH_PORTA }}
           caminho_infra: ${{ vars.CAMINHO_INFRA }}
