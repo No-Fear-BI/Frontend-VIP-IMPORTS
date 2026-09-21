@@ -213,7 +213,7 @@ A VIP Imports vende peças de grife importadas sem carrinho de pagamento: o site
 
 A direção é **Editorial de moda cruzado com etiqueta de alfaiataria**. De um lado, a revista (The Gentlewoman, Apartamento, a Harper's Bazaar de Brodovitch): título serifado grande, rótulo versalete espaçado, filete fino no lugar de caixa, cor usada em faixa cheia e não em pontinhos. Do outro, a etiqueta de papel pendurada na peça: o creme do manual da marca é literalmente o "papel de etiqueta", e o código do produto (`X030`) é tratado como o número escrito nessa etiqueta, não como um dado de sistema.
 
-A pegada de **exclusividade** vem de retenção, não de enfeite. Não há preço, não há contador de desconto nem selo de "mais vendido". Não há sombra, gradiente colorido ou canto arredondado. Cada peça tem uma moldura branca, como um objeto em vitrine, e o texto fala como atendimento de loja, não como e-commerce ("Valor confirmado pelo atendimento.", "Comprar no WhatsApp"). A sensação no primeiro segundo deve ser: *loja pequena, que atende por hora marcada*.
+A pegada de **exclusividade** vem de retenção, não de enfeite. Não há preço, não há contador de desconto nem selo de "mais vendido". Não há sombra, gradiente colorido ou canto arredondado. Cada peça tem uma moldura branca, como um objeto em vitrine, e o texto fala como atendimento de loja, não como e-commerce ("Valor confirmado pelo atendimento.", "Consultar valores no WhatsApp"). A sensação no primeiro segundo deve ser: *loja pequena, que atende por hora marcada*.
 
 **O que esta direção abandona, de propósito: densidade.** A grade mostra quatro peças por linha no desktop e duas no celular, com espaço generoso entre elas. Um atacadista mostraria o dobro. A troca compra a leitura de boutique, que é o que justifica atendimento individual. Para quem já sabe o que quer, busca e filtros resolvem, sem apertar a grade.
 
@@ -317,7 +317,7 @@ Não existe raio de 4, 8 ou 16px. Canto arredondado é o sotaque de app de consu
 
 ## Components
 
-**Botão principal (`button-primary`).** Verde cheio, texto creme em `button` (versalete 13px, +0,12em), 52px de altura, raio 0. É a ação que termina em conversa: **"Comprar no WhatsApp"** no produto, "Enviar seleção pelo WhatsApp" na seleção, "Continuar" na identificação. Hover em `primary-hover` com o brilho diagonal atravessando (ver Movimento), sem mudar tamanho nem ganhar sombra; ao pressionar, escala 0,985. Carregando: o texto dá lugar a "Abrindo o WhatsApp…" e o botão fica desabilitado, sem spinner girando.
+**Botão principal (`button-primary`).** Verde cheio, texto creme em `button` (versalete 13px, +0,12em), 52px de altura, raio 0. É a ação que termina em conversa: **"Consultar valores no WhatsApp"** no produto, "Enviar seleção pelo WhatsApp" na seleção, "Continuar" na identificação. Hover em `primary-hover` com o brilho diagonal atravessando (ver Movimento), sem mudar tamanho nem ganhar sombra; ao pressionar, escala 0,985. Carregando: o texto dá lugar a "Abrindo o WhatsApp…" e o botão fica desabilitado, sem spinner girando.
 
 **Botão secundário (`button-secondary`).** Papel com contorno de 1px `border-strong` e texto verde. Ações de apoio: "Ver seleção", "Tentar de novo", "Limpar filtros". Hover: o contorno vai para `primary`.
 
@@ -325,7 +325,7 @@ Não existe raio de 4, 8 ou 16px. Canto arredondado é o sotaque de app de consu
 
 **Link versalete (`link-caps`).** "Ver detalhes →", "Ver tudo →", "Coleção Feminina →". Texto em `label-caps` com sublinhado de 1px afastado 4px da linha de base. No hover o sublinhado engrossa para 2px e a seta desliza 4px para a direita; a cor não muda.
 
-**Cartão de produto.** Não é cartão: não tem fundo, borda nem sombra. De cima para baixo: foto 4:5 na `vitrine-foto`; marca em `text-meta` (versalete 11px, `on-surface-muted`); "Código X030" em `headline-sm`; categoria em `body-sm` `on-surface-muted`; "Valor confirmado pelo atendimento." em `body-sm` `on-surface-muted`; e uma linha com o link "Ver detalhes →" à esquerda e o botão de texto **"Comprar no WhatsApp"** (ícone + versalete, sem fundo) à direita. Produto `esgotado`: sobre a foto, no canto superior esquerdo, uma etiqueta papel com "Esgotado" em versalete; a foto não perde saturação. No hover do cartão, a foto dá o zoom de 1,04 em 1s dentro da vitrine. O botão de compra vira "Consultar disponibilidade", e o fluxo segue igual, porque esgotado continua sendo vitrine e o atendimento decide. **Não existe preço em lugar nenhum**, nem campo "a partir de".
+**Cartão de produto.** Não é cartão: não tem fundo, borda nem sombra. De cima para baixo: foto 4:5 na `vitrine-foto`; marca em `text-meta` (versalete 11px, `on-surface-muted`); "Código X030" em `headline-sm`; categoria em `body-sm` `on-surface-muted`; "Valor confirmado pelo atendimento." em `body-sm` `on-surface-muted`; e o link "Ver detalhes →". **O cartão não tem botão de compra**: a compra começa na página do produto. Produto `esgotado`: sobre a foto, no canto superior esquerdo, uma etiqueta papel com "Esgotado" em versalete; a foto não perde saturação. No hover do cartão, a foto dá o zoom de 1,04 em 1s dentro da vitrine. Na página do produto, o botão de compra vira "Consultar disponibilidade", e o fluxo segue igual, porque esgotado continua sendo vitrine e o atendimento decide. **Não existe preço em lugar nenhum**, nem campo "a partir de".
 
 **Etiqueta (`etiqueta`).** Código do produto sobre creme com ilhós. Ver Shapes.
 
@@ -351,7 +351,7 @@ Não existe raio de 4, 8 ou 16px. Canto arredondado é o sotaque de app de consu
 - **Não use dourado, mostarda, vermelho ou cinza neutro**, nem "só num detalhe". A referência base44 usa dourado nos botões e divisores; aqui esse papel é do verde cheio (botão) e do filete `border` (divisor).
 - **Use no máximo duas faixas verdes de sangria total por página** (o rodapé não conta). Com três, o verde deixa de ser destaque e vira fundo.
 - **Não mostre preço, desconto, parcela ou "a partir de".** O texto fixo é "Valor confirmado pelo atendimento."
-- **Todo botão de compra diz "Comprar no WhatsApp"** (ou "Consultar disponibilidade" para esgotado). Nunca "Comprar", "Adicionar ao carrinho" ou "Finalizar pedido": não existe checkout.
+- **Todo botão de compra diz "Consultar valores no WhatsApp"** (ou "Consultar disponibilidade" para esgotado). Nunca "Comprar", "Adicionar ao carrinho" ou "Finalizar pedido": não existe checkout.
 - **Não use Bodoni Moda abaixo de 20px nem em texto corrido.** Descrição, legenda e aviso vão em Jost.
 - **Não use Jost em peso diferente de 400 e 600.** Se um título não está chamando atenção, ele precisa de mais espaço acima, não de negrito.
 - **Não centralize texto.** Nem título de seção, nem estado vazio, nem diálogo. Exceções: nome no cartão de marca e wordmark no cabeçalho do celular.

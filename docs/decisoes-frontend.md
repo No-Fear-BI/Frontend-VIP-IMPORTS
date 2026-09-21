@@ -156,3 +156,9 @@ Além disso, a base de acesso dele não tem rota protegida, não separa 401 de 4
 **Testado contra a API real (21/09):** criar ("Lilás Teste" → slug `lilas-teste`), editar (renomear mantendo o slug, esconder → some de `GET /cores`), excluir cor sem peça, excluir cor em uso (botão desabilitado; DELETE forçado → 409 com `totalProdutos: 774`, cor intacta), gaveta de peças e `/feminino?cor=preta,bege` (873 peças, igual à API).
 
 **Limitação conhecida:** a gaveta "peças nesta cor" mostra só as 50 primeiras, sem paginação.
+
+## 15. O botão passa a se chamar "Consultar valores no WhatsApp" e sai do cartão (21/09/2026)
+
+**Decidido pelo cliente:** o botão de compra se chama **"Consultar valores no WhatsApp"** (esgotado continua "Consultar disponibilidade"), e **só aparece na página do produto**. O cartão da listagem fica com "Ver detalhes →", que agora aparece também no celular (antes ele sumia no celular para dar lugar ao botão). Substitui o nome da decisão 2; o fluxo pelo backend (decisão 3) não muda. O texto vem de `rotuloCompra()` em `components/Produto.jsx`, e o título do diálogo de compra acompanha.
+
+**Não entrou, porque não foi pedido:** as contagens de peças em categorias e marcas e o texto do rodapé, que tinham sido tirados junto, voltaram.

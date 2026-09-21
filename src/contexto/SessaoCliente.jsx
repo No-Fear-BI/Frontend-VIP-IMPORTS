@@ -4,7 +4,7 @@
  * painel não deve ler nada daqui.
  *
  * Decisão de produto (docs/decisoes-frontend.md): não existe carrinho anônimo. O único
- * caminho para um item entrar na seleção é "Comprar no WhatsApp", que identifica o
+ * caminho para um item entrar na seleção é "Consultar valores no WhatsApp", que identifica o
  * cliente antes. Por isso POST /carrinho/migrar não é usado na loja.
  */
 

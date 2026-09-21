@@ -27,7 +27,8 @@ export function Sobre() {
         </p>
         <h2 className="t-headline-md">Como comprar</h2>
         <p>
-          Em qualquer peça, toque em Comprar no WhatsApp. Na primeira vez pedimos só o seu e-mail, sem senha. O
+          Em qualquer peça, toque em Consultar valores no WhatsApp. Na primeira vez pedimos só o seu e-mail, sem
+          senha. O
           WhatsApp abre com a mensagem pronta, com o código, a marca e o tamanho e a cor que você escolheu.
         </p>
         <div>
@@ -49,7 +50,8 @@ export function Contato() {
       </header>
       <div className="texto-corrido secao secao--proxima">
         <p className="t-body-lg">
-          Para comprar, o caminho mais rápido é o botão Comprar no WhatsApp na própria peça: a mensagem já chega com
+          Para comprar, o caminho mais rápido é o botão Consultar valores no WhatsApp na própria peça: a mensagem já
+          chega com
           o código certo.
         </p>
         {(LINK_WHATSAPP_CONTATO || LINK_INSTAGRAM) && (

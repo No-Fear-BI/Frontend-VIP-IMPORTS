@@ -159,7 +159,8 @@ function DetalheProduto({ produto }) {
             <h2 className="t-label-caps">Como funciona a compra</h2>
             <ol className="t-body-sm">
               <li>
-                <span className="t-codigo">01</span> Toque em Comprar no WhatsApp. Tamanho e cor são opcionais.
+                <span className="t-codigo">01</span> Toque em Consultar valores no WhatsApp. Tamanho e cor são
+                opcionais.
               </li>
               <li>
                 <span className="t-codigo">02</span> Na primeira vez, informe seu e-mail. Não tem senha.

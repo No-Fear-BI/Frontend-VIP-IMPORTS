@@ -25,7 +25,7 @@ O site queria que o Claude Code use como inspiração de estrutura, layout e tom
 - Seção de produtos isolados sobre fundo neutro (sem card, sem sombra pesada) — várias peças flutuando, foto limpa.
 - Dois banners grandes lado a lado para "Coleção Feminina" / "Coleção Masculina": foto de fundo cheia, texto sobre gradiente escuro, link sublinhado versalete.
 - Grade de categorias em destaque: foto quadrada + nome da categoria (serifado) + gênero (versalete cinza pequeno) abaixo.
-- Cartão de produto: marca em versalete cinza pequeno, "Código X030" como título serifado, categoria, "Valor confirmado pelo atendimento." no lugar do preço, link "Ver detalhes →" — é exatamente o padrão que já está descrito no Dia 2 do plano (loja), esse site já implementa.
+- Cartão de produto: marca em versalete cinza pequeno, "Código X030" como título serifado, categoria, "Valor confirmado pelo atendimento." no lugar do preço, link "Ver detalhes →" (sem botão de compra no cartão) — é exatamente o padrão que já está descrito no Dia 2 do plano (loja), esse site já implementa.
 - Grade de marcas: cartões simples com borda fina, nome centralizado.
 - Seção final de CTA com dois botões (ação primária + "Falar no WhatsApp") antes do footer.
 - Footer: colunas de coleções / navegação / contato, com WhatsApp e Instagram.
@@ -45,8 +45,8 @@ Não tem designer externo entregando tela pronta — a tela é por conta do pró
 Registro completo, com o porquê e as alternativas descartadas, em `docs/decisoes-frontend.md`. O que está pendente fica em `docs/pendencias-frontend.md`. Resumo:
 
 - **Direção visual: pendente com o cliente.** A opção 1 ("Vitrine Reservada", editorial + etiqueta) foi construída em 15/09 e o `DESIGN.md` dela está guardado em `docs/propostas/DESIGN-opcao-1-vitrine-reservada.md` — é proposta, não fonte de verdade. A opção 2 (Luxo minimalista) existe só em `docs/comparacao/`. Não importe nada dessas pastas.
-- **A loja não tem venda direta.** Não existe preço, checkout ou "Adicionar ao carrinho". Todo botão de compra diz **"Comprar no WhatsApp"** ("Consultar disponibilidade" se `status === 'esgotado'`). No texto, o carrinho do backend se chama **"seleção"**.
-- **"Comprar no WhatsApp" passa pelo backend** (`src/contexto/CompraWhatsApp.jsx`): escolhe tamanho/cor (opcionais) → identifica por e-mail se não houver sessão → `POST /carrinho` → se a seleção já tinha outras peças, pergunta "só esta" ou "todas juntas" → `POST /selecoes` → abre o `linkWhatsapp` que o backend devolve. **Nunca monte link `wa.me` de compra no frontend nem guarde o número da loja aqui.**
+- **A loja não tem venda direta.** Não existe preço, checkout ou "Adicionar ao carrinho". Todo botão de compra diz **"Consultar valores no WhatsApp"** ("Consultar disponibilidade" se `status === 'esgotado'`), e ele fica só na página do produto: o cartão da listagem leva a ela por "Ver detalhes →". Nome definido pelo cliente em 21/09/2026 (antes era "Comprar no WhatsApp"); o texto sai de `rotuloCompra()` em `components/Produto.jsx`. No texto, o carrinho do backend se chama **"seleção"**.
+- **"Consultar valores no WhatsApp" passa pelo backend** (`src/contexto/CompraWhatsApp.jsx`): escolhe tamanho/cor (opcionais) → identifica por e-mail se não houver sessão → `POST /carrinho` → se a seleção já tinha outras peças, pergunta "só esta" ou "todas juntas" → `POST /selecoes` → abre o `linkWhatsapp` que o backend devolve. **Nunca monte link `wa.me` de compra no frontend nem guarde o número da loja aqui.**
 - **Não existe carrinho anônimo.** Só entra peça na seleção pelo fluxo acima, que já identifica o cliente. Por isso a loja não usa `carrinhoService.migrar` (`POST /carrinho/migrar`).
 
 ## Como o código está organizado
