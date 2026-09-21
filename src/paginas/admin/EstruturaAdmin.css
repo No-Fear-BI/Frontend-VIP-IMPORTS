@@ -62,3 +62,37 @@
     padding: var(--espaco-6) var(--container-margem-celular);
   }
 }
+
+/* Mantém a navegação disponível, inclusive em telas de pouca altura. */
+.admin__lateral {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  z-index: var(--camada-cabecalho);
+}
+
+.admin__lateral > nav { width: 100%; min-width: 0; }
+.admin__conteudo { min-width: 0; }
+
+@media (max-width: 1023px) {
+  .admin__lateral {
+    height: auto;
+    max-height: 100dvh;
+    gap: var(--espaco-3);
+    padding: var(--espaco-3) var(--container-margem-celular);
+    min-width: 0;
+  }
+
+  .admin__menu {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: var(--espaco-1);
+  }
+
+  .admin__menu > li { flex: 0 0 auto; }
+  .admin__link { white-space: nowrap; }
+}

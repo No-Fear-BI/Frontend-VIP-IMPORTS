@@ -1,1 +1,15 @@
-.revisao{background:#f5f3ed;color:#171813;min-height:100%;padding:32px;font-family:Manrope,Arial,sans-serif}.revisao__cabecalho,.revisao__filtros,.revisao__card nav{display:flex;justify-content:space-between;gap:16px;align-items:center}.revisao h1{font:400 32px/1.1 'Cormorant Garamond',Georgia,serif;margin:4px 0}.revisao__marca{font-size:12px;letter-spacing:.16em;margin:0}.revisao__cabecalho a,.revisao__card a{color:#596241}.revisao__resumo{margin:32px 0;padding:20px;background:#fffdf8;border:1px solid #dedbd1}.revisao__resumo strong{font:400 38px/1 'Cormorant Garamond',Georgia,serif}.revisao__resumo p{margin:8px 0 0}.revisao__filtros{margin-bottom:24px}.revisao select,.revisao input{background:#fffdf8;border:1px solid #dedbd1;padding:12px;font:inherit}.revisao__filtros input{flex:1}.revisao__grade{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}.revisao__card{background:#fffdf8;border:1px solid #dedbd1}.revisao__card img{width:100%;height:220px;object-fit:contain;background:#fff}.revisao__card>div{padding:14px}.revisao__card small{display:block;color:#596241}.revisao__card input{border-width:0 0 1px;width:100%;font:400 24px/1.1 'Cormorant Garamond',Georgia,serif;margin:10px 0}.revisao__card p{font-size:13px}.revisao__card nav{flex-wrap:wrap;margin-top:14px}.revisao button{background:#596241;color:#fffdf8;border:0;padding:10px 12px}.revisao__rejeitar{background:#9a4c43!important}.revisao__erro{color:#9a4c43}@media(max-width:900px){.revisao__grade{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.revisao{padding:16px}.revisao__cabecalho,.revisao__filtros{align-items:flex-start;flex-direction:column}.revisao__grade{grid-template-columns:1fr}.revisao__card img{height:340px}}
+﻿.revisao { background: var(--cor-superficie); color: var(--cor-texto); padding: var(--espaco-8); min-height: 100%; }
+.revisao__cabecalho, .revisao__filtros, .revisao__paginacao, .revisao__acoes { display: flex; justify-content: space-between; gap: var(--espaco-4); align-items: center; flex-wrap: wrap; }
+.revisao__resumo { margin-block: var(--espaco-8); padding: var(--espaco-5); border: var(--borda-fina) solid var(--cor-borda); }
+.revisao__resumo p { margin-top: var(--espaco-2); }
+.revisao__filtros { margin-bottom: var(--espaco-6); align-items: end; }
+.revisao__filtros .campo { flex: 1; min-width: 0; }
+.revisao__grade { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--espaco-5); }
+.revisao__card { min-width: 0; padding: 0; overflow: hidden; }
+.revisao__card img { width: 100%; aspect-ratio: 1; object-fit: contain; background: var(--cor-fundo-foto); }
+.revisao__conteudo { padding: var(--espaco-4); display: grid; gap: var(--espaco-3); overflow-wrap: anywhere; }
+.revisao__conteudo small { color: var(--cor-texto-suave); }
+.revisao__paginacao { margin-block: var(--espaco-6); }
+.revisao__acoes { margin-top: var(--espaco-3); }
+@media (max-width: 1023px) { .revisao__grade { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .revisao { padding: var(--espaco-4); } .revisao__cabecalho, .revisao__filtros { align-items: stretch; flex-direction: column; } .revisao__grade { grid-template-columns: 1fr; } }
