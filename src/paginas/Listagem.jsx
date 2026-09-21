@@ -36,6 +36,7 @@ export default function Listagem({ modo, colecaoFixa }) {
       colecao: colecaoFixa || params.get('colecao') || '',
       categoria: params.get('categoria') || '',
       marca: modo === 'marca' ? marcaDaRota : params.get('marca') || '',
+      cor: params.get('cor') || '',
       busca: params.get('busca') || '',
       ordem: params.get('ordem') || 'recentes',
     }),
@@ -59,6 +60,7 @@ export default function Listagem({ modo, colecaoFixa }) {
   }, [chave]);
 
   const marcas = useRequisicao((sinal) => catalogoService.marcas(sinal), []);
+  const cores = useRequisicao((sinal) => catalogoService.cores(sinal), []);
   const categorias = useRequisicao(
     (sinal) => (filtros.colecao ? catalogoService.categoriasDaColecao(filtros.colecao, sinal) : Promise.resolve([])),
     [filtros.colecao],
@@ -110,7 +112,10 @@ export default function Listagem({ modo, colecaoFixa }) {
   const produtos = primeiraPagina.dados ? [...primeiraPagina.dados.dados, ...maisPaginas.itens] : [];
   const total = primeiraPagina.dados?.paginacao.total ?? 0;
   const temFiltroAtivo = Boolean(
-    (!colecaoFixa && filtros.colecao) || filtros.categoria || (modo !== 'marca' && filtros.marca),
+    (!colecaoFixa && filtros.colecao) ||
+      filtros.categoria ||
+      filtros.cor ||
+      (modo !== 'marca' && filtros.marca),
   );
 
   const painelFiltros = (
@@ -119,6 +124,7 @@ export default function Listagem({ modo, colecaoFixa }) {
       filtros={filtros}
       colecaoFixa={colecaoFixa}
       marcas={marcas}
+      cores={cores}
       categorias={categorias}
       onMudar={mudarFiltro}
       onLimpar={limparFiltros}
@@ -243,14 +249,32 @@ function tituloDaPagina(modo, filtros, nomeMarca) {
   return { principal: 'Todas as peças', trilha: 'Peças' };
 }
 
-function PainelFiltros({ modo, filtros, colecaoFixa, marcas, categorias, onMudar, onLimpar, temFiltroAtivo }) {
+function PainelFiltros({
+  modo,
+  filtros,
+  colecaoFixa,
+  marcas,
+  cores,
+  categorias,
+  onMudar,
+  onLimpar,
+  temFiltroAtivo,
+}) {
   const marcasEscolhidas = filtros.marca ? filtros.marca.split(',') : [];
+  const coresEscolhidas = filtros.cor ? filtros.cor.split(',') : [];
 
   function alternarMarca(slug) {
     const proximas = marcasEscolhidas.includes(slug)
       ? marcasEscolhidas.filter((s) => s !== slug)
       : [...marcasEscolhidas, slug];
     onMudar({ marca: proximas.join(',') });
+  }
+
+  function alternarCor(slug) {
+    const proximas = coresEscolhidas.includes(slug)
+      ? coresEscolhidas.filter((s) => s !== slug)
+      : [...coresEscolhidas, slug];
+    onMudar({ cor: proximas.join(',') });
   }
 
   return (
@@ -332,6 +356,32 @@ function PainelFiltros({ modo, filtros, colecaoFixa, marcas, categorias, onMudar
           ))}
         </fieldset>
       )}
+
+      {/* Sem `modo !== 'marca'`: cor faz sentido até dentro da página de uma marca. */}
+      <fieldset className="filtros__grupo">
+        <legend className="t-label-caps">Cor</legend>
+        {cores.carregando && <p className="t-body-sm t-muted">Carregando…</p>}
+        {cores.erro && (
+          <button type="button" className="link-caps" onClick={cores.recarregar}>
+            Tentar de novo
+          </button>
+        )}
+        {cores.dados && cores.dados.length === 0 && (
+          <p className="t-body-sm t-muted">Nenhuma cor cadastrada ainda.</p>
+        )}
+        {cores.dados?.map((c) => (
+          <OpcaoFiltro
+            key={c.id}
+            tipo="checkbox"
+            nome="cor"
+            ativo={coresEscolhidas.includes(c.slug)}
+            onChange={() => alternarCor(c.slug)}
+            contagem={c.totalProdutos}
+          >
+            {c.nome}
+          </OpcaoFiltro>
+        ))}
+      </fieldset>
 
       {temFiltroAtivo && (
         <button type="button" className="link-caps filtros__limpar" onClick={onLimpar}>

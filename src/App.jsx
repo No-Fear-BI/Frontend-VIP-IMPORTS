@@ -5,6 +5,7 @@ import RotaAdminProtegida from './paginas/admin/Acesso.jsx';
 import AdminBanners from './paginas/admin/Banners.jsx';
 import AdminCategorias from './paginas/admin/Categorias.jsx';
 import AdminClientes from './paginas/admin/Clientes.jsx';
+import AdminCores from './paginas/admin/Cores.jsx';
 import AdminDestaques from './paginas/admin/Destaques.jsx';
 import EstruturaAdmin from './paginas/admin/EstruturaAdmin.jsx';
 import AdminLogin from './paginas/admin/Login.jsx';
@@ -63,6 +64,7 @@ export default function App() {
             <Route path="resumo" element={<AdminResumo />} />
             <Route path="produtos" element={<AdminProdutos />} />
             <Route path="marcas" element={<AdminMarcas />} />
+            <Route path="cores" element={<AdminCores />} />
             <Route path="categorias" element={<AdminCategorias />} />
             <Route path="banners" element={<AdminBanners />} />
             <Route path="destaques" element={<AdminDestaques />} />

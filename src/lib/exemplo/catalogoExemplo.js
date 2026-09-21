@@ -118,6 +118,36 @@ export const produtos = produtosBrutos.map(([codigo, nome, marcaSlug, categoriaI
   };
 });
 
+/*
+ * A paleta, espelhando a tabela `cores` do backend (revisão 0007). Aqui ela é
+ * DERIVADA das variações de cor dos produtos, com a mesma regra de slug do
+ * backend (minúscula, sem acento, não-alfanumérico vira hífen): assim "Preto" e
+ * "preto" caem na mesma cor, como cairiam lá.
+ */
+const slugDeCor = (texto) =>
+  texto
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .join('-');
+
+export const cores = [
+  ...new Map(
+    produtos.flatMap((p) =>
+      p.variacoes.filter((v) => v.tipo === 'cor').map((v) => [slugDeCor(v.valor), v.valor]),
+    ),
+  ),
+]
+  .sort(([, a], [, b]) => a.localeCompare(b, 'pt-BR'))
+  .map(([slug, nome], i) => ({ id: 900 + i, nome, slug }));
+
+/** Os slugs de cor de um produto — é o que o filtro `?cor=` compara. */
+export const coresDoProduto = (produto) =>
+  produto.variacoes.filter((v) => v.tipo === 'cor').map((v) => slugDeCor(v.valor));
+
 export const banners = [
   {
     id: 1,

@@ -12,7 +12,16 @@
 // Como no backend, a sessão do admin vale mais que a do cliente; só cliente → 403 SEM_PERMISSAO.
 
 import { ErroApi } from '../apiClient.js';
-import { banners, categorias, colecoes, marcas, produtos, WHATSAPP_EXEMPLO } from './catalogoExemplo.js';
+import {
+  banners,
+  categorias,
+  colecoes,
+  cores,
+  coresDoProduto,
+  marcas,
+  produtos,
+  WHATSAPP_EXEMPLO,
+} from './catalogoExemplo.js';
 
 const CHAVE = 'vip-exemplo-estado';
 const SENHA_ADMIN_EXEMPLO = 'exemplo';
@@ -123,6 +132,68 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
     }
     if (!estado.admin) throw erro(401, 'NAO_IDENTIFICADO', 'Faça login para acessar o painel.');
     if (rota === 'GET /admin/eu') return estado.admin;
+
+    /*
+     * Paleta do painel. As cores nascem das variações dos produtos (ver catalogoExemplo),
+     * e o que o painel cria/edita/exclui vive no estado local — produto de exemplo não muda,
+     * então `totalProdutos` continua saindo do catálogo fixo.
+     */
+    if (rota === 'GET /admin/cores') return coresDoPainel(estado);
+
+    if (rota === 'POST /admin/cores') {
+      const nome = String(corpo?.nome || '').trim();
+      if (!nome) {
+        throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', {
+          campos: { nome: 'Obrigatório.' },
+        });
+      }
+      const slug = String(corpo?.slug || nome).trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      if (coresDoPainel(estado).some((c) => c.slug === slug)) {
+        throw erro(409, 'SLUG_EM_USO', `O slug '${slug}' já está em uso por outra cor.`, {
+          campos: { slug: 'Este slug já está em uso.' },
+        });
+      }
+      const nova = { id: Date.now(), nome, slug, ordem: 0, ativa: corpo?.ativa ?? true };
+      gravar({ ...estado, coresExtras: [...(estado.coresExtras || []), nova] });
+      return { ...nova, totalProdutos: 0 };
+    }
+
+    if ((m = caminho.match(/^\/admin\/cores\/(\d+)$/))) {
+      const id = Number(m[1]);
+      const atual = coresDoPainel(estado).find((c) => c.id === id);
+      if (!atual) throw erro(404, 'COR_NAO_ENCONTRADA', 'Cor não encontrada.');
+
+      if (metodo === 'DELETE') {
+        if (atual.totalProdutos > 0) {
+          throw erro(
+            409,
+            'COR_EM_USO',
+            `Não é possível excluir: ${atual.totalProdutos} produtos usam esta cor.`,
+            { detalhes: { totalProdutos: atual.totalProdutos } },
+          );
+        }
+        gravar({ ...estado, coresExtras: (estado.coresExtras || []).filter((c) => c.id !== id) });
+        return { ok: true };
+      }
+
+      const mudancas = { ...corpo };
+      if (mudancas.nome) mudancas.nome = String(mudancas.nome).trim();
+      const ajustadas = (estado.coresExtras || []).map((c) => (c.id === id ? { ...c, ...mudancas } : c));
+      // Cor derivada do catálogo não existe no estado: vira uma entrada nova que a sobrescreve.
+      if (!ajustadas.some((c) => c.id === id)) ajustadas.push({ ...atual, ...mudancas });
+      gravar({ ...estado, coresExtras: ajustadas });
+      return { ...atual, ...mudancas };
+    }
+
+    if (rota === 'GET /admin/produtos') {
+      const corId = Number(q.get('corId'));
+      const cor = coresDoPainel(estado).find((c) => c.id === corId);
+      const lista = cor ? produtos.filter((p) => coresDoProduto(p).includes(cor.slug)) : [];
+      return {
+        dados: lista.map(item),
+        paginacao: { total: lista.length, porPagina: 50, pagina: 1 },
+      };
+    }
   }
 
   if (rota === 'GET /home') {
@@ -148,6 +219,11 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
     if (q.get('marca')) {
       const slugs = q.get('marca').split(',');
       lista = lista.filter((p) => slugs.includes(p.marca.slug));
+    }
+    if (q.get('cor')) {
+      // OU entre as cores, como no backend: quem tem preto OU bege, não os dois.
+      const slugs = q.get('cor').split(',');
+      lista = lista.filter((p) => coresDoProduto(p).some((slug) => slugs.includes(slug)));
     }
     if (q.get('busca')) {
       const termo = normalizar(q.get('busca'));
@@ -184,6 +260,7 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
   }
 
   if (rota === 'GET /marcas') return vazio ? [] : marcasComTotal();
+  if (rota === 'GET /cores') return vazio ? [] : coresComTotal();
   if (rota === 'GET /colecoes') return colecoes;
 
   if ((m = caminho.match(/^\/colecoes\/([^/]+)\/categorias$/)) && metodo === 'GET') {
@@ -332,6 +409,24 @@ function acharProduto(codigo) {
 
 function marcasComTotal() {
   return marcas.map((m) => ({ ...m, totalProdutos: produtos.filter((p) => p.marca.slug === m.slug).length }));
+}
+
+function coresComTotal() {
+  return cores.map((c) => ({
+    ...c,
+    totalProdutos: produtos.filter((p) => coresDoProduto(p).includes(c.slug)).length,
+  }));
+}
+
+/** A paleta como o painel vê: as do catálogo mais as criadas na sessão, com as edições por cima. */
+function coresDoPainel(estado) {
+  const extras = estado.coresExtras || [];
+  const base = coresComTotal().map((c) => ({ ordem: 0, ativa: true, ...c }));
+  const combinadas = base.map((c) => ({ ...c, ...(extras.find((e) => e.id === c.id) || {}) }));
+  const novas = extras
+    .filter((e) => !base.some((c) => c.id === e.id))
+    .map((e) => ({ ...e, totalProdutos: 0 }));
+  return [...combinadas, ...novas].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
 }
 
 function normalizar(texto) {

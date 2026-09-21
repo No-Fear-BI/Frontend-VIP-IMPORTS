@@ -15,6 +15,7 @@ const MENU_ADMIN = [
   { rotulo: 'Resumo', para: 'resumo' },
   { rotulo: 'Produtos', para: 'produtos' },
   { rotulo: 'Marcas', para: 'marcas' },
+  { rotulo: 'Cores', para: 'cores' },
   { rotulo: 'Categorias', para: 'categorias' },
   { rotulo: 'Banners', para: 'banners' },
   { rotulo: 'Destaques', para: 'destaques' },

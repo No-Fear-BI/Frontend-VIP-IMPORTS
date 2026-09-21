@@ -143,3 +143,16 @@ Fluxo (`src/contexto/CompraWhatsApp.jsx`):
 Além disso, a base de acesso dele não tem rota protegida, não separa 401 de 403 e não trata a sessão de 12h (comparação completa na conversa de 21/09; conflito de merge sobre a base atual: `adminService.js`, `Login.jsx`, `App.jsx` e `DESIGN.md`, este só por fim de linha).
 
 **Para a `Revisao` voltar:** o backend precisa ter as rotas (ou elas precisam estar acordadas com o time do backend), a tela precisa ser reescrita com tokens, os três estados e `requisitarAdmin`, entrar no grupo `<RotaAdminProtegida>` e sair da `Home` da loja. Aí o conflito se reduz à linha da rota e ao item de menu.
+
+## 13. Cores: paleta no painel e filtro na vitrine (21/09/2026)
+
+**Decidido:** cor virou vocabulário no backend (revisão 0007, branch `feat/cores` do backend; rotas no `docs/contrato-api-v1-adendo.json`, não no contrato v1.0). No frontend:
+
+- **`/admin/cores`** (`src/paginas/admin/Cores.jsx`, `coresService` com `requisitarAdmin`): lista com contagem de peças (contando as ocultas), criar, renomear, esconder do filtro, excluir e uma gaveta "peças nesta cor". Dentro do grupo protegido.
+- **Excluir cor em uso** é barrado duas vezes: a tela já mostra quantas peças usam a cor e desabilita o botão, e se a lista estiver velha o backend responde 409 `COR_EM_USO`, que a tela mostra. A saída sugerida é esconder a cor, que não mexe em peça nenhuma.
+- **Renomear** reescreve o texto em todas as variações; o slug (a URL do filtro) só muda se for mandado, e a tela avisa que link antigo quebra.
+- **Filtro de cor na vitrine** (`Listagem.jsx`): checkbox múltiplo com contagem, `?cor=slug1,slug2` na URL (OU entre as cores, como marca), entra no "Limpar filtros". A paleta vem de `GET /cores`, que só traz as ativas.
+
+**Testado contra a API real (21/09):** criar ("Lilás Teste" → slug `lilas-teste`), editar (renomear mantendo o slug, esconder → some de `GET /cores`), excluir cor sem peça, excluir cor em uso (botão desabilitado; DELETE forçado → 409 com `totalProdutos: 774`, cor intacta), gaveta de peças e `/feminino?cor=preta,bege` (873 peças, igual à API).
+
+**Limitação conhecida:** a gaveta "peças nesta cor" mostra só as 50 primeiras, sem paginação.
