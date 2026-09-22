@@ -49,7 +49,6 @@ export function CartaoProduto({ produto, carregamento }) {
         <p className="t-label-caps-sm t-muted cartao-produto__marca">{produto.marca.nome}</p>
         <h3 className="t-headline-sm">Código {produto.codigo}</h3>
         <p className="t-body-sm t-muted">{produto.categoria.nome}</p>
-        <p className="t-body-sm t-muted">Valor confirmado pelo atendimento.</p>
       </Link>
       <div className="cartao-produto__acoes">
         <Link to={destino} className="link-caps">

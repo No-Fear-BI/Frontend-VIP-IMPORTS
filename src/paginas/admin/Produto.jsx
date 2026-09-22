@@ -29,7 +29,9 @@ import Modal from '../../components/ui/Modal.jsx';
 import { useRequisicao } from '../../hooks/useRequisicao.js';
 import { catalogoService } from '../../services/catalogoService.js';
 import { coresService } from '../../services/coresService.js';
-import { catalogoAdminService, produtosAdminService } from '../../services/produtosAdminService.js';
+import { categoriasService } from '../../services/categoriasService.js';
+import { marcasService } from '../../services/marcasService.js';
+import { produtosAdminService } from '../../services/produtosAdminService.js';
 import { ROTULO_STATUS } from './rotulosProduto.js';
 import './Produtos.css';
 
@@ -226,10 +228,10 @@ function DadosProduto({ modo, inicial, onSalvar }) {
   const [erro, setErro] = useState(null);
   const [aviso, setAviso] = useState('');
 
-  const marcas = useRequisicao((sinal) => catalogoAdminService.marcas(sinal), []);
+  const marcas = useRequisicao((sinal) => marcasService.listar(sinal), []);
   const colecoes = useRequisicao((sinal) => catalogoService.colecoes(sinal), []);
   const categorias = useRequisicao(
-    (sinal) => (colecaoId ? catalogoAdminService.categorias(Number(colecaoId), sinal) : Promise.resolve([])),
+    (sinal) => (colecaoId ? categoriasService.listar(Number(colecaoId), sinal) : Promise.resolve([])),
     [colecaoId],
   );
 

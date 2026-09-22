@@ -1,0 +1,53 @@
+.admin-categorias__topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--espaco-4);
+  margin-bottom: var(--espaco-8);
+}
+
+.admin-categorias__ajuda {
+  margin-top: var(--espaco-2);
+  max-width: var(--medida-curta);
+}
+
+.admin-categorias__colecoes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-9);
+}
+
+.admin-categorias__bloco {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.admin-categorias__slug {
+  color: var(--cor-texto-suave);
+}
+
+.admin-categorias__acoes {
+  display: flex;
+  gap: var(--espaco-4);
+  justify-content: flex-end;
+}
+
+.admin-categorias__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.admin-categorias__aviso {
+  padding-left: var(--espaco-3);
+  border-left: var(--borda-grossa) solid var(--cor-primaria);
+}
+
+@media (max-width: 767px) {
+  .admin-categorias__acoes {
+    justify-content: flex-start;
+    margin-top: var(--espaco-2);
+  }
+}

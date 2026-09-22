@@ -16,7 +16,9 @@ import { FotoProduto } from '../../components/Produto.jsx';
 import Button from '../../components/ui/Button.jsx';
 import { useRequisicao } from '../../hooks/useRequisicao.js';
 import { catalogoService } from '../../services/catalogoService.js';
-import { catalogoAdminService, produtosAdminService } from '../../services/produtosAdminService.js';
+import { categoriasService } from '../../services/categoriasService.js';
+import { marcasService } from '../../services/marcasService.js';
+import { produtosAdminService } from '../../services/produtosAdminService.js';
 import { BotaoDuplicar } from './Produto.jsx';
 import { ROTULO_STATUS } from './rotulosProduto.js';
 import './Produtos.css';
@@ -40,10 +42,10 @@ export default function AdminProdutos() {
     [chave],
   );
 
-  const marcas = useRequisicao((sinal) => catalogoAdminService.marcas(sinal), []);
+  const marcas = useRequisicao((sinal) => marcasService.listar(sinal), []);
   const colecoes = useRequisicao((sinal) => catalogoService.colecoes(sinal), []);
   const categorias = useRequisicao(
-    (sinal) => catalogoAdminService.categorias(filtros.colecaoId || undefined, sinal),
+    (sinal) => categoriasService.listar(filtros.colecaoId || undefined, sinal),
     [filtros.colecaoId],
   );
 

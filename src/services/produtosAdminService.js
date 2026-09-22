@@ -70,16 +70,3 @@ export const produtosAdminService = {
   definirVariacoes: (id, variacoes) =>
     requisitarAdmin('PATCH', `/admin/produtos/${id}/variacoes`, { corpo: { variacoes } }),
 };
-
-/*
- * Marcas e categorias do painel, por enquanto só a leitura que os filtros da listagem usam.
- * As coleções não têm rota de painel (são duas, fixas): vêm de `catalogoService.colecoes`.
- */
-export const catalogoAdminService = {
-  /** GET /admin/marcas — marcas_listar. Traz as inativas e `totalProdutos` com ocultos. */
-  marcas: (sinal) => requisitarAdmin('GET', '/admin/marcas', { sinal }),
-
-  /** GET /admin/categorias — categorias_listar. `colecaoId` opcional; cada uma traz `colecaoId`. */
-  categorias: (colecaoId, sinal) =>
-    requisitarAdmin('GET', '/admin/categorias', { query: { colecaoId }, sinal }),
-};

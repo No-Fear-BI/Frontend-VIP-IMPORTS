@@ -186,3 +186,11 @@ Além disso, a base de acesso dele não tem rota protegida, não separa 401 de 4
 **Decidido pelo cliente:** o botão de compra se chama **"Consultar valores no WhatsApp"** (esgotado continua "Consultar disponibilidade"), e **só aparece na página do produto**. O cartão da listagem fica com "Ver detalhes →", que agora aparece também no celular (antes ele sumia no celular para dar lugar ao botão). Substitui o nome da decisão 2; o fluxo pelo backend (decisão 3) não muda. O texto vem de `rotuloCompra()` em `components/Produto.jsx`, e o título do diálogo de compra acompanha.
 
 **Não entrou, porque não foi pedido:** as contagens de peças em categorias e marcas e o texto do rodapé, que tinham sido tirados junto, voltaram.
+
+## 17. Cartão de produto da grade sem "Valor confirmado" (22/09/2026)
+
+**Decidido:** o `CartaoProduto` (grade de catálogo — usado em Home, Listagem, relacionados da página de produto e favoritos em Conta) não mostra mais a linha "Valor confirmado pelo atendimento.". O botão de compra já tinha saído do cartão na seção 16; esta rodada tira também o texto de valor, então o cartão passa a ter só marca, código, categoria e "Ver detalhes →" — a compra (texto e botão) fica reservada à página do produto.
+
+**Por quê:** pedido direto do time, a partir de um print do cartão.
+
+**Não mudou:** `src/contexto/CompraWhatsApp.jsx` e o fluxo pelo backend (seção 3) continuam do jeito que estavam.

@@ -186,13 +186,164 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
       return { ...atual, ...mudancas };
     }
 
-    if (rota === 'GET /admin/marcas') return marcasDoPainel();
+    if (rota === 'GET /admin/marcas') return marcasDoPainel(estado);
+
+    if (rota === 'POST /admin/marcas') {
+      const nome = String(corpo?.nome || '').trim();
+      if (!nome) {
+        throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', { campos: { nome: 'Obrigatório.' } });
+      }
+      const existentes = marcasDoPainel(estado);
+      const slugs = existentes.map((mm) => mm.slug);
+      let slug;
+      if (corpo?.slug) {
+        slug = slugDeCor(corpo.slug);
+        if (slugs.includes(slug)) {
+          throw erro(409, 'SLUG_EM_USO', `O slug '${slug}' já está em uso por outra marca.`, {
+            campos: { slug: 'Este slug já está em uso.' },
+          });
+        }
+      } else {
+        slug = slugUnico(slugs, slugDeCor(nome));
+      }
+      const agora = new Date().toISOString();
+      const nova = {
+        id: proximoId(estado, 'proximoIdMarca', 800000),
+        nome,
+        slug,
+        logoUrl: null,
+        ordem: 0,
+        ativa: true,
+        totalProdutos: 0,
+        criadoEm: agora,
+        atualizadoEm: agora,
+      };
+      estado.marcasExtras = [...(estado.marcasExtras || []), nova];
+      gravar(estado);
+      return nova;
+    }
+
+    if ((m = caminho.match(/^\/admin\/marcas\/(\d+)$/))) {
+      const id = Number(m[1]);
+      const atual = marcasDoPainel(estado).find((mm) => mm.id === id);
+      if (!atual) throw erro(404, 'MARCA_NAO_ENCONTRADA', 'Marca não encontrada.');
+
+      if (metodo === 'DELETE') {
+        if (atual.totalProdutos > 0) {
+          throw erro(409, 'MARCA_COM_PRODUTOS', `Não é possível excluir: ${atual.totalProdutos} produtos usam esta marca.`, {
+            detalhes: { totalProdutos: atual.totalProdutos },
+          });
+        }
+        estado.marcasExtras = (estado.marcasExtras || []).filter((mm) => mm.id !== id);
+        gravar(estado);
+        return { ok: true };
+      }
+
+      const mudancas = {};
+      if (corpo?.nome) mudancas.nome = String(corpo.nome).trim();
+      if (corpo?.slug) {
+        const slug = slugDeCor(corpo.slug);
+        if (marcasDoPainel(estado).some((mm) => mm.id !== id && mm.slug === slug)) {
+          throw erro(409, 'SLUG_EM_USO', `O slug '${slug}' já está em uso por outra marca.`, {
+            campos: { slug: 'Este slug já está em uso.' },
+          });
+        }
+        mudancas.slug = slug;
+      }
+      mudancas.atualizadoEm = new Date().toISOString();
+      const ajustadas = (estado.marcasExtras || []).map((mm) => (mm.id === id ? { ...mm, ...mudancas } : mm));
+      if (!ajustadas.some((mm) => mm.id === id)) ajustadas.push({ ...atual, ...mudancas });
+      estado.marcasExtras = ajustadas;
+      gravar(estado);
+      return { ...atual, ...mudancas };
+    }
 
     if (rota === 'GET /admin/categorias') {
       const colecaoId = Number(q.get('colecaoId')) || null;
       let lista = categoriasDoPainel(estado);
       if (colecaoId) lista = lista.filter((c) => c.colecaoId === colecaoId);
       return lista;
+    }
+
+    if (rota === 'POST /admin/categorias') {
+      const nome = String(corpo?.nome || '').trim();
+      if (!nome) {
+        throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', { campos: { nome: 'Obrigatório.' } });
+      }
+      const colecaoId = Number(corpo?.colecaoId);
+      const colecao = colecoes.find((c) => c.id === colecaoId);
+      if (!colecao) {
+        throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', { campos: { colecaoId: 'Coleção não encontrada.' } });
+      }
+      const daColecao = categoriasDoPainel(estado).filter((c) => c.colecaoId === colecaoId);
+      const slugs = daColecao.map((c) => c.slug);
+      let slug;
+      if (corpo?.slug) {
+        slug = slugDeCor(corpo.slug);
+        if (slugs.includes(slug)) {
+          throw erro(409, 'SLUG_EM_USO', `Já existe uma categoria '${slug}' na coleção ${colecao.slug}.`, {
+            campos: { slug: 'Este slug já existe nesta coleção.' },
+          });
+        }
+      } else {
+        slug = slugUnico(slugs, slugDeCor(nome));
+      }
+      const agora = new Date().toISOString();
+      const nova = {
+        id: proximoId(estado, 'proximoIdCategoria', 800000),
+        colecaoId,
+        colecaoSlug: colecao.slug,
+        nome,
+        slug,
+        imagemUrl: null,
+        destaque: false,
+        destaqueOrdem: null,
+        ordem: 0,
+        ativa: true,
+        totalProdutos: 0,
+        criadoEm: agora,
+        atualizadoEm: agora,
+      };
+      estado.categoriasExtras = [...(estado.categoriasExtras || []), nova];
+      gravar(estado);
+      return nova;
+    }
+
+    if ((m = caminho.match(/^\/admin\/categorias\/(\d+)$/))) {
+      const id = Number(m[1]);
+      const atual = categoriasDoPainel(estado).find((c) => c.id === id);
+      if (!atual) throw erro(404, 'CATEGORIA_NAO_ENCONTRADA', 'Categoria não encontrada.');
+
+      if (metodo === 'DELETE') {
+        if (atual.totalProdutos > 0) {
+          throw erro(409, 'CATEGORIA_COM_PRODUTOS', `Não é possível excluir: ${atual.totalProdutos} produtos usam esta categoria.`, {
+            detalhes: { totalProdutos: atual.totalProdutos },
+          });
+        }
+        estado.categoriasExtras = (estado.categoriasExtras || []).filter((c) => c.id !== id);
+        gravar(estado);
+        return { ok: true };
+      }
+
+      // Esta tela não manda colecaoId no PATCH (ver comentário de Categorias.jsx): só nome e slug.
+      const mudancas = {};
+      if (corpo?.nome) mudancas.nome = String(corpo.nome).trim();
+      if (corpo?.slug) {
+        const slug = slugDeCor(corpo.slug);
+        const naMesmaColecao = categoriasDoPainel(estado).filter((c) => c.id !== id && c.colecaoId === atual.colecaoId);
+        if (naMesmaColecao.some((c) => c.slug === slug)) {
+          throw erro(409, 'SLUG_EM_USO', `Já existe uma categoria '${slug}' na coleção ${atual.colecaoSlug}.`, {
+            campos: { slug: 'Este slug já existe nesta coleção.' },
+          });
+        }
+        mudancas.slug = slug;
+      }
+      mudancas.atualizadoEm = new Date().toISOString();
+      const ajustadas = (estado.categoriasExtras || []).map((c) => (c.id === id ? { ...c, ...mudancas } : c));
+      if (!ajustadas.some((c) => c.id === id)) ajustadas.push({ ...atual, ...mudancas });
+      estado.categoriasExtras = ajustadas;
+      gravar(estado);
+      return { ...atual, ...mudancas };
     }
 
     if (rota === 'GET /admin/produtos') {
@@ -757,7 +908,7 @@ function aplicarEdicao(estado, id, campos) {
   }
 }
 
-function marcasDoPainel() {
+function marcasBase() {
   return marcas.map((m, i) => ({
     id: m.id,
     nome: m.nome,
@@ -771,7 +922,16 @@ function marcasDoPainel() {
   }));
 }
 
-function categoriasDoPainel(estado) {
+/** As marcas fixas (com as edições da sessão por cima) + as criadas nela. Mesmo padrão de `coresDoPainel`. */
+function marcasDoPainel(estado) {
+  const extras = estado.marcasExtras || [];
+  const base = marcasBase();
+  const combinadas = base.map((mm) => ({ ...mm, ...(extras.find((e) => e.id === mm.id) || {}) }));
+  const novas = extras.filter((e) => !base.some((mm) => mm.id === e.id));
+  return [...combinadas, ...novas].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+}
+
+function categoriasBase(estado) {
   const todos = produtosDoPainel(estado);
   return categorias.map((c) => ({
     id: c.id,
@@ -788,6 +948,24 @@ function categoriasDoPainel(estado) {
     criadoEm: '2026-01-01T00:00:00.000Z',
     atualizadoEm: '2026-01-01T00:00:00.000Z',
   }));
+}
+
+/** As categorias fixas (com as edições da sessão por cima) + as criadas nela. */
+function categoriasDoPainel(estado) {
+  const extras = estado.categoriasExtras || [];
+  const base = categoriasBase(estado);
+  const combinadas = base.map((c) => ({ ...c, ...(extras.find((e) => e.id === c.id) || {}) }));
+  const novas = extras.filter((e) => !base.some((c) => c.id === e.id));
+  return [...combinadas, ...novas];
+}
+
+/** Slug único numa lista de slugs já usados: livre entra direto, colisão ganha sufixo -2, -3… */
+function slugUnico(usados, base) {
+  if (!usados.includes(base)) return base;
+  for (let sufixo = 2; ; sufixo++) {
+    const candidato = `${base}-${sufixo}`;
+    if (!usados.includes(candidato)) return candidato;
+  }
 }
 
 function refDaMarca(marcaId) {
