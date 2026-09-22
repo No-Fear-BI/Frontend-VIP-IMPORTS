@@ -4,12 +4,21 @@
   min-height: 100vh;
 }
 
+/*
+ * No desktop a lateral acompanha a janela, não a página: sem isto ela esticava até o fim do
+ * conteúdo e o "Sair" (no pé dela) mudava de lugar a cada tela — lá embaixo numa tabela longa,
+ * sempre fora da tela sem rolar. Se a janela for baixa demais, a lateral rola sozinha.
+ */
 .admin__lateral {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--espaco-10);
-  padding: var(--espaco-10) var(--espaco-6);
+  gap: var(--espaco-6);
+  padding: var(--espaco-6);
 }
 
 .admin__menu {
@@ -42,6 +51,13 @@
 @media (max-width: 1023px) {
   .admin {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Empilhada em cima do conteúdo: volta a ter a altura do que tem dentro. */
+  .admin__lateral {
+    position: static;
+    height: auto;
+    overflow-y: visible;
   }
 
   .admin__menu {
