@@ -360,6 +360,15 @@ button {
   text-decoration-thickness: var(--borda-grossa);
 }
 
+.link-caps:disabled {
+  color: var(--cor-texto-suave);
+  cursor: default;
+}
+
+.link-caps:disabled:hover {
+  text-decoration-thickness: var(--borda-fina);
+}
+
 .link-caps svg {
   width: var(--icone-sm);
   height: var(--icone-sm);

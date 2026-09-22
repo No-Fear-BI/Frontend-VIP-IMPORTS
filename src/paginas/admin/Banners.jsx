@@ -198,6 +198,25 @@ function FormBanner({ banner, onPronto }) {
   const [ativo, setAtivo] = useState(banner?.ativo || false);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState(null);
+  const [enviando, setEnviando] = useState(null); // 'desktop' | 'mobile' | null
+  const [erroUpload, setErroUpload] = useState(null);
+
+  async function enviarArquivo(campo, evento) {
+    const arquivo = evento.target.files?.[0];
+    evento.target.value = ''; // deixa escolher o mesmo arquivo de novo, se precisar
+    if (!arquivo) return;
+    setEnviando(campo);
+    setErroUpload(null);
+    try {
+      const enviada = await bannersService.uploadImagem(arquivo, alt.trim() || undefined);
+      if (campo === 'desktop') setImagemUrl(enviada.url);
+      else setImagemUrlMobile(enviada.url);
+    } catch (falha) {
+      setErroUpload(falha);
+    } finally {
+      setEnviando(null);
+    }
+  }
 
   async function salvar(evento) {
     evento.preventDefault();
@@ -239,23 +258,46 @@ function FormBanner({ banner, onPronto }) {
       <Field
         id="banner-imagem-url"
         rotulo="Imagem (desktop)"
-        ajuda="Só https."
+        ajuda="Só https. Proporção recomendada: 21:9 (bem larga) — o carrossel da home ocupa a tela quase toda (72% da altura, entre 460px e 720px) e corta o que sobrar das laterais ou do topo."
         value={imagemUrl}
         onChange={(e) => setImagemUrl(e.target.value)}
         erro={erro?.campos?.imagemUrl}
         placeholder="https://…"
         required
       />
+      <label className="link-caps admin-banners__upload">
+        {enviando === 'desktop' ? 'Enviando…' : 'ou envie um arquivo'}
+        <input
+          type="file"
+          accept="image/*"
+          capture
+          hidden
+          disabled={Boolean(enviando)}
+          onChange={(e) => enviarArquivo('desktop', e)}
+        />
+      </label>
       <PreviaImagem url={imagemUrl} alt={alt} className="admin-banners__previa-form" />
       <Field
         id="banner-imagem-url-mobile"
         rotulo="Imagem (celular)"
-        ajuda="Opcional. Só https."
+        ajuda="Opcional. Só https. Proporção recomendada: 2:3 (retrato) — no celular a mesma faixa fica estreita e alta; sem esta imagem, a de desktop é cortada nesse formato."
         value={imagemUrlMobile}
         onChange={(e) => setImagemUrlMobile(e.target.value)}
         erro={erro?.campos?.imagemUrlMobile}
         placeholder="https://…"
       />
+      <label className="link-caps admin-banners__upload">
+        {enviando === 'mobile' ? 'Enviando…' : 'ou envie um arquivo'}
+        <input
+          type="file"
+          accept="image/*"
+          capture
+          hidden
+          disabled={Boolean(enviando)}
+          onChange={(e) => enviarArquivo('mobile', e)}
+        />
+      </label>
+      {erroUpload && <ErroGeral>{erroUpload.mensagem}</ErroGeral>}
       <Field
         id="banner-titulo"
         rotulo="Título"

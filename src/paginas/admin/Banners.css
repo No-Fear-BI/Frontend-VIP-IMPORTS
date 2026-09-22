@@ -34,6 +34,14 @@
   gap: var(--espaco-4);
 }
 
+.admin-banners__upload {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  min-height: var(--altura-controle-compacto);
+  cursor: pointer;
+}
+
 .admin-banners__checkbox {
   display: flex;
   align-items: center;

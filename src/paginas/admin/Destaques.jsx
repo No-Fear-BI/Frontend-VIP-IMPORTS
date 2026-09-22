@@ -203,18 +203,17 @@ function BuscaProduto({ excluir, cheia, onAdicionar }) {
         <Field
           id="destaques-busca-produto"
           rotulo="Adicionar produto"
-          ajuda={cheia ? `Limite de ${TETO_PRODUTOS} produtos atingido.` : 'Nome ou código.'}
+          ajuda={cheia ? `Limite de ${TETO_PRODUTOS} produtos atingido — busque à vontade, mas remova algum para adicionar outro.` : 'Nome ou código.'}
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
-          disabled={cheia}
           placeholder="Ex.: bolsa, X030…"
         />
-        <Button variante="secundaria" type="submit" disabled={cheia || !texto.trim()}>
+        <Button variante="secundaria" type="submit" disabled={!texto.trim()}>
           Buscar
         </Button>
       </form>
 
-      {termo && !cheia && (
+      {termo && (
         resultado.carregando ? (
           <Esqueleto className="esqueleto--linha" />
         ) : resultado.erro ? (
@@ -232,7 +231,7 @@ function BuscaProduto({ excluir, cheia, onAdicionar }) {
                 <button
                   type="button"
                   className="link-caps"
-                  disabled={excluir.has(produto.id)}
+                  disabled={excluir.has(produto.id) || cheia}
                   onClick={() => onAdicionar(produto)}
                 >
                   {excluir.has(produto.id) ? 'Já adicionado' : 'Adicionar'}
@@ -402,9 +401,9 @@ function AdicionarCategoria({ disponiveis, carregando, cheia, onAdicionar }) {
           className="campo__input"
           value={escolhida}
           onChange={(e) => setEscolhida(e.target.value)}
-          disabled={cheia || carregando || disponiveis.length === 0}
+          disabled={carregando || disponiveis.length === 0}
         >
-          <option value="">{cheia ? `Limite de ${TETO_CATEGORIAS} atingido.` : 'Selecione'}</option>
+          <option value="">{cheia ? `Limite de ${TETO_CATEGORIAS} atingido — remova alguma para trocar.` : 'Selecione'}</option>
           {disponiveis.map((c) => (
             <option key={c.id} value={String(c.id)}>
               {c.nome} · {c.colecaoSlug}

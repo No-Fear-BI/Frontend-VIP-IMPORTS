@@ -13,7 +13,7 @@
  * é erro do formulário, não sessão vencida.
  */
 
-import { ErroApi, requisitar } from './apiClient.js';
+import { ErroApi, requisitar, requisitarArquivo } from './apiClient.js';
 
 const ouvintes = new Set();
 
@@ -36,6 +36,19 @@ export const ehSessaoDeCliente = (erro) =>
 export async function requisitarAdmin(metodo, caminho, opcoes) {
   try {
     return await requisitar(metodo, caminho, opcoes);
+  } catch (erro) {
+    if (ehSessaoAdminVencida(erro) || ehSessaoDeCliente(erro)) {
+      ouvintes.forEach((ouvinte) => ouvinte(erro));
+    }
+    throw erro;
+  }
+}
+
+/** Mesma ideia de `requisitarAdmin`, para upload de arquivo (ver `requisitarArquivo`
+ * em apiClient.js). Sessão de painel vencida se avisa do mesmo jeito. */
+export async function requisitarArquivoAdmin(caminho, opcoes) {
+  try {
+    return await requisitarArquivo(caminho, opcoes);
   } catch (erro) {
     if (ehSessaoAdminVencida(erro) || ehSessaoDeCliente(erro)) {
       ouvintes.forEach((ouvinte) => ouvinte(erro));

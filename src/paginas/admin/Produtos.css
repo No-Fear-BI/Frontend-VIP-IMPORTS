@@ -186,6 +186,13 @@
   min-width: 0;
 }
 
+.admin-produto__upload {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--altura-controle);
+  cursor: pointer;
+}
+
 .admin-produto__grade-topo {
   display: flex;
   flex-direction: column;

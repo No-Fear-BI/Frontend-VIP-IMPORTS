@@ -6,11 +6,21 @@
  * é 400 com `erro.campos.ativo` explicando o limite. Banner inativo é rascunho, sem teto.
  */
 
-import { requisitarAdmin } from '../lib/apiAdmin.js';
+import { requisitarAdmin, requisitarArquivoAdmin } from '../lib/apiAdmin.js';
 
 export const bannersService = {
   /** GET /admin/banners — banners_listar. Ativos e inativos, na ordem do carrossel. */
   listar: (sinal) => requisitarAdmin('GET', '/admin/banners', { sinal }),
+
+  /**
+   * POST /admin/banners/upload — envia um arquivo em vez de digitar URL. Não existe banner
+   * ainda nesta etapa: devolve `{url, alt}` para preencher o campo de imagem (desktop ou
+   * celular) do formulário, que segue para `criar`/`editar` como sempre.
+   * @param {File} arquivo
+   * @param {string} [alt]
+   */
+  uploadImagem: (arquivo, alt) =>
+    requisitarArquivoAdmin('/admin/banners/upload', { arquivo, campos: { alt } }),
 
   /**
    * POST /admin/banners — banners_criar. `imagemUrl` obrigatória (só https); `imagemUrlMobile`

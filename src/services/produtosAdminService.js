@@ -8,7 +8,7 @@
  * - O produto abre por ID, não por código: no painel o código é editável.
  */
 
-import { requisitarAdmin } from '../lib/apiAdmin.js';
+import { requisitarAdmin, requisitarArquivoAdmin } from '../lib/apiAdmin.js';
 
 export const produtosAdminService = {
   /**
@@ -48,6 +48,20 @@ export const produtosAdminService = {
    */
   adicionarImagens: (id, imagens) =>
     requisitarAdmin('POST', `/admin/produtos/${id}/imagens`, { corpo: { imagens } }),
+
+  /**
+   * POST /admin/produtos/:id/imagens/upload — envia um arquivo (câmera/galeria/computador) em
+   * vez de digitar URL. NÃO acrescenta à galeria sozinho: devolve `{url, alt}`, que a tela então
+   * manda para `adicionarImagens` — as duas etapas ficam separadas de propósito.
+   * @param {number} id
+   * @param {File} arquivo
+   * @param {string} [alt]
+   */
+  uploadImagem: (id, arquivo, alt) =>
+    requisitarArquivoAdmin(`/admin/produtos/${id}/imagens/upload`, {
+      arquivo,
+      campos: { alt },
+    }),
 
   /**
    * PATCH /admin/produtos/:id/imagens/ordem — a lista COMPLETA de ids na ordem desejada.
