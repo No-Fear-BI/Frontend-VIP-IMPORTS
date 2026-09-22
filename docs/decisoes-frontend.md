@@ -186,3 +186,22 @@ Além disso, a base de acesso dele não tem rota protegida, não separa 401 de 4
 **Decidido pelo cliente:** o botão de compra se chama **"Consultar valores no WhatsApp"** (esgotado continua "Consultar disponibilidade"), e **só aparece na página do produto**. O cartão da listagem fica com "Ver detalhes →", que agora aparece também no celular (antes ele sumia no celular para dar lugar ao botão). Substitui o nome da decisão 2; o fluxo pelo backend (decisão 3) não muda. O texto vem de `rotuloCompra()` em `components/Produto.jsx`, e o título do diálogo de compra acompanha.
 
 **Não entrou, porque não foi pedido:** as contagens de peças em categorias e marcas e o texto do rodapé, que tinham sido tirados junto, voltaram.
+
+## 17. Cartão de produto da grade sem "Valor confirmado" (22/09/2026)
+
+**Decidido:** o `CartaoProduto` (grade de catálogo — usado em Home, Listagem, relacionados da página de produto e favoritos em Conta) não mostra mais a linha "Valor confirmado pelo atendimento.". O botão de compra já tinha saído do cartão na seção 16; esta rodada tira também o texto de valor, então o cartão passa a ter só marca, código, categoria e "Ver detalhes →" — a compra (texto e botão) fica reservada à página do produto.
+
+**Por quê:** pedido direto do time, a partir de um print do cartão.
+
+**Não mudou:** `src/contexto/CompraWhatsApp.jsx` e o fluxo pelo backend (seção 3) continuam do jeito que estavam.
+
+## 18. Marcas e Categorias no painel (22/09/2026)
+
+**Decidido:** `/admin/marcas` e `/admin/categorias` (branch `feat/painel-catalogo`, rebaseada sobre a main depois dos merges de produtos-painel/todos/botao-whatsapp), no mesmo padrão de `Cores.jsx`.
+
+- **Marcas:** listagem com `totalProdutos` (contando ocultos), criar, editar (nome e slug — slug só muda se vier explícito no corpo, mesma regra de Cores) e excluir. Excluir com produtos é barrado na tela (botão desabilitado) e reforçado pelo 409 `MARCA_COM_PRODUTOS` do backend, com a contagem na mensagem.
+- **Categorias:** mesmo CRUD, mas a coleção é escolhida na CRIAÇÃO e não muda depois (editar manda só nome/slug — trocar a coleção de uma categoria com produtos é 409 no backend, e a tela não expõe esse caminho). Listagem separada por coleção (`porColecao`, um bloco por `GET /colecoes`). O slug é único POR COLEÇÃO: "bolsas" existe em Feminino e Masculino como categorias diferentes, e o 409 `SLUG_EM_USO`/`CATEGORIA_COM_PRODUTOS` só dispara dentro da mesma coleção.
+- **`catalogoAdminService` (que só tinha a leitura de marcas/categorias, provisório desde o Dia de produtos no painel) foi substituído por `marcasService` e `categoriasService`** — um service por domínio, no padrão do resto do projeto, com o CRUD completo. `Produto.jsx` e `Produtos.jsx` do painel foram atualizados para os services novos.
+- Modo exemplo (`servidorExemplo.js`) ganhou o CRUD completo de marcas/categorias, incluindo `?exemplo=vazio` (antes só existia a leitura, sem respeitar os três estados).
+
+**Testado contra o backend local (22/09):** criar marca, renomear mantendo o slug, excluir marca com produtos (barrado, 409 com a contagem), excluir marca vazia (funcionou); criar categoria "bolsas" na Feminina com slug explícito igual ao já existente (409 `SLUG_EM_USO` sob o campo) e criar "Vestidos" na Masculina com o mesmo slug que já existe na Feminina (funcionou — confirma que o slug é único por coleção, não global). Banco revertido ao fim (marca e categoria de teste excluídas).

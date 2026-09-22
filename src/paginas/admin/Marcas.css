@@ -1,0 +1,41 @@
+.admin-marcas__topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--espaco-4);
+  margin-bottom: var(--espaco-8);
+}
+
+.admin-marcas__ajuda {
+  margin-top: var(--espaco-2);
+  max-width: var(--medida-curta);
+}
+
+.admin-marcas__slug {
+  color: var(--cor-texto-suave);
+}
+
+.admin-marcas__acoes {
+  display: flex;
+  gap: var(--espaco-4);
+  justify-content: flex-end;
+}
+
+.admin-marcas__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.admin-marcas__aviso {
+  padding-left: var(--espaco-3);
+  border-left: var(--borda-grossa) solid var(--cor-primaria);
+}
+
+@media (max-width: 767px) {
+  .admin-marcas__acoes {
+    justify-content: flex-start;
+    margin-top: var(--espaco-2);
+  }
+}
