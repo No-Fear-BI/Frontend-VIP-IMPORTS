@@ -1,0 +1,62 @@
+.admin-cores__topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--espaco-4);
+  margin-bottom: var(--espaco-8);
+}
+
+.admin-cores__ajuda {
+  margin-top: var(--espaco-2);
+  max-width: var(--medida-curta);
+}
+
+.admin-cores__slug {
+  color: var(--cor-texto-suave);
+}
+
+.admin-cores__acoes {
+  display: flex;
+  gap: var(--espaco-4);
+  justify-content: flex-end;
+}
+
+.admin-cores__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.admin-cores__aviso {
+  padding-left: var(--espaco-3);
+  border-left: var(--borda-grossa) solid var(--cor-primaria);
+}
+
+.admin-cores__checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+}
+
+.admin-cores__produtos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.admin-cores__produto {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--espaco-1) var(--espaco-3);
+  padding-block: var(--espaco-2);
+  border-bottom: var(--borda-fina) solid var(--cor-borda);
+}
+
+@media (max-width: 767px) {
+  .admin-cores__acoes {
+    justify-content: flex-start;
+    margin-top: var(--espaco-2);
+  }
+}

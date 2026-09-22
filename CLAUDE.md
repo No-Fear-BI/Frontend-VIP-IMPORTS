@@ -51,31 +51,32 @@ Registro completo, com o porquê e as alternativas descartadas, em `docs/decisoe
 
 ## Como o código está organizado
 
-- `src/lib/apiClient.js`: o único `fetch` do projeto (envelope de erro → `ErroApi`, `X-Rastreio` nos 500). `src/lib/cn.js`: junta classes condicionalmente.
-- `src/services/`: um service por domínio, um método por rota, com o `handler` do contrato no comentário — `catalogoService` (home, produtos, produto, relacionados, marcas, colecoes, categoriasDaColecao), `clienteService` (identificar, eu, atualizarEu, sair), `carrinhoService` (obter, adicionar, trocarVariacao, remover, migrar), `favoritosService` (listar, adicionar, remover), `selecoesService` (enviar, historico). Tela nenhuma chama `requisitar` ou `fetch` direto. O painel ganha service(s) próprio(s).
+- `src/lib/apiClient.js`: o único `fetch` do projeto (envelope de erro → `ErroApi`, `X-Rastreio` nos 500). `src/lib/apiAdmin.js`: `requisitarAdmin`, o `requisitar` das rotas do painel — avisa a sessão do painel quando qualquer chamada volta 401 (sessão de 12h acabou) ou 403 (sessão de cliente). `src/lib/cn.js`: junta classes condicionalmente.
+- `src/services/`: um service por domínio, um método por rota, com o `handler` do contrato no comentário — `catalogoService` (home, produtos, produto, relacionados, marcas, cores, colecoes, categoriasDaColecao), `clienteService` (identificar, eu, atualizarEu, sair), `carrinhoService` (obter, adicionar, trocarVariacao, remover, migrar), `favoritosService` (listar, adicionar, remover), `selecoesService` (enviar, historico). Tela nenhuma chama `requisitar` ou `fetch` direto. Painel: `adminService` (entrar, eu, sair), `coresService` (listar, criar, editar, excluir, produtosDaCor), `produtosAdminService` (listar, obter, criar, editar, duplicar, adicionarImagens, reordenarImagens, excluirImagem, definirVariacoes) e `catalogoAdminService` (marcas, categorias); todo service novo do painel usa `requisitarAdmin`, nunca `requisitar` — só o login foge disso, porque o 401 dele (`CREDENCIAIS_INVALIDAS`) é erro de formulário.
 - `src/lib/exemplo/`: API simulada para `npm run dev:exemplo` (catálogo e ilustrações fictícios em `public/exemplo/`). Na URL, `?exemplo=lento`, `?exemplo=vazio` e `?exemplo=erro` forçam os três estados. Nunca entra no build de produção.
 - `src/components/ui/`: componentes base — `Button` (variantes `primaria`, `secundaria`, `texto`, `sobre-primaria`, `contorno-sobre-primaria`; vira `<Link>` com `para`), `Field` (input + rótulo + erro, e `ErroGeral`), `Card` (`borda`, `como`), `Modal` (única camada flutuante; `lateral` vira gaveta).
 - `src/components/`: peças da loja — `Estados.jsx` (EstadoVazio, EstadoErro, esqueletos), `Produto.jsx` (FotoProduto, Etiqueta, CartaoProduto), `SeletorVariacoes`, `FormIdentificacao`, `Cabecalho`, `Rodape`, `Estrutura`, `Logo` (**provisório**, em texto, até chegar o SVG oficial).
-- `src/contexto/`: `SessaoCliente.jsx` (cliente, seleção, favoritos, aviso) e `CompraWhatsApp.jsx` (o diálogo de compra, em qualquer tela via `useCompra()`).
+- `src/contexto/`: `SessaoCliente.jsx` (cliente, seleção, favoritos, aviso) e `CompraWhatsApp.jsx` (o diálogo de compra, em qualquer tela via `useCompra()`). `SessaoAdmin.jsx` (`useSessaoAdmin()`: admin, `situacao` verificando/dentro/fora/cliente/erro, entrar, sair) — só existe dentro de `/admin/*` e não lê nada de `SessaoCliente`.
 - `src/hooks/useRequisicao.js`: devolve `{dados, erro, carregando, recarregar}`. Use nas telas que buscam dado, porque é ele que garante os três estados.
-- `src/paginas/`: telas da loja. `src/paginas/admin/`: painel (`/admin/*`, com `EstruturaAdmin` própria) — hoje só placeholders.
+- `src/paginas/`: telas da loja. `src/paginas/admin/`: painel (`/admin/*`, com `EstruturaAdmin` própria). `Acesso.jsx` tem a `RotaAdminProtegida` (401 → `/admin/login` guardando a origem; 403 → mensagem "área da equipe" sem mandar ao login) e a moldura das telas sem sessão. Login, Sair, Cores e Produtos prontos (listagem com filtros na URL; dados com PATCH parcial; imagens — acrescentar, reordenar, excluir; criar em `/admin/produtos/novo`; duplicar, que nasce oculto; e a grade de variações — carrega, edita uma cópia local e manda tudo de volta, cada cor com o `corId` da leitura). As demais páginas ainda são placeholders.
 - `src/styles/tokens.css`: o contrato de tokens. `global.css`: importa os tokens; reset, classes `t-*`, `.botao--*`, `.link-caps`, `.filete` e as classes dos três estados (`.estado--vazio`, `.estado--erro`, `.estado-carregando`, `.esqueleto*`). `paginas.css`: blocos de página compartilhados. **Os estilos globais são importados antes do `App` em `main.jsx`, e essa ordem precisa ser mantida**, senão o CSS do componente perde para `.botao`.
 - `src/config.js`: variáveis de ambiente (links de contato geral, imagens dos painéis de coleção). Veja `.env.example`.
 
 ## Rotas
 
-Loja: `/`, `/feminino`, `/masculino`, `/colecoes/:slug`, `/novidades`, `/produtos?busca=`, `/categorias`, `/categorias/:categoria?colecao=` (redireciona para a coleção filtrada; slug de categoria só é único dentro da coleção), `/marcas`, `/marcas/:slug`, `/produto/:codigo`, `/selecao` (`/carrinho` redireciona), `/conta` (`/favoritos` redireciona), `/sobre`, `/contato`. Painel: `/admin/login`, `resumo`, `produtos`, `marcas`, `categorias`, `banners`, `destaques`, `selecoes`, `clientes`.
+Loja: `/`, `/feminino`, `/masculino`, `/colecoes/:slug`, `/novidades`, `/produtos?busca=`, `/categorias`, `/categorias/:categoria?colecao=` (redireciona para a coleção filtrada; slug de categoria só é único dentro da coleção), `/marcas`, `/marcas/:slug` (as listagens aceitam `?cor=slug1,slug2`), `/produto/:codigo`, `/selecao` (`/carrinho` redireciona), `/conta` (`/favoritos` redireciona), `/sobre`, `/contato`. Painel: `/admin/login` (única aberta) e, atrás da rota protegida, `resumo`, `produtos`, `produtos/novo`, `produtos/:id` (por id, não código: no painel o código é editável), `marcas`, `cores`, `categorias`, `banners`, `destaques`, `selecoes`, `clientes`.
 
 ## Rodar
 
 - Backend: em `../Backend-VIP-IMPORTS`, `docker compose up -d` (API em `localhost:8000`, massa de dados já carregada no volume; o Docker Desktop precisa estar aberto). O `vite.config.js` encaminha `/api` para lá, então os cookies funcionam sem configurar CORS.
 - `npm run dev`: site contra a API real (`localhost:5173`). As fotos da massa apontam para `cdn.exemplo.com` e aparecem como "Foto em breve", que é o comportamento certo para foto quebrada.
-- `npm run dev:exemplo`: site com a API simulada, para avaliar layout sem backend.
+- `npm run dev:exemplo`: site com a API simulada, para avaliar layout sem backend. Painel: qualquer e-mail com a senha `exemplo`.
+- Admin no banco local: `docker exec -it vip-imports-api python scripts/criar_admin.py` (não existe cadastro de admin pela API).
 - `npm run build`: build de produção. `npm run lint:design`: auditoria do `DESIGN.md` — só faz sentido depois que ele for gerado.
 
 ## API
 
-O backend vive em `../Backend-VIP-IMPORTS` (FastAPI, `localhost:8000/api/v1`). A fonte da verdade para qualquer formato de request/response é `docs/para-o-frontend.md` e `docs/contrato-api-v1.json` naquele repositório — leia os dois antes de escrever ou alterar uma chamada de API. Se esse repositório não estiver acessível na sessão, rode `/add-dir` apontando para ele antes de continuar.
+O backend vive em `../Backend-VIP-IMPORTS` (FastAPI, `localhost:8000/api/v1`). A fonte da verdade para qualquer formato de request/response é `docs/para-o-frontend.md`, `docs/contrato-api-v1.json` e `docs/contrato-api-v1-adendo.json` (rotas posteriores ao v1.0, como cores e `/admin/eu`) naquele repositório — leia os três antes de escrever ou alterar uma chamada de API. Se esse repositório não estiver acessível na sessão, rode `/add-dir` apontando para ele antes de continuar.
 
 Regras que corrompem dado se forem ignoradas — releia antes de mexer nas telas correspondentes:
 

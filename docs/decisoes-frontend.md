@@ -115,3 +115,62 @@ Fluxo (`src/contexto/CompraWhatsApp.jsx`):
 **Ficou de fora, de propósito (ver `docs/pendencias-frontend.md`):** `--altura-linha-titulo` continua uma média única para os quatro tamanhos de título — só o tracking entrou no pedido desta rodada — e `--medida-titulo` continua um só valor para hero (14ch) e CTA final (18ch).
 
 **Conferência:** `scripts/checar-tokens.mjs` (novo, `npm run check:tokens`) varre todo `var(--token)` em `src/**/*.css` contra as definições de `tokens.css`; rodado antes e depois desta mudança, 0 referências penduradas nas duas vezes. `--sombra` não foi removida na rodada anterior (só teve o valor trocado para `none`), então nunca existiu risco de referência pendurada por causa dela.
+
+## 11. Acesso ao painel: sessão própria, rota protegida, login e sair (21/09/2026)
+
+**Decidido:** antes de qualquer tela do painel, a base de acesso. `/admin/*` abria sem login porque nada checava sessão.
+
+- **`GET /admin/eu` foi conferido no código do backend** (`rotas/admin_painel.py`, esquema `AdminEu`), porque não está no contrato v1.0 — só em `para-o-frontend.md`. Devolve `{ id, nome, email, ultimoLoginEm, criadoEm }`, igual ao `POST /admin/sessao`.
+- **Contexto separado** (`src/contexto/SessaoAdmin.jsx`), montado só em `/admin/*`. Não reaproveita nada de `SessaoCliente`: no backend são cookies e prazos diferentes (12h sem renovar × sessão do cliente que se estende).
+- **401 e 403 levam a lugares diferentes.** 401 `NAO_IDENTIFICADO` → `/admin/login`, guardando a página de origem para voltar depois de entrar. 403 `SEM_PERMISSAO` → tela "Esta área é restrita à equipe da loja." SEM redirecionar: o backend só devolve 403 quando o navegador tem sessão de CLIENTE e nenhuma de admin, e mandar essa pessoa ao login a faria tentar uma senha que não tem. Há um link discreto "Sou da equipe: entrar no painel" para quem é da equipe e também está identificado como cliente — com as duas sessões, o backend faz valer a de admin.
+- **Sessão vencida no meio do uso é tratada num lugar só.** `requisitarAdmin` (`src/lib/apiAdmin.js`) avisa o contexto em qualquer 401/403 de rota do painel; a rota protegida reage, e o login mostra "Sua sessão expirou. Faça login de novo." (mensagem do backend). Nenhuma tela do painel trata sessão vencida na mão.
+- **Login** mostra uma frase só para `CREDENCIAIS_INVALIDAS` — "E-mail ou senha inválidos." — como o backend pede (e-mail inexistente, senha errada e conta desativada são a mesma resposta de propósito). 429 usa a mensagem do backend.
+- **Sair** só tira a pessoa do painel depois que o `DELETE /admin/sessao` confirma. Se a chamada falhar, o cookie pode continuar valendo; a tela mostra o erro em vez de fingir que saiu.
+- **Modo exemplo** simula a sessão do admin (qualquer e-mail, senha `exemplo`), com a mesma regra de 401/403, para o painel continuar navegável sem backend.
+
+**Descartado:** checar sessão só no `EstruturaAdmin` (o login ficaria com menu lateral e a proteção dependeria de cada página nova ficar dentro dele sem estar explícito em `App.jsx`); tratar 401 em cada tela (cada página nova do painel teria de lembrar).
+
+**Conflito conhecido:** o branch remoto `feature/aprovacao-produtos` (não mergeado) cria outro `src/services/adminService.js` (funções soltas `entrarAdmin`/`obterAdminAtual`/`sairAdmin`) e outro `Login.jsx`. No merge, fica a versão desta seção (objeto `adminService`, padrão dos outros services) e a página `Revisao` passa a usar `requisitarAdmin` e a entrar no grupo protegido.
+
+## 12. Branch `feature/aprovacao-produtos` não entra como está (21/09/2026)
+
+**Decidido:** a base do painel que fica é a da seção 11. Nada do branch remoto `feature/aprovacao-produtos` (commit `2f98f09`, do Rauhan) é mergeado como está: nem a tela `Revisao` / `revisaoService`, nem a mudança na `Home.jsx` que chama `catalogoService.produtosAprovados`. Três motivos:
+
+1. **Rotas que não existem no backend.** `/admin/revisao/*` e `/produtos-aprovados` respondem 404: não estão em nenhum branch do backend, nem no contrato v1.0, nem em `para-o-frontend.md`. A tela não funciona contra a API real.
+2. **404 na home da loja.** A `Home.jsx` dele chama `/produtos-aprovados` em toda visita e mistura o resultado com os destaques, engolindo o erro sem aviso. A loja passa a fazer uma chamada quebrada por visita.
+3. **Valores soltos fora da paleta.** `Revisao.css` não usa nenhum `var(--token)`: hex fora das três cores oficiais (incluindo o vermelho `#9a4c43`), fontes que não existem no projeto (Cormorant Garamond, Manrope), `px` de espaçamento e tamanho, quebras de 900px e 520px. O `check:tokens` só passa ali porque não há `var()` para conferir.
+
+Além disso, a base de acesso dele não tem rota protegida, não separa 401 de 403 e não trata a sessão de 12h (comparação completa na conversa de 21/09; conflito de merge sobre a base atual: `adminService.js`, `Login.jsx`, `App.jsx` e `DESIGN.md`, este só por fim de linha).
+
+**Para a `Revisao` voltar:** o backend precisa ter as rotas (ou elas precisam estar acordadas com o time do backend), a tela precisa ser reescrita com tokens, os três estados e `requisitarAdmin`, entrar no grupo `<RotaAdminProtegida>` e sair da `Home` da loja. Aí o conflito se reduz à linha da rota e ao item de menu.
+
+## 13. Cores: paleta no painel e filtro na vitrine (21/09/2026)
+
+**Decidido:** cor virou vocabulário no backend (revisão 0007, branch `feat/cores` do backend; rotas no `docs/contrato-api-v1-adendo.json`, não no contrato v1.0). No frontend:
+
+- **`/admin/cores`** (`src/paginas/admin/Cores.jsx`, `coresService` com `requisitarAdmin`): lista com contagem de peças (contando as ocultas), criar, renomear, esconder do filtro, excluir e uma gaveta "peças nesta cor". Dentro do grupo protegido.
+- **Excluir cor em uso** é barrado duas vezes: a tela já mostra quantas peças usam a cor e desabilita o botão, e se a lista estiver velha o backend responde 409 `COR_EM_USO`, que a tela mostra. A saída sugerida é esconder a cor, que não mexe em peça nenhuma.
+- **Renomear** reescreve o texto em todas as variações; o slug (a URL do filtro) só muda se for mandado, e a tela avisa que link antigo quebra.
+- **Filtro de cor na vitrine** (`Listagem.jsx`): checkbox múltiplo com contagem, `?cor=slug1,slug2` na URL (OU entre as cores, como marca), entra no "Limpar filtros". A paleta vem de `GET /cores`, que só traz as ativas.
+
+**Testado contra a API real (21/09):** criar ("Lilás Teste" → slug `lilas-teste`), editar (renomear mantendo o slug, esconder → some de `GET /cores`), excluir cor sem peça, excluir cor em uso (botão desabilitado; DELETE forçado → 409 com `totalProdutos: 774`, cor intacta), gaveta de peças e `/feminino?cor=preta,bege` (873 peças, igual à API).
+
+**Limitação conhecida:** a gaveta "peças nesta cor" mostra só as 50 primeiras, sem paginação.
+
+## 14. Produtos no painel: listagem, dados, imagens, duplicar e a grade (22/09/2026)
+
+**Decidido:** `/admin/produtos` (branch `feat/produtos-painel` do frontend, saindo de `feat/cores`), em duas rodadas no mesmo dia.
+
+**Listagem (`Produtos.jsx`):** traz os ocultos, pagina por página (não por cursor), busca e filtros (marca, coleção, categoria, status) na URL, junto com a página. Trocar a coleção limpa a categoria. Três estados de sempre.
+
+**Produto (`Produto.jsx`):**
+- **Dados** (nome, descrição, marca, coleção/categoria, status, código): `PATCH` **parcial** — o formulário compara com o que veio da leitura e só manda o que mudou; `descricao` vazia vira `null` (apaga). **A "Coleção" do formulário é só filtro de tela**: o backend não tem `colecaoId` em criar/editar, só `categoriaId` (a categoria já diz a coleção); trocar a coleção troca as opções de categoria e limpa a escolhida, mas o que viaja é só `categoriaId`.
+- **Criar** (`/admin/produtos/novo`, mesmo formulário): código opcional, o backend gera no padrão da marca. Ao criar, navega para a edição — é lá que imagens e variações entram.
+- **Imagens:** acrescentar por URL (só https, máx. 10), excluir e reordenar (mover para cima/para baixo, sem arrastar — sem biblioteca de drag-and-drop no projeto). Reordenar manda a lista COMPLETA de ids; a de ordem 1 é a capa, marcada como tal na tela.
+- **Duplicar:** botão na listagem (coluna de ações) e na tela do produto, os dois com o mesmo componente (`BotaoDuplicar`) e o mesmo modal de aviso — a cópia nasce **oculta e sem destaque**, e o modal diz isso antes de confirmar. Ao duplicar, navega para a cópia com um aviso na tela.
+- **Grade de variações:** sem mudança nesta rodada (regra já registrada: `PATCH .../variacoes` substitui o conjunto inteiro, cor sempre com `corId` da leitura).
+- **`ROTULO_STATUS`** (`Na loja`/`Esgotado`/`Oculto`) vive em `rotulosProduto.js`, não em `Produtos.jsx`: `Produto.jsx` e `Produtos.jsx` passaram a importar um do outro (`BotaoDuplicar`), e os rótulos num arquivo à parte evitam um import circular entre os dois.
+
+**Modo exemplo (`npm run dev:exemplo`) ganhou as rotas do painel de produtos** (`servidorExemplo.js`): listar com todos os filtros, obter, criar, editar, duplicar, imagens (acrescentar/reordenar/excluir) e variações, mais `GET /admin/marcas`/`GET /admin/categorias`. Os produtos fixos de `catalogoExemplo.js` nunca são mutados — uma camada (`produtosPainel`, por id) guarda as edições, e os criados/duplicados vivem em `produtosCriados`, os dois no `localStorage`, no mesmo padrão de `coresExtras`. **A loja pública (`GET /produtos`, `GET /produtos/:codigo`) continua lendo só o catálogo fixo** — editar ou criar pelo painel no modo exemplo não aparece na vitrine simulada; é limitação conhecida, registrada em `docs/pendencias-frontend.md`.
+
+**Testado contra o backend local (22/09):** criar um produto (marca, coleção, categoria — trocar a coleção limpou a categoria), três imagens, trocar a capa (mover para cima), excluir uma imagem (a que sobrou renumerou), duplicar (a cópia nasceu `oculto`, `destaque: false`, com as imagens copiadas com ids novos), editar só o status (`PATCH` mandou `{"status":"normal"}`, nada mais), limpar a descrição (`PATCH` mandou `{"descricao":null}`), código duplicado (409 `CODIGO_EM_USO` sob o campo) e URL de imagem sem https (400 do validador do Pydantic). Banco revertido ao fim (produtos de teste excluídos).
