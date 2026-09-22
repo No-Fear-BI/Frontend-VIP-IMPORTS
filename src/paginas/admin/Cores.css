@@ -12,24 +12,6 @@
   max-width: var(--medida-curta);
 }
 
-.admin-tabela {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
-
-.admin-tabela th,
-.admin-tabela td {
-  padding: var(--espaco-3) var(--espaco-4) var(--espaco-3) 0;
-  border-bottom: var(--borda-fina) solid var(--cor-borda);
-  vertical-align: baseline;
-}
-
-.admin-tabela th {
-  color: var(--cor-texto-suave);
-  border-bottom-color: var(--cor-borda-forte);
-}
-
 .admin-cores__slug {
   color: var(--cor-texto-suave);
 }
@@ -73,22 +55,6 @@
 }
 
 @media (max-width: 767px) {
-  .admin-tabela thead {
-    display: none;
-  }
-
-  .admin-tabela tr {
-    display: grid;
-    gap: var(--espaco-1);
-    padding-block: var(--espaco-3);
-    border-bottom: var(--borda-fina) solid var(--cor-borda);
-  }
-
-  .admin-tabela td {
-    padding: 0;
-    border: 0;
-  }
-
   .admin-cores__acoes {
     justify-content: flex-start;
     margin-top: var(--espaco-2);

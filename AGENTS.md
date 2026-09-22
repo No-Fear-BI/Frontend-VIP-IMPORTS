@@ -17,6 +17,7 @@ Instruções para agentes de código (Codex e outros). O Claude Code lê `CLAUDE
 - Toda chamada de API passa por `src/services/*` (que usam `src/lib/apiClient.js`). Botão, campo, cartão e modal: `src/components/ui/` (`Button`, `Field`, `Card`, `Modal`). Trate erro lendo `ErroApi` (`codigo`, `mensagem`, `campos`, `detalhes`).
 - Painel (`/admin/*`): service novo usa `requisitarAdmin` (`src/lib/apiAdmin.js`), não `requisitar`. Página nova entra DENTRO do grupo `<RotaAdminProtegida>` em `App.jsx` — fora dele abre sem login. 401 em rota de painel é sessão vencida (volta ao login), 403 é sessão de cliente (mensagem própria, nunca manda ao login). Sessão do painel e do cliente são independentes: `useSessaoAdmin()` × `useSessaoCliente()`.
 - `PATCH /carrinho/:itemId` recebe sempre `variacaoTamanhoId` **e** `variacaoCorId`. Listas de variações, destaques e ordens do painel substituem o conjunto inteiro.
+- Grade de variações do painel (`src/paginas/admin/Produto.jsx`): carregue a grade atual, edite e mande TUDO de volta, cada cor com o `corId` que veio da leitura. Sem `corId`, uma cor renomeada na paleta vira cor nova, sem erro. Cor nova entra escolhida de `GET /admin/cores`, nunca digitada.
 - Toda tela que busca dado tem os três estados: carregando (esqueleto), vazio (com saída) e erro ("Tentar de novo"). Use `useRequisicao`, `components/Estados.jsx` e as classes de estado de `styles/global.css`.
 - Código, nomes e rotas em português.
 - `docs/comparacao/` e `docs/propostas/` não são código do site. Não importe de lá e não "conserte" lá.

@@ -10,6 +10,7 @@ import AdminDestaques from './paginas/admin/Destaques.jsx';
 import EstruturaAdmin from './paginas/admin/EstruturaAdmin.jsx';
 import AdminLogin from './paginas/admin/Login.jsx';
 import AdminMarcas from './paginas/admin/Marcas.jsx';
+import AdminProduto from './paginas/admin/Produto.jsx';
 import AdminProdutos from './paginas/admin/Produtos.jsx';
 import AdminResumo from './paginas/admin/Resumo.jsx';
 import AdminSelecoes from './paginas/admin/Selecoes.jsx';
@@ -63,6 +64,7 @@ export default function App() {
             <Route index element={<Navigate to="resumo" replace />} />
             <Route path="resumo" element={<AdminResumo />} />
             <Route path="produtos" element={<AdminProdutos />} />
+            <Route path="produtos/:id" element={<AdminProduto />} />
             <Route path="marcas" element={<AdminMarcas />} />
             <Route path="cores" element={<AdminCores />} />
             <Route path="categorias" element={<AdminCategorias />} />
