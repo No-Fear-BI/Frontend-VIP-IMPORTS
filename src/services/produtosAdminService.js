@@ -22,6 +22,45 @@ export const produtosAdminService = {
   obter: (id, sinal) => requisitarAdmin('GET', `/admin/produtos/${id}`, { sinal }),
 
   /**
+   * POST /admin/produtos — criar. Responde 201 com o produto. `codigo` ausente: o backend gera
+   * no padrão da marca (três letras + sequencial). `categoriaId` já diz a coleção — não existe
+   * `colecaoId` no corpo.
+   * @param {{ codigo?: string, nome: string, descricao?: string, status?: string, marcaId: number, categoriaId: number }} dados
+   */
+  criar: (dados) => requisitarAdmin('POST', '/admin/produtos', { corpo: dados }),
+
+  /**
+   * PATCH /admin/produtos/:id — editar. PARCIAL: campo ausente não muda; `null` em `descricao`
+   * apaga. Mande só o que mudou.
+   */
+  editar: (id, patch) => requisitarAdmin('PATCH', `/admin/produtos/${id}`, { corpo: patch }),
+
+  /**
+   * POST /admin/produtos/:id/duplicar — responde 201 com a cópia: mesmas imagens e variações,
+   * código novo, "(cópia)" no nome. A cópia nasce SEMPRE oculta e sem destaque.
+   */
+  duplicar: (id) => requisitarAdmin('POST', `/admin/produtos/${id}/duplicar`),
+
+  /**
+   * POST /admin/produtos/:id/imagens — acrescenta por URL (só https, máx. 10 no total). As
+   * novas entram no FIM da ordem — nunca trocam a capa sozinhas. Devolve a galeria inteira.
+   * @param {{ url: string, alt?: string }[]} imagens
+   */
+  adicionarImagens: (id, imagens) =>
+    requisitarAdmin('POST', `/admin/produtos/${id}/imagens`, { corpo: { imagens } }),
+
+  /**
+   * PATCH /admin/produtos/:id/imagens/ordem — a lista COMPLETA de ids na ordem desejada.
+   * A de ordem 1 vira a capa. Lista parcial é 400.
+   * @param {number[]} ids
+   */
+  reordenarImagens: (id, ids) =>
+    requisitarAdmin('PATCH', `/admin/produtos/${id}/imagens/ordem`, { corpo: { ids } }),
+
+  /** DELETE /admin/imagens/:id — sem o produto na URL. Devolve as imagens que sobraram. */
+  excluirImagem: (imagemId) => requisitarAdmin('DELETE', `/admin/imagens/${imagemId}`),
+
+  /**
    * PATCH /admin/produtos/:id/variacoes — variacoes_definir. SUBSTITUI A GRADE INTEIRA: o que
    * não vier na lista sai, sem erro. Mande sempre tudo o que o produto tem, e cada cor com o
    * `corId` que veio da leitura — pelo texto, uma cor renomeada viraria cor nova na paleta.

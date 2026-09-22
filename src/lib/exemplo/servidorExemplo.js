@@ -20,6 +20,7 @@ import {
   coresDoProduto,
   marcas,
   produtos,
+  slugDeCor,
   WHATSAPP_EXEMPLO,
 } from './catalogoExemplo.js';
 
@@ -185,14 +186,281 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
       return { ...atual, ...mudancas };
     }
 
+    if (rota === 'GET /admin/marcas') return marcasDoPainel();
+
+    if (rota === 'GET /admin/categorias') {
+      const colecaoId = Number(q.get('colecaoId')) || null;
+      let lista = categoriasDoPainel(estado);
+      if (colecaoId) lista = lista.filter((c) => c.colecaoId === colecaoId);
+      return lista;
+    }
+
     if (rota === 'GET /admin/produtos') {
-      const corId = Number(q.get('corId'));
-      const cor = coresDoPainel(estado).find((c) => c.id === corId);
-      const lista = cor ? produtos.filter((p) => coresDoProduto(p).includes(cor.slug)) : [];
+      let lista = vazio ? [] : produtosDoPainel(estado);
+      const marcaId = Number(q.get('marcaId')) || null;
+      const categoriaId = Number(q.get('categoriaId')) || null;
+      const colecaoId = Number(q.get('colecaoId')) || null;
+      const corId = Number(q.get('corId')) || null;
+      const status = q.get('status') || null;
+      const busca = (q.get('busca') || '').trim();
+
+      if (marcaId) lista = lista.filter((p) => p.marcaId === marcaId);
+      if (categoriaId) lista = lista.filter((p) => p.categoriaId === categoriaId);
+      else if (colecaoId) lista = lista.filter((p) => p.colecaoId === colecaoId);
+      if (status) lista = lista.filter((p) => p.status === status);
+      if (corId) {
+        const cor = coresDoPainel(estado).find((c) => c.id === corId);
+        lista = cor ? lista.filter((p) => coresDoProduto(p).includes(cor.slug)) : [];
+      }
+      if (busca) {
+        const termo = normalizar(busca);
+        const termoCodigo = busca.toUpperCase();
+        lista = lista.filter((p) => normalizar(p.nome).includes(termo) || p.codigo.includes(termoCodigo));
+      }
+
+      const porPagina = Math.min(Number(q.get('porPagina')) || 50, 100);
+      const pagina = Math.max(1, Number(q.get('pagina')) || 1);
+      const inicio = (pagina - 1) * porPagina;
       return {
-        dados: lista.map(item),
-        paginacao: { total: lista.length, porPagina: 50, pagina: 1 },
+        dados: lista.slice(inicio, inicio + porPagina).map(itemDoPainel),
+        paginacao: { total: lista.length, porPagina, pagina },
       };
+    }
+
+    if (rota === 'POST /admin/produtos') {
+      const nome = String(corpo?.nome || '').trim();
+      if (!nome) throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', { campos: { nome: 'Obrigatório.' } });
+      const marcaId = Number(corpo?.marcaId);
+      const marca = marcas.find((m) => m.id === marcaId);
+      if (!marca) {
+        throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', { campos: { marcaId: 'Marca não encontrada.' } });
+      }
+      const categoriaId = Number(corpo?.categoriaId);
+      const categoria = categorias.find((c) => c.id === categoriaId);
+      if (!categoria) {
+        throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', { campos: { categoriaId: 'Categoria não encontrada.' } });
+      }
+      const colecaoId = colecoes.find((c) => c.slug === categoria.colecao).id;
+      const existentes = produtosDoPainel(estado);
+      let codigo = corpo?.codigo ? String(corpo.codigo).trim().toUpperCase() : '';
+      if (codigo && existentes.some((p) => p.codigo === codigo)) {
+        throw erro(409, 'CODIGO_EM_USO', `O código ${codigo} já está em uso por outro produto.`, {
+          campos: { codigo: 'Este código já está em uso.' },
+        });
+      }
+      if (!codigo) codigo = proximoCodigo(existentes, marca.nome);
+
+      const agora = new Date().toISOString();
+      const novo = {
+        id: proximoId(estado, 'proximoIdProduto', 100000),
+        codigo,
+        nome,
+        descricao: corpo?.descricao ?? null,
+        status: corpo?.status || 'normal',
+        destaque: false,
+        destaqueOrdem: null,
+        marcaId,
+        categoriaId,
+        colecaoId,
+        imagens: [],
+        variacoes: [],
+        criadoEm: agora,
+        atualizadoEm: agora,
+      };
+      estado.produtosCriados = [...(estado.produtosCriados || []), novo];
+      gravar(estado);
+      return detalheDoPainel(novo);
+    }
+
+    if ((m = caminho.match(/^\/admin\/produtos\/(\d+)$/)) && metodo === 'GET') {
+      const p = produtoDoPainelPorId(estado, Number(m[1]));
+      if (!p) throw erro(404, 'PRODUTO_NAO_ENCONTRADO', 'Produto não encontrado.');
+      return detalheDoPainel(p);
+    }
+
+    if ((m = caminho.match(/^\/admin\/produtos\/(\d+)$/)) && metodo === 'PATCH') {
+      const id = Number(m[1]);
+      const atual = produtoDoPainelPorId(estado, id);
+      if (!atual) throw erro(404, 'PRODUTO_NAO_ENCONTRADO', 'Produto não encontrado.');
+
+      const campos = {};
+      if ('codigo' in corpo && corpo.codigo) {
+        const novoCodigo = String(corpo.codigo).trim().toUpperCase();
+        if (produtosDoPainel(estado).some((p) => p.id !== id && p.codigo === novoCodigo)) {
+          throw erro(409, 'CODIGO_EM_USO', `O código ${novoCodigo} já está em uso por outro produto.`, {
+            campos: { codigo: 'Este código já está em uso.' },
+          });
+        }
+        campos.codigo = novoCodigo;
+      }
+      if ('nome' in corpo && corpo.nome) campos.nome = String(corpo.nome).trim();
+      if ('descricao' in corpo) campos.descricao = corpo.descricao ?? null;
+      if ('status' in corpo && corpo.status) campos.status = corpo.status;
+      if ('marcaId' in corpo && corpo.marcaId != null) {
+        if (!marcas.some((mm) => mm.id === corpo.marcaId)) {
+          throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', { campos: { marcaId: 'Marca não encontrada.' } });
+        }
+        campos.marcaId = corpo.marcaId;
+      }
+      if ('categoriaId' in corpo && corpo.categoriaId != null) {
+        const categoria = categorias.find((c) => c.id === corpo.categoriaId);
+        if (!categoria) {
+          throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', { campos: { categoriaId: 'Categoria não encontrada.' } });
+        }
+        campos.categoriaId = corpo.categoriaId;
+        campos.colecaoId = colecoes.find((c) => c.slug === categoria.colecao).id;
+      }
+      if ('destaque' in corpo && corpo.destaque != null) campos.destaque = corpo.destaque;
+      campos.atualizadoEm = new Date().toISOString();
+
+      aplicarEdicao(estado, id, campos);
+      gravar(estado);
+      return detalheDoPainel(produtoDoPainelPorId(estado, id));
+    }
+
+    if ((m = caminho.match(/^\/admin\/produtos\/(\d+)\/duplicar$/)) && metodo === 'POST') {
+      const original = produtoDoPainelPorId(estado, Number(m[1]));
+      if (!original) throw erro(404, 'PRODUTO_NAO_ENCONTRADO', 'Produto não encontrado.');
+      const marca = marcas.find((mm) => mm.id === original.marcaId);
+      const agora = new Date().toISOString();
+      const copia = {
+        id: proximoId(estado, 'proximoIdProduto', 100000),
+        codigo: proximoCodigo(produtosDoPainel(estado), marca?.nome || 'Produto'),
+        nome: `${original.nome} (cópia)`.slice(0, 180),
+        descricao: original.descricao,
+        status: 'oculto',
+        destaque: false,
+        destaqueOrdem: null,
+        marcaId: original.marcaId,
+        categoriaId: original.categoriaId,
+        colecaoId: original.colecaoId,
+        imagens: original.imagens.map((im) => ({ ...im, id: proximoId(estado, 'proximoIdImagem', 500000) })),
+        variacoes: original.variacoes.map((v) => ({ ...v, id: proximoId(estado, 'proximoIdVariacao', 700000) })),
+        criadoEm: agora,
+        atualizadoEm: agora,
+      };
+      estado.produtosCriados = [...(estado.produtosCriados || []), copia];
+      gravar(estado);
+      return detalheDoPainel(copia);
+    }
+
+    if ((m = caminho.match(/^\/admin\/produtos\/(\d+)\/imagens$/)) && metodo === 'POST') {
+      const id = Number(m[1]);
+      const atual = produtoDoPainelPorId(estado, id);
+      if (!atual) throw erro(404, 'PRODUTO_NAO_ENCONTRADO', 'Produto não encontrado.');
+      const entradas = corpo?.imagens || [];
+      if (entradas.length === 0) {
+        throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', { campos: { imagens: 'Envie ao menos uma imagem.' } });
+      }
+      for (const im of entradas) {
+        if (!String(im?.url || '').toLowerCase().startsWith('https://')) {
+          throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', {
+            campos: { imagens: 'A URL da imagem precisa começar com https://.' },
+          });
+        }
+      }
+      if (atual.imagens.length + entradas.length > 10) {
+        const total = atual.imagens.length + entradas.length;
+        throw erro(400, 'DADOS_INVALIDOS', `Este produto ficaria com ${total} imagens; o máximo é 10.`, {
+          campos: { imagens: `Este produto ficaria com ${total} imagens; o máximo é 10.` },
+        });
+      }
+      const novas = entradas.map((im, i) => ({
+        id: proximoId(estado, 'proximoIdImagem', 500000),
+        url: String(im.url).trim(),
+        alt: im.alt || null,
+        ordem: atual.imagens.length + i + 1,
+      }));
+      const imagens = [...atual.imagens, ...novas];
+      aplicarEdicao(estado, id, { imagens, atualizadoEm: new Date().toISOString() });
+      gravar(estado);
+      return produtoDoPainelPorId(estado, id).imagens;
+    }
+
+    if ((m = caminho.match(/^\/admin\/produtos\/(\d+)\/imagens\/ordem$/)) && metodo === 'PATCH') {
+      const id = Number(m[1]);
+      const atual = produtoDoPainelPorId(estado, id);
+      if (!atual) throw erro(404, 'PRODUTO_NAO_ENCONTRADO', 'Produto não encontrado.');
+      const pedidos = corpo?.ids || [];
+      const atuais = new Set(atual.imagens.map((i) => i.id));
+      const pedidosUnicos = new Set(pedidos);
+      const listaCompleta =
+        pedidosUnicos.size === pedidos.length &&
+        pedidosUnicos.size === atuais.size &&
+        [...pedidosUnicos].every((idPedido) => atuais.has(idPedido));
+      if (!listaCompleta) {
+        throw erro(400, 'DADOS_INVALIDOS', 'A lista precisa trazer todas as imagens deste produto, e só elas.', {
+          campos: { ids: 'A lista precisa trazer todas as imagens deste produto, e só elas.' },
+        });
+      }
+      const porId = new Map(atual.imagens.map((i) => [i.id, i]));
+      const imagens = pedidos.map((idImagem, i) => ({ ...porId.get(idImagem), ordem: i + 1 }));
+      aplicarEdicao(estado, id, { imagens, atualizadoEm: new Date().toISOString() });
+      gravar(estado);
+      return imagens;
+    }
+
+    if ((m = caminho.match(/^\/admin\/imagens\/(\d+)$/)) && metodo === 'DELETE') {
+      const imagemId = Number(m[1]);
+      const dono = produtosDoPainel(estado).find((p) => p.imagens.some((i) => i.id === imagemId));
+      if (!dono) throw erro(404, 'PRODUTO_NAO_ENCONTRADO', 'Imagem não encontrada.');
+      const restantes = dono.imagens
+        .filter((i) => i.id !== imagemId)
+        .map((i, idx) => ({ ...i, ordem: idx + 1 }));
+      aplicarEdicao(estado, dono.id, { imagens: restantes, atualizadoEm: new Date().toISOString() });
+      gravar(estado);
+      return restantes;
+    }
+
+    if ((m = caminho.match(/^\/admin\/produtos\/(\d+)\/variacoes$/)) && metodo === 'PATCH') {
+      const id = Number(m[1]);
+      const atual = produtoDoPainelPorId(estado, id);
+      if (!atual) throw erro(404, 'PRODUTO_NAO_ENCONTRADO', 'Produto não encontrado.');
+
+      const resolvidas = [];
+      const vistas = new Set();
+      for (const pedida of corpo?.variacoes || []) {
+        let valor = String(pedida.valor || '').trim();
+        let corId = null;
+        if (pedida.tipo === 'cor') {
+          if (pedida.corId != null) {
+            const cor = coresDoPainel(estado).find((c) => c.id === pedida.corId);
+            if (!cor) {
+              throw erro(404, 'COR_NAO_ENCONTRADA', `Cor ${pedida.corId} não encontrada.`, { campos: { corId: 'Cor não encontrada.' } });
+            }
+            valor = cor.nome;
+            corId = cor.id;
+          } else {
+            const slug = slugDeCor(valor);
+            let cor = coresDoPainel(estado).find((c) => slugDeCor(c.nome) === slug);
+            if (!cor) {
+              cor = { id: proximoId(estado, 'proximoIdCor', 900000), nome: valor, slug, ordem: 0, ativa: true, totalProdutos: 0 };
+              estado.coresExtras = [...(estado.coresExtras || []), cor];
+            }
+            valor = cor.nome;
+            corId = cor.id;
+          }
+        } else if (pedida.corId != null) {
+          throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', { campos: { variacoes: 'Variação de tamanho não leva cor.' } });
+        }
+        const chave = `${pedida.tipo}:${valor}`;
+        if (vistas.has(chave)) {
+          throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', {
+            campos: { variacoes: `'${valor}' aparece duas vezes em ${pedida.tipo}.` },
+          });
+        }
+        vistas.add(chave);
+        resolvidas.push({ tipo: pedida.tipo, valor, corId, disponivel: pedida.disponivel ?? true });
+      }
+
+      const atuaisPorChave = new Map(atual.variacoes.map((v) => [`${v.tipo}:${v.valor}`, v]));
+      const variacoes = resolvidas.map((r) => {
+        const existente = atuaisPorChave.get(`${r.tipo}:${r.valor}`);
+        return existente ? { ...existente, ...r } : { ...r, id: proximoId(estado, 'proximoIdVariacao', 700000) };
+      });
+      aplicarEdicao(estado, id, { variacoes, atualizadoEm: new Date().toISOString() });
+      gravar(estado);
+      return variacoes;
     }
   }
 
@@ -416,6 +684,152 @@ function coresComTotal() {
     ...c,
     totalProdutos: produtos.filter((p) => coresDoProduto(p).includes(c.slug)).length,
   }));
+}
+
+// ======================================================================
+// Produtos do painel: uma camada por cima do catálogo fixo (`produtos`), para editar, criar,
+// duplicar e mexer em imagens/variações sem reescrever catalogoExemplo.js. Mesma ideia de
+// `coresExtras`/`coresDoPainel` acima: o catálogo fixo nunca é mutado, as edições vivem no
+// `estado` (localStorage) e são aplicadas por cima na leitura.
+// ======================================================================
+
+/** Um contador por chave, persistido no estado — evita ids repetidos entre chamadas na mesma sessão. */
+function proximoId(estado, chave, base) {
+  const atual = estado[chave] || base;
+  estado[chave] = atual + 1;
+  return atual;
+}
+
+/** Três letras da marca + o próximo sequencial livre, como o backend gera (docs/para-o-frontend.md). */
+function proximoCodigo(existentes, nomeMarca) {
+  const prefixo = (nomeMarca.replace(/[^a-zA-Z]/g, '').slice(0, 3) || 'PRD').toUpperCase();
+  let sequencial = 1;
+  while (existentes.some((p) => p.codigo === `${prefixo}-${String(sequencial).padStart(4, '0')}`)) sequencial++;
+  return `${prefixo}-${String(sequencial).padStart(4, '0')}`;
+}
+
+/** A categoria de um produto estático, por slug DA CATEGORIA *e* DA COLEÇÃO — "bolsas" existe nas duas. */
+function categoriaDoProdutoEstatico(p) {
+  return categorias.find((c) => c.slug === p.categoria.slug && c.colecao === p.colecao.slug);
+}
+
+/** Um produto estático como o painel o vê: com os ids que o formulário e os filtros precisam. */
+function produtoEstaticoParaPainel(p) {
+  const categoria = categoriaDoProdutoEstatico(p);
+  return {
+    id: p.id,
+    codigo: p.codigo,
+    nome: p.nome,
+    descricao: p.descricao,
+    status: p.status,
+    destaque: p.destaque,
+    destaqueOrdem: null,
+    marcaId: marcas.find((m) => m.slug === p.marca.slug).id,
+    categoriaId: categoria.id,
+    colecaoId: colecoes.find((c) => c.slug === p.colecao.slug).id,
+    imagens: p.imagens,
+    variacoes: p.variacoes,
+    criadoEm: p.criadoEm,
+    atualizadoEm: p.criadoEm,
+  };
+}
+
+/** Todos os produtos do painel: os fixos (com as edições da sessão por cima) + os criados/duplicados nela. */
+function produtosDoPainel(estado) {
+  const overrides = estado.produtosPainel || {};
+  const fixos = produtos.map((p) => ({ ...produtoEstaticoParaPainel(p), ...(overrides[p.id] || {}) }));
+  return [...fixos, ...(estado.produtosCriados || [])];
+}
+
+function produtoDoPainelPorId(estado, id) {
+  return produtosDoPainel(estado).find((p) => p.id === id);
+}
+
+/** Muda os campos de um produto do painel: mutação direta se foi criado nesta sessão, ou uma
+ * entrada em `produtosPainel[id]` (camada) se é um dos fixos do catálogo. */
+function aplicarEdicao(estado, id, campos) {
+  const criado = (estado.produtosCriados || []).find((p) => p.id === id);
+  if (criado) {
+    Object.assign(criado, campos);
+  } else {
+    estado.produtosPainel = estado.produtosPainel || {};
+    estado.produtosPainel[id] = { ...(estado.produtosPainel[id] || {}), ...campos };
+  }
+}
+
+function marcasDoPainel() {
+  return marcas.map((m, i) => ({
+    id: m.id,
+    nome: m.nome,
+    slug: m.slug,
+    logoUrl: m.logoUrl,
+    ordem: i,
+    ativa: true,
+    totalProdutos: produtos.filter((p) => p.marca.slug === m.slug).length,
+    criadoEm: '2026-01-01T00:00:00.000Z',
+    atualizadoEm: '2026-01-01T00:00:00.000Z',
+  }));
+}
+
+function categoriasDoPainel(estado) {
+  const todos = produtosDoPainel(estado);
+  return categorias.map((c) => ({
+    id: c.id,
+    colecaoId: colecoes.find((x) => x.slug === c.colecao).id,
+    colecaoSlug: c.colecao,
+    nome: c.nome,
+    slug: c.slug,
+    imagemUrl: c.imagemUrl,
+    destaque: false,
+    destaqueOrdem: null,
+    ordem: c.id,
+    ativa: true,
+    totalProdutos: todos.filter((p) => p.categoriaId === c.id).length,
+    criadoEm: '2026-01-01T00:00:00.000Z',
+    atualizadoEm: '2026-01-01T00:00:00.000Z',
+  }));
+}
+
+function refDaMarca(marcaId) {
+  const m = marcas.find((x) => x.id === marcaId);
+  return { nome: m?.nome || '?', slug: m?.slug || '' };
+}
+
+function refDaCategoria(categoriaId) {
+  const c = categorias.find((x) => x.id === categoriaId);
+  return { nome: c?.nome || '?', slug: c?.slug || '' };
+}
+
+function refDaColecao(colecaoId) {
+  const c = colecoes.find((x) => x.id === colecaoId);
+  return { nome: c?.nome || '?', slug: c?.slug || '' };
+}
+
+/** ProdutoAdminDetalhe: o produto do painel com marca/categoria/coleção por extenso. */
+function detalheDoPainel(p) {
+  return {
+    ...p,
+    marca: refDaMarca(p.marcaId),
+    categoria: refDaCategoria(p.categoriaId),
+    colecao: refDaColecao(p.colecaoId),
+  };
+}
+
+/** ProdutoAdminItem: a linha da listagem. */
+function itemDoPainel(p) {
+  return {
+    id: p.id,
+    codigo: p.codigo,
+    nome: p.nome,
+    status: p.status,
+    destaque: p.destaque,
+    marca: refDaMarca(p.marcaId),
+    categoria: refDaCategoria(p.categoriaId),
+    colecao: refDaColecao(p.colecaoId),
+    capa: p.imagens[0] ? { url: p.imagens[0].url, alt: p.imagens[0].alt } : null,
+    criadoEm: p.criadoEm,
+    atualizadoEm: p.atualizadoEm,
+  };
 }
 
 /** A paleta como o painel vê: as do catálogo mais as criadas na sessão, com as edições por cima. */

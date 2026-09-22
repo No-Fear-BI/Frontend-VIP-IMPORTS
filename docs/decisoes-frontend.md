@@ -156,3 +156,21 @@ Além disso, a base de acesso dele não tem rota protegida, não separa 401 de 4
 **Testado contra a API real (21/09):** criar ("Lilás Teste" → slug `lilas-teste`), editar (renomear mantendo o slug, esconder → some de `GET /cores`), excluir cor sem peça, excluir cor em uso (botão desabilitado; DELETE forçado → 409 com `totalProdutos: 774`, cor intacta), gaveta de peças e `/feminino?cor=preta,bege` (873 peças, igual à API).
 
 **Limitação conhecida:** a gaveta "peças nesta cor" mostra só as 50 primeiras, sem paginação.
+
+## 14. Produtos no painel: listagem, dados, imagens, duplicar e a grade (22/09/2026)
+
+**Decidido:** `/admin/produtos` (branch `feat/produtos-painel` do frontend, saindo de `feat/cores`), em duas rodadas no mesmo dia.
+
+**Listagem (`Produtos.jsx`):** traz os ocultos, pagina por página (não por cursor), busca e filtros (marca, coleção, categoria, status) na URL, junto com a página. Trocar a coleção limpa a categoria. Três estados de sempre.
+
+**Produto (`Produto.jsx`):**
+- **Dados** (nome, descrição, marca, coleção/categoria, status, código): `PATCH` **parcial** — o formulário compara com o que veio da leitura e só manda o que mudou; `descricao` vazia vira `null` (apaga). **A "Coleção" do formulário é só filtro de tela**: o backend não tem `colecaoId` em criar/editar, só `categoriaId` (a categoria já diz a coleção); trocar a coleção troca as opções de categoria e limpa a escolhida, mas o que viaja é só `categoriaId`.
+- **Criar** (`/admin/produtos/novo`, mesmo formulário): código opcional, o backend gera no padrão da marca. Ao criar, navega para a edição — é lá que imagens e variações entram.
+- **Imagens:** acrescentar por URL (só https, máx. 10), excluir e reordenar (mover para cima/para baixo, sem arrastar — sem biblioteca de drag-and-drop no projeto). Reordenar manda a lista COMPLETA de ids; a de ordem 1 é a capa, marcada como tal na tela.
+- **Duplicar:** botão na listagem (coluna de ações) e na tela do produto, os dois com o mesmo componente (`BotaoDuplicar`) e o mesmo modal de aviso — a cópia nasce **oculta e sem destaque**, e o modal diz isso antes de confirmar. Ao duplicar, navega para a cópia com um aviso na tela.
+- **Grade de variações:** sem mudança nesta rodada (regra já registrada: `PATCH .../variacoes` substitui o conjunto inteiro, cor sempre com `corId` da leitura).
+- **`ROTULO_STATUS`** (`Na loja`/`Esgotado`/`Oculto`) vive em `rotulosProduto.js`, não em `Produtos.jsx`: `Produto.jsx` e `Produtos.jsx` passaram a importar um do outro (`BotaoDuplicar`), e os rótulos num arquivo à parte evitam um import circular entre os dois.
+
+**Modo exemplo (`npm run dev:exemplo`) ganhou as rotas do painel de produtos** (`servidorExemplo.js`): listar com todos os filtros, obter, criar, editar, duplicar, imagens (acrescentar/reordenar/excluir) e variações, mais `GET /admin/marcas`/`GET /admin/categorias`. Os produtos fixos de `catalogoExemplo.js` nunca são mutados — uma camada (`produtosPainel`, por id) guarda as edições, e os criados/duplicados vivem em `produtosCriados`, os dois no `localStorage`, no mesmo padrão de `coresExtras`. **A loja pública (`GET /produtos`, `GET /produtos/:codigo`) continua lendo só o catálogo fixo** — editar ou criar pelo painel no modo exemplo não aparece na vitrine simulada; é limitação conhecida, registrada em `docs/pendencias-frontend.md`.
+
+**Testado contra o backend local (22/09):** criar um produto (marca, coleção, categoria — trocar a coleção limpou a categoria), três imagens, trocar a capa (mover para cima), excluir uma imagem (a que sobrou renumerou), duplicar (a cópia nasceu `oculto`, `destaque: false`, com as imagens copiadas com ids novos), editar só o status (`PATCH` mandou `{"status":"normal"}`, nada mais), limpar a descrição (`PATCH` mandou `{"descricao":null}`), código duplicado (409 `CODIGO_EM_USO` sob o campo) e URL de imagem sem https (400 do validador do Pydantic). Banco revertido ao fim (produtos de teste excluídos).

@@ -17,12 +17,12 @@ import Button from '../../components/ui/Button.jsx';
 import { useRequisicao } from '../../hooks/useRequisicao.js';
 import { catalogoService } from '../../services/catalogoService.js';
 import { catalogoAdminService, produtosAdminService } from '../../services/produtosAdminService.js';
+import { BotaoDuplicar } from './Produto.jsx';
+import { ROTULO_STATUS } from './rotulosProduto.js';
 import './Produtos.css';
 
 const POR_PAGINA = 50;
 const FILTROS = ['busca', 'marcaId', 'colecaoId', 'categoriaId', 'status'];
-
-export const ROTULO_STATUS = { normal: 'Na loja', esgotado: 'Esgotado', oculto: 'Oculto' };
 
 export default function AdminProdutos() {
   const [params, setParams] = useSearchParams();
@@ -66,12 +66,17 @@ export default function AdminProdutos() {
 
   return (
     <section className="admin__pagina">
-      <header className="admin-produtos__topo">
-        <p className="t-label-caps-sm t-muted">/admin/produtos</p>
-        <h1 className="t-headline-lg">Produtos</h1>
-        <p className="t-body-sm t-muted admin-produtos__ajuda">
-          O catálogo inteiro, inclusive o que está oculto da loja.
-        </p>
+      <header className="admin-produtos__topo admin-produtos__topo-linha">
+        <div>
+          <p className="t-label-caps-sm t-muted">/admin/produtos</p>
+          <h1 className="t-headline-lg">Produtos</h1>
+          <p className="t-body-sm t-muted admin-produtos__ajuda">
+            O catálogo inteiro, inclusive o que está oculto da loja.
+          </p>
+        </div>
+        <Button variante="primaria" para="/admin/produtos/novo">
+          Novo produto
+        </Button>
       </header>
 
       <div className="admin-produtos__filtros" role="search">
@@ -165,6 +170,7 @@ export default function AdminProdutos() {
                 <th scope="col" className="t-label-caps-sm">Produto</th>
                 <th scope="col" className="t-label-caps-sm">Categoria</th>
                 <th scope="col" className="t-label-caps-sm">Status</th>
+                <th scope="col"><span className="visualmente-oculto">Ações</span></th>
               </tr>
             </thead>
             <tbody>
@@ -195,6 +201,16 @@ export default function AdminProdutos() {
                       {ROTULO_STATUS[produto.status]}
                     </span>
                     {produto.destaque && <span className="t-muted"> · destaque</span>}
+                  </td>
+                  <td className="admin-produtos__acoes">
+                    <BotaoDuplicar
+                      produtoId={produto.id}
+                      render={(abrir) => (
+                        <button type="button" className="link-caps" onClick={abrir}>
+                          Duplicar
+                        </button>
+                      )}
+                    />
                   </td>
                 </tr>
               ))}

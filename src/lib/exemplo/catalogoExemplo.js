@@ -124,7 +124,7 @@ export const produtos = produtosBrutos.map(([codigo, nome, marcaSlug, categoriaI
  * backend (minúscula, sem acento, não-alfanumérico vira hífen): assim "Preto" e
  * "preto" caem na mesma cor, como cairiam lá.
  */
-const slugDeCor = (texto) =>
+export const slugDeCor = (texto) =>
   texto
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
