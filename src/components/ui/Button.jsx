@@ -5,7 +5,7 @@ import { cn } from '../../lib/cn.js';
  * Botão base. Estilos em src/styles/global.css (.botao, .botao--*), só com tokens.
  *
  * variante:
- *   'primaria'                    ação principal da tela (ex.: "Comprar no WhatsApp")
+ *   'primaria'                    ação principal da tela (ex.: "Consultar valores no WhatsApp")
  *   'secundaria'                  ação de apoio, "Tentar de novo"
  *   'texto'                       ícone + versalete, sem fundo (ações dentro de cartão)
  *   'sobre-primaria'              botão cheio dentro de .faixa-primaria
