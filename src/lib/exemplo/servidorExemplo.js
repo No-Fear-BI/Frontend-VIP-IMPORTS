@@ -186,7 +186,7 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
       return { ...atual, ...mudancas };
     }
 
-    if (rota === 'GET /admin/marcas') return marcasDoPainel(estado);
+    if (rota === 'GET /admin/marcas') return vazio ? [] : marcasDoPainel(estado);
 
     if (rota === 'POST /admin/marcas') {
       const nome = String(corpo?.nome || '').trim();
@@ -260,7 +260,7 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
 
     if (rota === 'GET /admin/categorias') {
       const colecaoId = Number(q.get('colecaoId')) || null;
-      let lista = categoriasDoPainel(estado);
+      let lista = vazio ? [] : categoriasDoPainel(estado);
       if (colecaoId) lista = lista.filter((c) => c.colecaoId === colecaoId);
       return lista;
     }
