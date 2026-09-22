@@ -57,6 +57,15 @@ function esperar(ms, sinal) {
 
 const erro = (status, codigo, mensagem, extra = {}) => new ErroApi({ status, codigo, mensagem, ...extra });
 
+const LIMITE_BANNERS_ATIVOS = 4;
+const LIMITE_DESTAQUES_PRODUTOS = 12;
+const LIMITE_DESTAQUES_CATEGORIAS = 8;
+
+const erroLimiteBanners = () =>
+  erro(400, 'DADOS_INVALIDOS', `O carrossel da home aceita ${LIMITE_BANNERS_ATIVOS} banners ativos. Desative um antes de ativar este.`, {
+    campos: { ativo: `Já há ${LIMITE_BANNERS_ATIVOS} banners ativos.` },
+  });
+
 const item = (p) => ({
   id: p.id,
   codigo: p.codigo,
@@ -613,20 +622,219 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
       gravar(estado);
       return variacoes;
     }
+
+    if (rota === 'GET /admin/banners') return vazio ? [] : bannersDoPainel(estado);
+
+    if (rota === 'POST /admin/banners') {
+      const imagemUrl = String(corpo?.imagemUrl || '').trim();
+      if (!imagemUrl || !imagemUrl.toLowerCase().startsWith('https://')) {
+        throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', {
+          campos: { imagemUrl: 'A URL da imagem precisa começar com https://.' },
+        });
+      }
+      const imagemUrlMobile = corpo?.imagemUrlMobile ? String(corpo.imagemUrlMobile).trim() : null;
+      if (imagemUrlMobile && !imagemUrlMobile.toLowerCase().startsWith('https://')) {
+        throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', {
+          campos: { imagemUrlMobile: 'A URL da imagem precisa começar com https://.' },
+        });
+      }
+      const ativo = Boolean(corpo?.ativo);
+      if (ativo && bannersDoPainel(estado).filter((b) => b.ativo).length >= LIMITE_BANNERS_ATIVOS) {
+        throw erroLimiteBanners();
+      }
+      const agora = new Date().toISOString();
+      const novo = {
+        id: proximoId(estado, 'proximoIdBanner', 800000),
+        titulo: corpo?.titulo || null,
+        subtitulo: corpo?.subtitulo || null,
+        imagemUrl,
+        imagemUrlMobile,
+        alt: corpo?.alt || null,
+        linkUrl: corpo?.linkUrl || null,
+        ordem: bannersDoPainel(estado).length + 1,
+        ativo,
+        criadoEm: agora,
+        atualizadoEm: agora,
+      };
+      estado.bannersExtras = [...(estado.bannersExtras || []), novo];
+      gravar(estado);
+      return novo;
+    }
+
+    if (rota === 'PATCH /admin/banners/ordem') {
+      const atuaisIds = bannersDoPainel(estado).map((b) => b.id);
+      const pedidos = Array.isArray(corpo?.ids) ? corpo.ids : [];
+      const unicos = [...new Set(pedidos)];
+      const mesmoConjunto =
+        unicos.length === pedidos.length &&
+        unicos.length === atuaisIds.length &&
+        atuaisIds.every((id) => unicos.includes(id));
+      if (!mesmoConjunto) {
+        throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', {
+          campos: { ids: 'A lista precisa trazer todos os banners, e só eles.' },
+        });
+      }
+      estado.bannersExtras = bannersDoPainel(estado).map((b) => ({ ...b, ordem: pedidos.indexOf(b.id) + 1 }));
+      gravar(estado);
+      return bannersDoPainel(estado);
+    }
+
+    if ((m = caminho.match(/^\/admin\/banners\/(\d+)$/))) {
+      const id = Number(m[1]);
+      const atual = bannersDoPainel(estado).find((b) => b.id === id);
+      if (!atual) throw erro(404, 'PRODUTO_NAO_ENCONTRADO', 'Banner não encontrado.');
+
+      if (metodo === 'DELETE') {
+        estado.bannersExcluidos = [...(estado.bannersExcluidos || []), id];
+        const restantes = bannersDoPainel(estado).map((b, i) => ({ ...b, ordem: i + 1 }));
+        estado.bannersExtras = restantes;
+        gravar(estado);
+        return restantes;
+      }
+
+      const mudancas = {};
+      if ('imagemUrl' in corpo && corpo.imagemUrl) {
+        const url = String(corpo.imagemUrl).trim();
+        if (!url.toLowerCase().startsWith('https://')) {
+          throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', {
+            campos: { imagemUrl: 'A URL da imagem precisa começar com https://.' },
+          });
+        }
+        mudancas.imagemUrl = url;
+      }
+      if ('imagemUrlMobile' in corpo) {
+        const url = corpo.imagemUrlMobile ? String(corpo.imagemUrlMobile).trim() : null;
+        if (url && !url.toLowerCase().startsWith('https://')) {
+          throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', {
+            campos: { imagemUrlMobile: 'A URL da imagem precisa começar com https://.' },
+          });
+        }
+        mudancas.imagemUrlMobile = url;
+      }
+      if ('titulo' in corpo) mudancas.titulo = corpo.titulo || null;
+      if ('subtitulo' in corpo) mudancas.subtitulo = corpo.subtitulo || null;
+      if ('alt' in corpo) mudancas.alt = corpo.alt || null;
+      if ('linkUrl' in corpo) mudancas.linkUrl = corpo.linkUrl || null;
+      if ('ativo' in corpo && corpo.ativo != null) {
+        if (corpo.ativo && !atual.ativo) {
+          const ativos = bannersDoPainel(estado).filter((b) => b.ativo && b.id !== id).length;
+          if (ativos >= LIMITE_BANNERS_ATIVOS) throw erroLimiteBanners();
+        }
+        mudancas.ativo = corpo.ativo;
+      }
+      mudancas.atualizadoEm = new Date().toISOString();
+
+      const extras = bannersDoPainel(estado).map((b) => (b.id === id ? { ...b, ...mudancas } : b));
+      estado.bannersExtras = extras;
+      gravar(estado);
+      return { ...atual, ...mudancas };
+    }
+
+    if (rota === 'PATCH /admin/destaques/produtos') {
+      const pedidos = Array.isArray(corpo?.ids) ? corpo.ids : [];
+      const unicos = [...new Set(pedidos)];
+      if (unicos.length !== pedidos.length) {
+        throw erro(400, 'DADOS_INVALIDOS', 'Há id repetido na lista.', { campos: { ids: 'Há id repetido na lista.' } });
+      }
+      if (unicos.length > LIMITE_DESTAQUES_PRODUTOS) {
+        throw erro(
+          400,
+          'DADOS_INVALIDOS',
+          `A home mostra no máximo ${LIMITE_DESTAQUES_PRODUTOS} produtos em destaque; a lista tem ${unicos.length}.`,
+          { campos: { ids: `A home mostra no máximo ${LIMITE_DESTAQUES_PRODUTOS} produtos em destaque; a lista tem ${unicos.length}.` } },
+        );
+      }
+      const todos = produtosDoPainel(estado);
+      const naoEncontrados = unicos.filter((id) => !todos.some((p) => p.id === id));
+      if (naoEncontrados.length) {
+        throw erro(400, 'DADOS_INVALIDOS', `Estes produtos não existem: ${naoEncontrados}.`, {
+          detalhes: { naoEncontrados },
+        });
+      }
+      const ocultos = unicos.filter((id) => todos.find((p) => p.id === id).status === 'oculto');
+      if (ocultos.length) {
+        throw erro(400, 'DADOS_INVALIDOS', 'Produto oculto não aparece na home e não pode ser destaque.', {
+          detalhes: { ocultos },
+        });
+      }
+      for (const p of todos) {
+        if (p.destaque) aplicarEdicao(estado, p.id, { destaque: false, destaqueOrdem: null });
+      }
+      unicos.forEach((id, i) => aplicarEdicao(estado, id, { destaque: true, destaqueOrdem: i + 1 }));
+      gravar(estado);
+      return unicos;
+    }
+
+    if (rota === 'PATCH /admin/destaques/categorias') {
+      const pedidos = Array.isArray(corpo?.ids) ? corpo.ids : [];
+      const unicos = [...new Set(pedidos)];
+      if (unicos.length !== pedidos.length) {
+        throw erro(400, 'DADOS_INVALIDOS', 'Há id repetido na lista.', { campos: { ids: 'Há id repetido na lista.' } });
+      }
+      if (unicos.length > LIMITE_DESTAQUES_CATEGORIAS) {
+        throw erro(
+          400,
+          'DADOS_INVALIDOS',
+          `A home mostra no máximo ${LIMITE_DESTAQUES_CATEGORIAS} categorias em destaque; a lista tem ${unicos.length}.`,
+          { campos: { ids: `A home mostra no máximo ${LIMITE_DESTAQUES_CATEGORIAS} categorias em destaque; a lista tem ${unicos.length}.` } },
+        );
+      }
+      const todas = categoriasDoPainel(estado);
+      const naoEncontradas = unicos.filter((id) => !todas.some((c) => c.id === id));
+      if (naoEncontradas.length) {
+        throw erro(400, 'DADOS_INVALIDOS', `Estas categorias não existem: ${naoEncontradas}.`, {
+          detalhes: { naoEncontrados: naoEncontradas },
+        });
+      }
+      const inativas = unicos.filter((id) => todas.find((c) => c.id === id).ativa === false);
+      if (inativas.length) {
+        throw erro(400, 'DADOS_INVALIDOS', 'Categoria inativa não aparece na home e não pode ser destaque.', {
+          detalhes: { inativas },
+        });
+      }
+      let extras = estado.categoriasExtras || [];
+      const aplicarCategoria = (id, campos) => {
+        const atual = todas.find((c) => c.id === id);
+        extras = extras.some((c) => c.id === id)
+          ? extras.map((c) => (c.id === id ? { ...c, ...campos } : c))
+          : [...extras, { ...atual, ...campos }];
+      };
+      for (const c of todas) {
+        if (c.destaque) aplicarCategoria(c.id, { destaque: false, destaqueOrdem: null });
+      }
+      unicos.forEach((id, i) => aplicarCategoria(id, { destaque: true, destaqueOrdem: i + 1 }));
+      estado.categoriasExtras = extras;
+      gravar(estado);
+      return unicos;
+    }
   }
 
   if (rota === 'GET /home') {
-    const visiveis = vazio ? [] : produtos;
+    const bannersAtivos = vazio ? [] : bannersDoPainel(estado).filter((b) => b.ativo);
+    const destaquesProdutos = vazio
+      ? []
+      : produtosDoPainel(estado)
+          .filter((p) => p.destaque)
+          .sort((a, b) => (a.destaqueOrdem ?? 0) - (b.destaqueOrdem ?? 0))
+          .slice(0, LIMITE_DESTAQUES_PRODUTOS)
+          .map(itemDoPainel);
+    const destaquesCategorias = vazio
+      ? []
+      : categoriasDoPainel(estado)
+          .filter((c) => c.destaque)
+          .sort((a, b) => (a.destaqueOrdem ?? 0) - (b.destaqueOrdem ?? 0))
+          .slice(0, LIMITE_DESTAQUES_CATEGORIAS)
+          .map((c) => ({
+            id: c.id,
+            nome: c.nome,
+            slug: c.slug,
+            imagemUrl: c.imagemUrl,
+            colecao: { nome: colecoes.find((x) => x.id === c.colecaoId).nome, slug: c.colecaoSlug },
+          }));
     return {
-      banners: vazio ? [] : banners,
-      destaques: visiveis.filter((p) => p.destaque).slice(0, 12).map(item),
-      categoriasDestaque: (vazio ? [] : categorias.slice(0, 8)).map((c) => ({
-        id: c.id,
-        nome: c.nome,
-        slug: c.slug,
-        imagemUrl: c.imagemUrl,
-        colecao: { nome: colecoes.find((x) => x.slug === c.colecao).nome, slug: c.colecao },
-      })),
+      banners: bannersAtivos,
+      destaques: destaquesProdutos,
+      categoriasDestaque: destaquesCategorias,
       marcas: vazio ? [] : marcasComTotal(),
     };
   }
@@ -874,7 +1082,9 @@ function produtoEstaticoParaPainel(p) {
     descricao: p.descricao,
     status: p.status,
     destaque: p.destaque,
-    destaqueOrdem: null,
+    // Os ids fixos são 100+i e o destaque, `i < 12` (catalogoExemplo.js) — id-99 reaproveita o
+    // índice original como ordem, sem precisar guardar um segundo campo lá.
+    destaqueOrdem: p.destaque ? p.id - 99 : null,
     marcaId: marcas.find((m) => m.slug === p.marca.slug).id,
     categoriaId: categoria.id,
     colecaoId: colecoes.find((c) => c.slug === p.colecao.slug).id,
@@ -933,15 +1143,17 @@ function marcasDoPainel(estado) {
 
 function categoriasBase(estado) {
   const todos = produtosDoPainel(estado);
-  return categorias.map((c) => ({
+  return categorias.map((c, i) => ({
     id: c.id,
     colecaoId: colecoes.find((x) => x.slug === c.colecao).id,
     colecaoSlug: c.colecao,
     nome: c.nome,
     slug: c.slug,
     imagemUrl: c.imagemUrl,
-    destaque: false,
-    destaqueOrdem: null,
+    // As 8 primeiras nascem em destaque, para a home do modo exemplo não abrir vazia — o mesmo
+    // padrão de `produtoEstaticoParaPainel` (`destaque: i < 12`) do lado dos produtos.
+    destaque: i < LIMITE_DESTAQUES_CATEGORIAS,
+    destaqueOrdem: i < LIMITE_DESTAQUES_CATEGORIAS ? i + 1 : null,
     ordem: c.id,
     ativa: true,
     totalProdutos: todos.filter((p) => p.categoriaId === c.id).length,
@@ -957,6 +1169,36 @@ function categoriasDoPainel(estado) {
   const combinadas = base.map((c) => ({ ...c, ...(extras.find((e) => e.id === c.id) || {}) }));
   const novas = extras.filter((e) => !base.some((c) => c.id === e.id));
   return [...combinadas, ...novas];
+}
+
+function bannersBase() {
+  return banners.map((b, i) => ({
+    id: b.id,
+    titulo: b.titulo,
+    subtitulo: b.subtitulo,
+    imagemUrl: b.imagemUrl,
+    imagemUrlMobile: b.imagemUrlMobile,
+    alt: b.alt,
+    linkUrl: b.linkUrl,
+    ordem: i + 1,
+    ativo: true,
+    criadoEm: '2026-01-01T00:00:00.000Z',
+    atualizadoEm: '2026-01-01T00:00:00.000Z',
+  }));
+}
+
+/**
+ * Os banners fixos (com as edições da sessão por cima, e os excluídos fora) + os criados nela.
+ * `bannersExcluidos` existe porque, ao contrário de marca/categoria/cor, um banner fixo PODE ser
+ * excluído de verdade — sem essa lista, ele reapareceria a cada leitura vindo de `bannersBase()`.
+ */
+function bannersDoPainel(estado) {
+  const excluidos = new Set(estado.bannersExcluidos || []);
+  const extras = estado.bannersExtras || [];
+  const base = bannersBase().filter((b) => !excluidos.has(b.id));
+  const combinados = base.map((b) => ({ ...b, ...(extras.find((e) => e.id === b.id) || {}) }));
+  const novos = extras.filter((e) => !base.some((b) => b.id === e.id) && !excluidos.has(e.id));
+  return [...combinados, ...novos].sort((a, b) => a.ordem - b.ordem);
 }
 
 /** Slug único numa lista de slugs já usados: livre entra direto, colisão ganha sufixo -2, -3… */
