@@ -6,13 +6,14 @@ import { IconeBusca, IconeFechar, IconeMenu, IconePessoa, IconeSacola } from './
 import Logo from './Logo.jsx';
 import './Cabecalho.css';
 
-// Os 8 itens de menu da referência (CLAUDE.md), nesta ordem.
+// Os itens de menu da referência (CLAUDE.md), nesta ordem, com "Todos" antes de Novidades.
 export const MENU = [
   { rotulo: 'Início', para: '/' },
   { rotulo: 'Feminino', para: '/feminino' },
   { rotulo: 'Masculino', para: '/masculino' },
   { rotulo: 'Categorias', para: '/categorias' },
   { rotulo: 'Marcas', para: '/marcas' },
+  { rotulo: 'Todos', para: '/todos' },
   { rotulo: 'Novidades', para: '/novidades' },
   { rotulo: 'Sobre', para: '/sobre' },
   { rotulo: 'Contato', para: '/contato' },

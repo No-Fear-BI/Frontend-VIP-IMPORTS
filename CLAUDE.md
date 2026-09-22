@@ -20,7 +20,7 @@ Isso é insumo fixo para a skill `design-md-planner` (abaixo) — ela deriva tip
 
 O site queria que o Claude Code use como inspiração de estrutura, layout e tom — não como fonte de cor nova. O que reaproveitar dali:
 
-- Header: os mesmos 8 itens de menu do plano (Início, Feminino, Masculino, Categorias, Marcas, Novidades, Sobre, Contato) + ícones de conta/busca/carrinho à direita.
+- Header: os mesmos itens de menu do plano (Início, Feminino, Masculino, Categorias, Marcas, **Todos**, Novidades, Sobre, Contato) + ícones de conta/busca/carrinho à direita. "Todos" (`/todos`, o catálogo inteiro) foi pedido pelo cliente em 21/09/2026 e não vem da referência.
 - Hero em carrossel na home, com legenda pequena versalete acima de um título serifado grande.
 - Seção de produtos isolados sobre fundo neutro (sem card, sem sombra pesada) — várias peças flutuando, foto limpa.
 - Dois banners grandes lado a lado para "Coleção Feminina" / "Coleção Masculina": foto de fundo cheia, texto sobre gradiente escuro, link sublinhado versalete.
@@ -64,7 +64,7 @@ Registro completo, com o porquê e as alternativas descartadas, em `docs/decisoe
 
 ## Rotas
 
-Loja: `/`, `/feminino`, `/masculino`, `/colecoes/:slug`, `/novidades`, `/produtos?busca=`, `/categorias`, `/categorias/:categoria?colecao=` (redireciona para a coleção filtrada; slug de categoria só é único dentro da coleção), `/marcas`, `/marcas/:slug` (as listagens aceitam `?cor=slug1,slug2`), `/produto/:codigo`, `/selecao` (`/carrinho` redireciona), `/conta` (`/favoritos` redireciona), `/sobre`, `/contato`. Painel: `/admin/login` (única aberta) e, atrás da rota protegida, `resumo`, `produtos`, `produtos/novo`, `produtos/:id` (por id, não código: no painel o código é editável), `marcas`, `cores`, `categorias`, `banners`, `destaques`, `selecoes`, `clientes`.
+Loja: `/`, `/feminino`, `/masculino`, `/colecoes/:slug`, `/todos` (catálogo inteiro, sem filtro), `/novidades`, `/produtos?busca=`, `/categorias`, `/categorias/:categoria?colecao=` (redireciona para a coleção filtrada; slug de categoria só é único dentro da coleção), `/marcas`, `/marcas/:slug` (as listagens aceitam `?cor=slug1,slug2`), `/produto/:codigo`, `/selecao` (`/carrinho` redireciona), `/conta` (`/favoritos` redireciona), `/sobre`, `/contato`. Painel: `/admin/login` (única aberta) e, atrás da rota protegida, `resumo`, `produtos`, `produtos/novo`, `produtos/:id` (por id, não código: no painel o código é editável), `marcas`, `cores`, `categorias`, `banners`, `destaques`, `selecoes`, `clientes`.
 
 ## Rodar
 

@@ -39,6 +39,7 @@ export default function App() {
         <Route path="feminino" element={<Listagem key="feminino" modo="colecao" colecaoFixa="feminino" />} />
         <Route path="masculino" element={<Listagem key="masculino" modo="colecao" colecaoFixa="masculino" />} />
         <Route path="colecoes/:slug" element={<ListagemDaColecao />} />
+        <Route path="todos" element={<Listagem key="todos" modo="todos" />} />
         <Route path="novidades" element={<Listagem key="novidades" modo="novidades" />} />
         <Route path="produtos" element={<Listagem key="busca" modo="busca" />} />
         <Route path="categorias" element={<Categorias />} />
