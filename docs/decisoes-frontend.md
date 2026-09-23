@@ -216,3 +216,12 @@ Além disso, a base de acesso dele não tem rota protegida, não separa 401 de 4
 - **`GET /home` no modo exemplo estava com dois bugs**, corrigidos nesta rodada: banners sempre vinham da lista fixa (ignorando ativo/inativo e a ordem gravada), e a grade de categorias em destaque sempre mostrava as 8 primeiras do catálogo fixo, sem checar o campo `destaque` — nenhum dos dois refletia o que o painel gravava. Agora os três (banners, destaques de produto, categorias em destaque) vêm de `bannersDoPainel`/`produtosDoPainel`/`categoriasDoPainel`, com os mesmos filtros e limites do backend real.
 
 **Testado contra o backend local (22/09):** com o banco preparado (3 produtos e 6 categorias em destaque; banners existentes desativados) — criar 5 banners tentando ativar todos: os 4 primeiros ativaram, o 5º voltou "Já há 4 banners ativos." sob o checkbox, sem fechar o formulário; reordenar dois banners de teste (confirmado na tela); adicionar um 4º produto ao destaque (confirmado no banco: 4 ids gravados); remover o do meio (confirmado: os outros 3 continuaram, renumerados 1-3); buscar e tentar destacar um produto oculto — 400 com `erro.detalhes.ocultos`, item marcado na tela, buffer local preservado; mesmo teste com uma categoria trocada em Categorias em destaque. Home da loja conferida durante o teste: carrossel e "Escolhidas pela casa" refletiam exatamente o estado gravado, na ordem nova. Banco revertido ao fim (banners de teste excluídos, os 3 originais reativados; produtos e categorias em destaque devolvidos aos ids e à ordem originais) — conferido linha a linha contra o estado inicial.
+
+
+## Revisão com múltiplas coleções e nome no card (23/09/2026)
+
+Por solicitação do cliente, a revisão permite marcar Masculino e Feminino no mesmo
+card, com uma categoria por coleção. A aprovação cria um único produto: Todos
+e a marca não repetem a peça. O título do card público passa a ser `produto.nome`,
+preservando o nome digitado na revisão; o código continua sendo a chave da URL.
+Esta decisão substitui a orientação anterior de usar "Código X030" como título.

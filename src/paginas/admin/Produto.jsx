@@ -18,7 +18,7 @@
  * - Duplicar sempre nasce OCULTO e sem destaque — é decisão do backend, não bug.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Esqueleto, EstadoErro } from '../../components/Estados.jsx';
 import { FotoProduto } from '../../components/Produto.jsx';
@@ -222,25 +222,25 @@ function DadosProduto({ modo, inicial, onSalvar }) {
   const [codigo, setCodigo] = useState(inicial?.codigo || '');
   const [status, setStatus] = useState(inicial?.status || 'normal');
   const [marcaId, setMarcaId] = useState(inicial?.marcaId ? String(inicial.marcaId) : '');
-  const [colecaoId, setColecaoId] = useState(inicial?.colecaoId ? String(inicial.colecaoId) : '');
-  const [categoriaId, setCategoriaId] = useState(inicial?.categoriaId ? String(inicial.categoriaId) : '');
+  const [destinos, setDestinos] = useState(() => {
+    const ids = inicial?.categoriasIds?.length ? inicial.categoriasIds : [inicial?.categoriaId];
+    return ids.filter(Boolean).reduce((acc, id) => ({ ...acc, [String(id)]: true }), {});
+  });
+  const [categoriasIds, setCategoriasIds] = useState(() => inicial?.categoriasIds?.length ? inicial.categoriasIds.map(String) : [String(inicial?.categoriaId || '')]);
+  const [colecoesMarcadas, setColecoesMarcadas] = useState(() => new Set());
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState(null);
   const [aviso, setAviso] = useState('');
 
   const marcas = useRequisicao((sinal) => marcasService.listar(sinal), []);
   const colecoes = useRequisicao((sinal) => catalogoService.colecoes(sinal), []);
-  const categorias = useRequisicao(
-    (sinal) => (colecaoId ? categoriasService.listar(Number(colecaoId), sinal) : Promise.resolve([])),
-    [colecaoId],
-  );
-
-  function mudarColecao(valor) {
-    setColecaoId(valor);
-    setCategoriaId(''); // Trocar a coleção limpa a categoria: a lista de opções muda inteira.
-  }
-
-  const faltaAlgoObrigatorio = !nome.trim() || !marcaId || !categoriaId;
+  const categorias = useRequisicao((sinal) => catalogoService.colecoes(sinal).then((cs) => Promise.all(cs.map((c) => categoriasService.listar(c.id, sinal)))).then((listas) => listas.flat()), []);
+  useEffect(() => {
+    if (categorias.dados && colecoes.dados && !colecoesMarcadas.size) {
+      setColecoesMarcadas(new Set(categoriasIds.map((id) => categorias.dados.find((c) => c.id === Number(id))?.colecaoId).filter(Boolean)));
+    }
+  }, [categorias.dados, colecoes.dados]);
+  const faltaAlgoObrigatorio = !nome.trim() || !marcaId || !categoriasIds.filter(Boolean).length;
 
   async function enviar(evento) {
     evento.preventDefault();
@@ -257,7 +257,8 @@ function DadosProduto({ modo, inicial, onSalvar }) {
           ...(codigo.trim() ? { codigo: codigo.trim() } : {}),
           status,
           marcaId: Number(marcaId),
-          categoriaId: Number(categoriaId),
+          categoriaId: Number(categoriasIds.find(Boolean)),
+          categoriasIds: categoriasIds.filter(Boolean).map(Number),
         });
       } catch (falha) {
         setErro(falha);
@@ -274,7 +275,9 @@ function DadosProduto({ modo, inicial, onSalvar }) {
     if (codigo.trim() && codigo.trim().toUpperCase() !== inicial.codigo) patch.codigo = codigo.trim();
     if (status !== inicial.status) patch.status = status;
     if (marcaId && Number(marcaId) !== inicial.marcaId) patch.marcaId = Number(marcaId);
-    if (categoriaId && Number(categoriaId) !== inicial.categoriaId) patch.categoriaId = Number(categoriaId);
+    const categoriasAtuais = categoriasIds.filter(Boolean).map(Number);
+    const categoriasIniciais = (inicial.categoriasIds?.length ? inicial.categoriasIds : [inicial.categoriaId]).map(Number);
+    if (JSON.stringify(categoriasAtuais) !== JSON.stringify(categoriasIniciais)) patch.categoriasIds = categoriasAtuais;
 
     if (Object.keys(patch).length === 0) {
       setAviso('Nada para salvar: nada mudou.');
@@ -328,25 +331,24 @@ function DadosProduto({ modo, inicial, onSalvar }) {
           erro={erro?.campos?.marcaId}
           required
         />
-        <CampoSelecao
-          id="produto-colecao"
-          rotulo="Coleção"
-          valor={colecaoId}
-          onMudar={mudarColecao}
-          opcoes={colecoes.dados?.map((c) => ({ valor: c.id, rotulo: c.nome }))}
-          required
-        />
-        <CampoSelecao
-          id="produto-categoria"
-          rotulo="Categoria"
-          valor={categoriaId}
-          onMudar={setCategoriaId}
-          opcoes={colecaoId ? categorias.dados?.map((c) => ({ valor: c.id, rotulo: c.nome })) : []}
-          vazio={!colecaoId ? 'Escolha a coleção primeiro' : undefined}
-          erro={erro?.campos?.categoriaId}
-          disabled={!colecaoId}
-          required
-        />
+        <fieldset className="admin-produto__destinos">
+          <legend className="t-label-caps">Coleções e categorias</legend>
+          {colecoes.dados?.map((colecao) => {
+            const opcoes = (categorias.dados || []).filter((categoria) => categoria.colecaoId === colecao.id);
+            const atual = categoriasIds.find((id) => opcoes.some((categoria) => String(categoria.id) === id)) || '';
+            const marcada = colecoesMarcadas.has(colecao.id);
+            return <div key={colecao.id} className="admin-produto__destino">
+              <label><input type="checkbox" checked={marcada} onChange={(e) => {
+                const proximo = categoriasIds.filter((id) => !opcoes.some((categoria) => String(categoria.id) === id));
+                setColecoesMarcadas((anterior) => { const novo = new Set(anterior); e.target.checked ? novo.add(colecao.id) : novo.delete(colecao.id); return novo; });
+                setCategoriasIds(e.target.checked ? [...proximo, ''] : proximo);
+              }} /> {colecao.nome}</label>
+              <CampoSelecao id={`produto-categoria-${colecao.id}`} rotulo={`Categoria — ${colecao.nome}`} valor={atual}
+                onMudar={(valor) => setCategoriasIds([...categoriasIds.filter((id) => !opcoes.some((categoria) => String(categoria.id) === id)), valor])}
+                opcoes={opcoes.map((c) => ({ valor: c.id, rotulo: c.nome }))} disabled={!marcada} />
+            </div>;
+          })}
+        </fieldset>
         <CampoSelecao
           id="produto-status"
           rotulo="Status"
@@ -368,7 +370,7 @@ function DadosProduto({ modo, inicial, onSalvar }) {
       />
 
       {erro && !erro.campos && <ErroGeral>{erro.mensagem}</ErroGeral>}
-      {erro?.campos && Object.keys(erro.campos).some((c) => !['nome', 'descricao', 'codigo', 'status', 'marcaId', 'categoriaId'].includes(c)) && (
+      {erro?.campos && Object.keys(erro.campos).some((c) => !['nome', 'descricao', 'codigo', 'status', 'marcaId', 'categoriaId', 'categoriasIds'].includes(c)) && (
         <ErroGeral>{erroGeralDe(erro)}</ErroGeral>
       )}
 

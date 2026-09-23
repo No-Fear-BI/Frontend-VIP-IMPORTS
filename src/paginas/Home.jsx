@@ -14,7 +14,7 @@ import './Home.css';
 export default function Home() {
   const { dados, erro, carregando, recarregar } = useRequisicao((sinal) => catalogoService.home(sinal), []);
   const aprovados = useRequisicao((sinal) => catalogoService.produtosAprovados(sinal), []);
-  const destaques = [...(dados?.destaques || []), ...(aprovados.dados || [])];
+  const destaques = [...new Map([...(dados?.destaques || []), ...(aprovados.dados || [])].map((p) => [p.id, p])).values()];
 
   if (erro) {
     return (

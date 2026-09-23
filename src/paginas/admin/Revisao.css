@@ -13,3 +13,11 @@
 .revisao__acoes { margin-top: var(--espaco-3); }
 @media (max-width: 1023px) { .revisao__grade { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 480px) { .revisao { padding: var(--espaco-4); } .revisao__cabecalho, .revisao__filtros { align-items: stretch; flex-direction: column; } .revisao__grade { grid-template-columns: 1fr; } }
+
+.revisao__destino { display: grid; gap: var(--espaco-3); border: var(--borda-fina) solid var(--cor-borda); padding: var(--espaco-3); min-width: 0; }
+.revisao__destino legend { padding-inline: var(--espaco-1); }
+.revisao__publicado { display: grid; gap: var(--espaco-2); padding: var(--espaco-4); margin-block: var(--espaco-4); background: var(--cor-secundaria); color: var(--cor-sobre-secundaria); }
+
+.revisao__colecao { display: grid; gap: var(--espaco-2); }
+.revisao__opcao { display: flex; align-items: center; gap: var(--espaco-2); min-height: var(--altura-controle-compacto); cursor: pointer; }
+.revisao__opcao input { accent-color: var(--cor-primaria); width: var(--icone-md); height: var(--icone-md); }
