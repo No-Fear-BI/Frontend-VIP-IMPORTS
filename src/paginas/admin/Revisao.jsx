@@ -12,8 +12,10 @@ export default function Revisao() {
   const [categoria, setCategoria] = useState('Todos');
   const [pagina, setPagina] = useState(1);
   const [nomes, setNomes] = useState({});
+  const [marcas, setMarcas] = useState({});
+  const [colecoes, setColecoes] = useState({});
   const [salvando, setSalvando] = useState(null);
-  const [erroDecisao, setErroDecisao] = useState('');
+  const [erroDecisao, setErroDecisao] = useState(null);
   const trava = useRef(false);
   const { dados, erro, carregando, recarregar } = useRequisicao(
     (sinal) => listarPendentes({ busca, categoria, pagina, porPagina: 60 }, sinal),
@@ -30,13 +32,21 @@ export default function Revisao() {
     if (trava.current) return;
     trava.current = true;
     setSalvando(item.id);
-    setErroDecisao('');
+    setErroDecisao(null);
     try {
-      await decidirProduto({ productId: item.id, status: 'approved', translatedName: nomes[item.id] ?? item.translatedName });
+      await decidirProduto({
+        productId: item.id,
+        status: 'approved',
+        translatedName: nomes[item.id] ?? item.translatedName,
+        marca: marcas[item.id] ?? '',
+        colecao: colecoes[item.id] ?? '',
+      });
       setNomes((atual) => { const novo = { ...atual }; delete novo[item.id]; return novo; });
+      setMarcas((atual) => { const novo = { ...atual }; delete novo[item.id]; return novo; });
+      setColecoes((atual) => { const novo = { ...atual }; delete novo[item.id]; return novo; });
       recarregar();
     } catch (falha) {
-      setErroDecisao(falha.mensagem || 'A decisão não foi salva. Tente novamente.');
+      setErroDecisao({ itemId: item.id, mensagem: falha.mensagem, campos: falha.campos || {} });
     } finally {
       trava.current = false;
       setSalvando(null);
@@ -60,7 +70,9 @@ export default function Revisao() {
         </label>
         <Field id="busca-revisao" rotulo="Buscar pelo título original" value={busca} disabled={Boolean(salvando)} onChange={(e) => { setBusca(e.target.value); setPagina(1); }} />
       </div>
-      {erroDecisao && <ErroGeral>{erroDecisao}</ErroGeral>}
+      {erroDecisao?.mensagem && !erroDecisao.campos?.marca && !erroDecisao.campos?.colecao && (
+        <ErroGeral>{erroDecisao.mensagem}</ErroGeral>
+      )}
       {carregando ? <EsqueletoGrade className="revisao__grade" /> : erro ? <EstadoErro erro={erro} onTentar={recarregar} /> : itens.length === 0 ? (
         <EstadoVazio titulo="Nenhum produto pendente" texto="Limpe os filtros ou atualize a fila para conferir novos produtos." acao={{ rotulo: busca || categoria !== 'Todos' ? 'Limpar filtros' : 'Atualizar fila', onClick: busca || categoria !== 'Todos' ? limpar : recarregar }} />
       ) : <>
@@ -77,6 +89,29 @@ export default function Revisao() {
               <Field id={`nome-${item.id}`} rotulo="Nome em português" value={nomes[item.id] ?? item.translatedName} disabled={Boolean(salvando)} onChange={(e) => setNomes((atual) => ({ ...atual, [item.id]: e.target.value }))} />
               <p>{item.translatedDetails}</p>
               <details><summary>Nome original</summary><p>{item.name}</p></details>
+              <Field
+                id={`marca-${item.id}`}
+                rotulo="Marca"
+                value={marcas[item.id] ?? ''}
+                disabled={Boolean(salvando)}
+                erro={erroDecisao?.itemId === item.id ? erroDecisao.campos?.marca : undefined}
+                onChange={(e) => setMarcas((atual) => ({ ...atual, [item.id]: e.target.value }))}
+              />
+              <label className="campo">Coleção
+                <select
+                  className="campo__input"
+                  value={colecoes[item.id] ?? ''}
+                  disabled={Boolean(salvando)}
+                  onChange={(e) => setColecoes((atual) => ({ ...atual, [item.id]: e.target.value }))}
+                >
+                  <option value="">Escolha…</option>
+                  <option value="feminino">Feminino</option>
+                  <option value="masculino">Masculino</option>
+                </select>
+              </label>
+              {erroDecisao?.itemId === item.id && erroDecisao.campos?.colecao && (
+                <p className="campo__erro t-body-sm">{erroDecisao.campos.colecao}</p>
+              )}
               <nav className="revisao__acoes">
                 <a href={item.sourceUrl} target="_blank" rel="noreferrer">Ver origem ↗</a>
                 <Button disabled={Boolean(salvando)} onClick={() => aprovar(item)}>{salvando === item.id ? 'Salvando…' : 'Aprovar'}</Button>

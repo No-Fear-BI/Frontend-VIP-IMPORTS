@@ -13,8 +13,7 @@ import './Home.css';
 
 export default function Home() {
   const { dados, erro, carregando, recarregar } = useRequisicao((sinal) => catalogoService.home(sinal), []);
-  const aprovados = useRequisicao((sinal) => catalogoService.produtosAprovados(sinal), []);
-  const destaques = [...(dados?.destaques || []), ...(aprovados.dados || [])];
+  const destaques = dados?.destaques || [];
 
   if (erro) {
     return (

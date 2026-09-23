@@ -1,5 +1,5 @@
-import { requisitar } from '../lib/apiClient.js';
+import { requisitarAdmin } from '../lib/apiAdmin.js';
 
-export const listarPendentes = (filtros, sinal) => requisitar('GET', '/admin/revisao/pendentes', { query: filtros, sinal });
-export const decidirProduto = (corpo) => requisitar('POST', '/admin/revisao', { corpo });
-export const desfazerDecisao = (produtoId) => requisitar('DELETE', '/admin/revisao', { query: { produtoId } });
+export const listarPendentes = (filtros, sinal) => requisitarAdmin('GET', '/admin/revisao/pendentes', { query: filtros, sinal });
+export const decidirProduto = (corpo) => requisitarAdmin('POST', '/admin/revisao', { corpo });
+export const desfazerDecisao = (produtoId) => requisitarAdmin('DELETE', '/admin/revisao', { query: { produtoId } });
