@@ -14,7 +14,8 @@ export const catalogoService = {
    * GET /produtos — listarProdutos. Paginação por CURSOR: mande `paginacao.proximoCursor`
    * da página anterior em `cursor`; nunca traga tudo de uma vez.
    * `categoria` só vale junto com `colecao` (o slug de categoria é único por coleção).
-   * @param {{ colecao?, categoria?, marca?, busca?, ordem?: 'recentes'|'nome', cursor?, porPagina? }} filtros
+   * `cor` aceita vários slugs separados por vírgula, com OU entre eles (como `marca`).
+   * @param {{ colecao?, categoria?, marca?, cor?, busca?, ordem?: 'recentes'|'nome', cursor?, porPagina? }} filtros
    */
   produtos: (filtros, sinal) => requisitar('GET', '/produtos', { query: filtros, sinal }),
 
@@ -30,6 +31,9 @@ export const catalogoService = {
 
   /** GET /marcas — listarMarcas */
   marcas: (sinal) => requisitar('GET', '/marcas', { sinal }),
+
+  /** GET /cores — listarCores. A paleta do filtro `?cor=`: só as cores ativas no painel. */
+  cores: (sinal) => requisitar('GET', '/cores', { sinal }),
 
   /** GET /colecoes — listarColecoes */
   colecoes: (sinal) => requisitar('GET', '/colecoes', { sinal }),

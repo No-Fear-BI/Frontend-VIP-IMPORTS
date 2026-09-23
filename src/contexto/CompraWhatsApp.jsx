@@ -1,5 +1,5 @@
 /*
- * Fluxo "Comprar no WhatsApp" — o único jeito de uma peça entrar na seleção.
+ * Fluxo "Consultar valores no WhatsApp" — o único jeito de uma peça entrar na seleção.
  *
  * Decisão registrada em docs/decisoes-frontend.md: o botão passa pelo BACKEND.
  *   1. (só a partir do cartão) escolher tamanho/cor, ambos opcionais
@@ -159,7 +159,7 @@ export function ProvedorCompraWhatsApp({ children }) {
   return (
     <Contexto.Provider value={valor}>
       {children}
-      <Modal aberto={Boolean(compra)} onFechar={fechar} titulo="Comprar no WhatsApp">
+      <Modal aberto={Boolean(compra)} onFechar={fechar} titulo="Consultar valores no WhatsApp">
         {compra && (
           <ConteudoCompra
             compra={compra}

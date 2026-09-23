@@ -4,12 +4,21 @@
   min-height: 100vh;
 }
 
+/*
+ * No desktop a lateral acompanha a janela, não a página: sem isto ela esticava até o fim do
+ * conteúdo e o "Sair" (no pé dela) mudava de lugar a cada tela — lá embaixo numa tabela longa,
+ * sempre fora da tela sem rolar. Se a janela for baixa demais, a lateral rola sozinha.
+ */
 .admin__lateral {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--espaco-10);
-  padding: var(--espaco-10) var(--espaco-6);
+  gap: var(--espaco-6);
+  padding: var(--espaco-6);
 }
 
 .admin__menu {
@@ -50,6 +59,13 @@
 @media (max-width: 1023px) {
   .admin {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Empilhada em cima do conteúdo: volta a ter a altura do que tem dentro. */
+  .admin__lateral {
+    position: static;
+    height: auto;
+    overflow-y: visible;
   }
 
   .admin__menu {
@@ -95,4 +111,60 @@
 
   .admin__menu > li { flex: 0 0 auto; }
   .admin__link { white-space: nowrap; }
+}
+/* Quem entrou + Sair, no pé da lateral. */
+.admin__sessao {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-2);
+  margin-top: auto;
+  padding-top: var(--espaco-6);
+  border-top: var(--borda-fina) solid var(--cor-borda-sobre-primaria);
+  width: 100%;
+}
+
+.admin__sessao .botao {
+  margin-top: var(--espaco-2);
+}
+
+.admin__sessao-detalhe {
+  color: var(--cor-sobre-primaria-suave);
+}
+
+/* Tabela das listagens do painel (cores, produtos). No celular, cada linha vira um bloco. */
+.admin-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-tabela th,
+.admin-tabela td {
+  padding: var(--espaco-3) var(--espaco-4) var(--espaco-3) 0;
+  border-bottom: var(--borda-fina) solid var(--cor-borda);
+  vertical-align: baseline;
+}
+
+.admin-tabela th {
+  color: var(--cor-texto-suave);
+  border-bottom-color: var(--cor-borda-forte);
+}
+
+@media (max-width: 767px) {
+  .admin-tabela thead {
+    display: none;
+  }
+
+  .admin-tabela tr {
+    display: grid;
+    gap: var(--espaco-1);
+    padding-block: var(--espaco-3);
+    border-bottom: var(--borda-fina) solid var(--cor-borda);
+  }
+
+  .admin-tabela td {
+    padding: 0;
+    border: 0;
+  }
 }

@@ -1,0 +1,81 @@
+.admin-banners__topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--espaco-4);
+  margin-bottom: var(--espaco-8);
+}
+
+.admin-banners__ajuda {
+  margin-top: var(--espaco-2);
+  max-width: var(--medida-curta);
+}
+
+.admin-banners__tabela td {
+  vertical-align: middle;
+}
+
+.admin-banners__miniatura {
+  width: 96px;
+  aspect-ratio: 16 / 9;
+}
+
+.admin-banners__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-4);
+  justify-content: flex-end;
+}
+
+.admin-banners__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.admin-banners__checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+}
+
+.admin-banners__aviso {
+  padding-left: var(--espaco-3);
+  border-left: var(--borda-grossa) solid var(--cor-erro);
+}
+
+.admin-banners__previa-form {
+  width: 100%;
+  aspect-ratio: 21 / 9;
+}
+
+/* ---- Prévia de imagem genérica (miniatura na tabela e prévia do formulário) ---- */
+
+.previa-imagem {
+  position: relative;
+  background: var(--cor-fundo-foto);
+  border: var(--borda-fina) solid var(--cor-borda);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.previa-imagem img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.previa-imagem__vazia {
+  color: var(--cor-texto-suave);
+  text-align: center;
+  padding: var(--espaco-2);
+}
+
+@media (max-width: 767px) {
+  .admin-banners__acoes {
+    justify-content: flex-start;
+    margin-top: var(--espaco-2);
+  }
+}

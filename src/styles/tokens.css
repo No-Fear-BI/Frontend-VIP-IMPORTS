@@ -1,10 +1,8 @@
 /*
  * CONTRATO DE TOKENS — VIP Imports
  *
- * Os VALORES deste arquivo são PROVISÓRIOS. O cliente ainda não escolheu a direção
- * visual (16/09/2026), então ainda não existe DESIGN.md. Quando ele decidir, a skill
- * design-md-planner gera o DESIGN.md e todos os valores abaixo são substituídos pelos
- * valores de lá.
+ * Os valores abaixo vêm do DESIGN.md na raiz (direção "Vitrine Reservada" — editorial de
+ * moda cruzado com etiqueta de alfaiataria, escolhida pelo cliente em 17/09/2026).
  *
  * Os NOMES são DEFINITIVOS. Nenhum nome é renomeado ou removido na troca de estilo,
  * então nenhum componente precisa ser reescrito quando os valores mudarem.
@@ -53,25 +51,57 @@
 
   /* ---------- Tipografia ---------- */
 
-  /* Fallback de sistema até a direção visual definir as fontes. */
-  --fonte-titulo: Georgia, 'Times New Roman', Times, serif;
-  --fonte-texto: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* Bodoni Moda (voz, Didone) e Jost (aparato, geométrica) — @fontsource-variable, licença SIL OFL. */
+  --fonte-titulo: 'Bodoni Moda Variable', 'Didot', 'Bodoni 72', Georgia, serif;
+  --fonte-texto: 'Jost Variable', 'Futura', 'Century Gothic', 'Avenir Next', sans-serif;
 
+  /* Escala genérica de tamanho — continua servindo texto que não é um papel nomeado do
+     DESIGN.md (select de ordenação, opção de filtro, link do rodapé, número do selo de
+     contagem). Não renomear nem remover: são os nomes que o resto do projeto já usa. */
   --texto-xs: 12px;
   --texto-sm: 14px;
   --texto-md: 16px;                        /* nunca abaixo disso em input: o iOS dá zoom */
   --texto-lg: 18px;
-  --texto-xl: 22px;
-  --texto-2xl: clamp(26px, 4vw, 34px);
-  --texto-3xl: clamp(36px, 7vw, 60px);
+  --texto-xl: 22px;                        /* headline-sm, exato */
+  /* Mantido por compatibilidade — headline-lg e headline-md agora têm token próprio abaixo
+     (--texto-headline-lg / --texto-headline-md); nada mais deve passar a usar este daqui pra
+     frente para título grande. */
+  --texto-2xl: clamp(30px, 5vw, 44px);
+  --texto-3xl: clamp(40px, 8vw, 72px);     /* display, exato e normativo */
 
-  --altura-linha-titulo: 1.12;
+  /* Tamanho por papel do DESIGN.md, para os casos em que a escala genérica acima não tinha
+     uma parada exata para o papel (headline-lg e headline-md dividiam --texto-2xl; label-caps,
+     label-caps-sm e button dividiam --texto-xs; codigo dividia --texto-sm com body-sm). */
+  --texto-headline-lg: clamp(30px, 5vw, 44px);   /* normativo no DESIGN.md */
+  --texto-headline-md: 30px;
+  --texto-label-caps: 12px;
+  --texto-label-caps-sm: 11px;
+  --texto-botao: 13px;
+  --texto-codigo: 13px;
+
+  /* Uma só razão de altura de linha para display/headline-lg/headline-md/headline-sm, que no
+     DESIGN.md são 1.02/1.08/1.15/1.2 (a régua é "inversa ao tamanho"; tokens.css não tem uma
+     parada por tamanho). 1.1 é o meio do intervalo. Fora de escopo desta rodada — ver
+     docs/pendencias-frontend.md. */
+  --altura-linha-titulo: 1.1;
   --altura-linha-texto: 1.6;
   --altura-linha-compacta: 1.3;
 
+  /* Tracking genérico — mantido por compatibilidade, mesmo motivo do --texto-2xl acima. */
   --tracking-titulo: -0.01em;
   --tracking-versalete: 0.14em;
-  --tracking-codigo: 0.08em;
+  --tracking-codigo: 0.08em;                /* exato, único papel que usava --tracking-codigo */
+
+  /* Tracking por papel do DESIGN.md. Uma Didone quer tracking cada vez mais negativo conforme
+     o tamanho cresce (title grande) e cada vez mais positivo em rótulo versalete pequeno — um
+     valor médio (--tracking-titulo/--tracking-versalete acima) erra nos dois extremos. */
+  --tracking-display: -0.02em;
+  --tracking-headline-lg: -0.015em;
+  --tracking-headline-md: -0.01em;
+  --tracking-headline-sm: 0em;              /* DESIGN.md não pede tracking negativo neste tamanho */
+  --tracking-label-caps: 0.16em;
+  --tracking-label-caps-sm: 0.14em;
+  --tracking-botao: 0.12em;
 
   --peso-regular: 400;
   --peso-forte: 600;
@@ -103,6 +133,8 @@
 
   --medida-texto: 64ch;                    /* largura máxima de texto corrido */
   --medida-curta: 48ch;
+  /* Meio-termo: no DESIGN.md o título do hero é 14ch e o do CTA final é 18ch; tokens.css não
+     distingue os dois títulos, então nenhum fica exato. */
   --medida-titulo: 16ch;
 
   --largura-lateral: 240px;                /* coluna de filtros */
@@ -132,9 +164,12 @@
 
   /* ---------- Forma ---------- */
 
-  --raio: 2px;
+  --raio: 0px;                              /* "Não existe raio de 4, 8 ou 16px" — quadrado ou círculo, nada no meio */
   --raio-circulo: 9999px;
-  --sombra: 0 8px 24px rgb(40 54 31 / 0.12);   /* só em camada flutuante: modal e aviso */
+  /* "Não existe sombra no sistema" (DESIGN.md, Elevation & Depth): a profundidade vem de
+     plano tonal, filete de 1px e espaço. O modal já tem o filete (--cor-borda-forte) e o véu
+     (--cor-veu) para a camada flutuante — isso é o que substitui a sombra, não este token. */
+  --sombra: none;
 
   --borda-fina: 1px;
   --borda-grossa: 2px;
@@ -161,11 +196,18 @@
   --curva-suave: cubic-bezier(0.22, 1, 0.36, 1);
 
   --duracao-rapida: 120ms;                 /* hover, troca de cor */
-  --duracao-media: 220ms;                  /* modal, aviso, seta do link */
+  --duracao-media: 220ms;                  /* modal e gaveta entrando, seta do link */
   --duracao-lenta: 700ms;                  /* hero, brilho do botão, entrada do cabeçalho */
-  --duracao-muito-lenta: 1000ms;           /* zoom da foto, filete da seção */
+  /* DESIGN.md separa isso em dois: 900ms para o filete do cabeçalho de seção se desenhando e
+     1000ms para o zoom da foto no hover. Fiquei com o valor do zoom, que aparece bem mais vezes
+     na tela; o filete se desenha 100ms mais devagar do que o especificado. */
+  --duracao-muito-lenta: 1000ms;
   --duracao-carrossel: 7000ms;             /* tempo de cada slide do hero */
   --atraso-cascata: 90ms;
+
+  /* Saída do modal/gaveta (DESIGN.md: "saem em 160ms ease-in"). Usados em Modal.jsx/Modal.css. */
+  --duracao-saida: 160ms;
+  --curva-saida: ease-in;
 
   --deslocamento-entrada: 16px;
   --deslocamento-seta: 4px;
@@ -181,6 +223,7 @@
     --duracao-media: 0ms;
     --duracao-lenta: 0ms;
     --duracao-muito-lenta: 0ms;
+    --duracao-saida: 0ms;
     --deslocamento-entrada: 0px;
     --deslocamento-seta: 0px;
     --escala-hover: 1;

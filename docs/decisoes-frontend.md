@@ -6,7 +6,7 @@ Quem mexe no código (pessoa, Claude Code ou Codex) lê este arquivo junto com `
 
 ---
 
-## 1. Direção visual: "Vitrine Reservada" (15/09/2026) — SUSPENSA em 16/09, ver seção 8
+## 1. Direção visual: "Vitrine Reservada" (15/09/2026) — SUSPENSA em 16/09, RETOMADA e definitiva em 17/09, ver seção 9
 
 **Decidido:** editorial de moda cruzado com etiqueta de alfaiataria, com pegada de exclusividade. O pedido do time foi "opção 1, com uma pegada de algo exclusivo". A especificação completa está em `DESIGN.md`, gerado pela skill `design-md-planner` e auditado com `@google/design.md lint`: 0 erros e 0 avisos já na primeira passada.
 
@@ -84,3 +84,135 @@ Fluxo (`src/contexto/CompraWhatsApp.jsx`):
 **Escolhas de rota:** `/carrinho` redireciona para `/selecao` (na tela o nome é "seleção"); `/favoritos` redireciona para `/conta`, onde os favoritos já estão; `/categorias/:categoria` exige `?colecao=` porque o slug de categoria só é único dentro da coleção, e sem ela volta para `/categorias`.
 
 **Para reabrir:** quando o cliente escolher, rode a skill `design-md-planner`, gere `DESIGN.md` na raiz, audite com `npm run lint:design` e substitua os valores de `tokens.css`. Se a direção pedir algo que nenhum token cobre, crie token novo; não renomeie os existentes.
+
+## 9. Direção visual definitiva: "Vitrine Reservada" (17/09/2026)
+
+**Decidido:** o cliente escolheu a opção 1 ("Vitrine Reservada", editorial de moda cruzado com etiqueta de alfaiataria — a mesma da seção 1, retomada da suspensão da seção 8). Não houve nova entrevista de gosto: a especificação já existia em `docs/propostas/DESIGN-opcao-1-vitrine-reservada.md` (auditada com 0 erros/0 avisos em 15/09) e foi copiada para `DESIGN.md` na raiz sem alterações de conteúdo. `npm run lint:design` continua fechando com 0 erros e 0 avisos.
+
+**Fontes viraram dependência de verdade.** `@fontsource-variable/bodoni-moda` e `@fontsource-variable/jost` (licença SIL OFL, permite redistribuir) voltaram para `package.json` e são importadas em `src/main.jsx` (`opsz.css` + `opsz-italic.css` da Bodoni Moda; `wght.css` do Jost — os arquivos hospedados antes em `docs/comparacao/fontes/` vieram exatamente desse pacote, mesmo hash). `--fonte-titulo` e `--fonte-texto` em `tokens.css` apontam para elas.
+
+**`tokens.css` recebeu os valores do `DESIGN.md`, sem mudar nome nenhum.** A maior parte já batia (a paleta de cor, curvas, durações e medidas de layout já vinham dessa mesma especificação desde a seção 8). O que mudou de fato: `--fonte-titulo`/`--fonte-texto` (fontes reais), `--texto-2xl` e `--texto-3xl` (escala grande do editorial), `--raio` (2px → 0px: a direção não tem canto arredondado) e `--sombra` (removida: "não existe sombra no sistema" — a profundidade do modal já vem do filete + véu que `Modal.css` já usava).
+
+**Onde a escala de `tokens.css` é mais grossa que o `DESIGN.md` e por quê ficou assim:** o contrato tem 7 tamanhos de texto e uma altura/tracking de título só, mas o DESIGN.md nomeia 11 papéis de tipografia com valores próprios. Isso obriga a dividir um token entre papéis (`--texto-2xl` serve `headline-lg` e `headline-md`; `--altura-linha-titulo`/`--tracking-titulo` servem os quatro tamanhos de título). Escolhi o valor mais carregado/mais usado em cada caso e documentei o desvio exato como comentário em cada token de `tokens.css`. Abrir tokens novos por papel resolveria isso, mas essa decisão fica para o time (ver `docs/pendencias-frontend.md`) porque o pedido desta rodada foi só trocar valores, não nomes.
+
+**Removido:** `docs/comparacao/` inteira (as duas homes estáticas de comparação e as imagens/fontes que só existiam para elas). Já cumpriu o papel de mostrar as opções ao cliente; a especificação da opção escolhida sobrevive em `docs/propostas/` e agora em `DESIGN.md`.
+
+## 10. Tokens de tipografia por papel, sem renomear os existentes (17/09/2026)
+
+**Decidido:** fechar a maior parte dos desvios registrados na seção 9 (`--texto-2xl` dividido entre `headline-lg`/`headline-md`, `--tracking-titulo` como média de quatro tamanhos, `--texto-xs`/`--texto-sm` divididos entre `label-caps`/`label-caps-sm`/`button`/`codigo`) **acrescentando token novo por papel, sem renomear nem remover nenhum token existente** — Rauhan estava escrevendo telas do painel sobre este arquivo ao mesmo tempo, e um rename quebraria o trabalho dele sem avisar.
+
+**Tokens novos em `tokens.css`:**
+- Tamanho: `--texto-headline-lg` (`clamp(30px,5vw,44px)`), `--texto-headline-md` (`30px`), `--texto-label-caps` (`12px`), `--texto-label-caps-sm` (`11px`), `--texto-botao` (`13px`), `--texto-codigo` (`13px`).
+- Tracking: `--tracking-display` (`-0.02em`), `--tracking-headline-lg` (`-0.015em`), `--tracking-headline-md` (`-0.01em`), `--tracking-headline-sm` (`0`), `--tracking-label-caps` (`0.16em`), `--tracking-label-caps-sm` (`0.14em`), `--tracking-botao` (`0.12em`).
+- Movimento: `--duracao-saida` (`160ms`) e `--curva-saida` (`ease-in`), para a saída do modal/gaveta.
+
+`--texto-2xl`, `--texto-xs`, `--texto-sm`, `--tracking-titulo` e `--tracking-versalete` continuam existindo com o mesmo valor de antes — só pararam de ser usados pelos papéis que ganharam token próprio. `body-sm` não ganhou token novo porque `--texto-sm` (14px) já era o valor exato do DESIGN.md para esse papel.
+
+**`global.css` religado aos papéis certos:** `.t-headline-lg`/`.t-headline-md` (antes um único bloco em `--texto-2xl`), `.t-label-caps`/`.t-label-caps-sm` (tamanho e tracking, mantendo o peso que já estava certo), `.t-codigo`, `.botao` e `.link-caps` (que no DESIGN.md usa a mesma tipografia de `label-caps`).
+
+**Modal ganhou saída de verdade.** `Modal.jsx` não fechava mais o `<dialog>` na hora: agora aplica a classe `.modal--fechando`, espera `--duracao-saida` (lido do próprio `tokens.css` via `getComputedStyle`, não duplicado como número mágico em JS) e só então chama `.close()`. `Modal.css` ganhou `@keyframes modal-sai`/`gaveta-sai`. Isolado a dois arquivos que o painel ainda não usa (`grep` confirmou: nada em `src/paginas/admin` importa `Modal`).
+
+**Ficou de fora, de propósito (ver `docs/pendencias-frontend.md`):** `--altura-linha-titulo` continua uma média única para os quatro tamanhos de título — só o tracking entrou no pedido desta rodada — e `--medida-titulo` continua um só valor para hero (14ch) e CTA final (18ch).
+
+**Conferência:** `scripts/checar-tokens.mjs` (novo, `npm run check:tokens`) varre todo `var(--token)` em `src/**/*.css` contra as definições de `tokens.css`; rodado antes e depois desta mudança, 0 referências penduradas nas duas vezes. `--sombra` não foi removida na rodada anterior (só teve o valor trocado para `none`), então nunca existiu risco de referência pendurada por causa dela.
+
+## 11. Acesso ao painel: sessão própria, rota protegida, login e sair (21/09/2026)
+
+**Decidido:** antes de qualquer tela do painel, a base de acesso. `/admin/*` abria sem login porque nada checava sessão.
+
+- **`GET /admin/eu` foi conferido no código do backend** (`rotas/admin_painel.py`, esquema `AdminEu`), porque não está no contrato v1.0 — só em `para-o-frontend.md`. Devolve `{ id, nome, email, ultimoLoginEm, criadoEm }`, igual ao `POST /admin/sessao`.
+- **Contexto separado** (`src/contexto/SessaoAdmin.jsx`), montado só em `/admin/*`. Não reaproveita nada de `SessaoCliente`: no backend são cookies e prazos diferentes (12h sem renovar × sessão do cliente que se estende).
+- **401 e 403 levam a lugares diferentes.** 401 `NAO_IDENTIFICADO` → `/admin/login`, guardando a página de origem para voltar depois de entrar. 403 `SEM_PERMISSAO` → tela "Esta área é restrita à equipe da loja." SEM redirecionar: o backend só devolve 403 quando o navegador tem sessão de CLIENTE e nenhuma de admin, e mandar essa pessoa ao login a faria tentar uma senha que não tem. Há um link discreto "Sou da equipe: entrar no painel" para quem é da equipe e também está identificado como cliente — com as duas sessões, o backend faz valer a de admin.
+- **Sessão vencida no meio do uso é tratada num lugar só.** `requisitarAdmin` (`src/lib/apiAdmin.js`) avisa o contexto em qualquer 401/403 de rota do painel; a rota protegida reage, e o login mostra "Sua sessão expirou. Faça login de novo." (mensagem do backend). Nenhuma tela do painel trata sessão vencida na mão.
+- **Login** mostra uma frase só para `CREDENCIAIS_INVALIDAS` — "E-mail ou senha inválidos." — como o backend pede (e-mail inexistente, senha errada e conta desativada são a mesma resposta de propósito). 429 usa a mensagem do backend.
+- **Sair** só tira a pessoa do painel depois que o `DELETE /admin/sessao` confirma. Se a chamada falhar, o cookie pode continuar valendo; a tela mostra o erro em vez de fingir que saiu.
+- **Modo exemplo** simula a sessão do admin (qualquer e-mail, senha `exemplo`), com a mesma regra de 401/403, para o painel continuar navegável sem backend.
+
+**Descartado:** checar sessão só no `EstruturaAdmin` (o login ficaria com menu lateral e a proteção dependeria de cada página nova ficar dentro dele sem estar explícito em `App.jsx`); tratar 401 em cada tela (cada página nova do painel teria de lembrar).
+
+**Conflito conhecido:** o branch remoto `feature/aprovacao-produtos` (não mergeado) cria outro `src/services/adminService.js` (funções soltas `entrarAdmin`/`obterAdminAtual`/`sairAdmin`) e outro `Login.jsx`. No merge, fica a versão desta seção (objeto `adminService`, padrão dos outros services) e a página `Revisao` passa a usar `requisitarAdmin` e a entrar no grupo protegido.
+
+## 12. Branch `feature/aprovacao-produtos` não entra como está (21/09/2026)
+
+**Decidido:** a base do painel que fica é a da seção 11. Nada do branch remoto `feature/aprovacao-produtos` (commit `2f98f09`, do Rauhan) é mergeado como está: nem a tela `Revisao` / `revisaoService`, nem a mudança na `Home.jsx` que chama `catalogoService.produtosAprovados`. Três motivos:
+
+1. **Rotas que não existem no backend.** `/admin/revisao/*` e `/produtos-aprovados` respondem 404: não estão em nenhum branch do backend, nem no contrato v1.0, nem em `para-o-frontend.md`. A tela não funciona contra a API real.
+2. **404 na home da loja.** A `Home.jsx` dele chama `/produtos-aprovados` em toda visita e mistura o resultado com os destaques, engolindo o erro sem aviso. A loja passa a fazer uma chamada quebrada por visita.
+3. **Valores soltos fora da paleta.** `Revisao.css` não usa nenhum `var(--token)`: hex fora das três cores oficiais (incluindo o vermelho `#9a4c43`), fontes que não existem no projeto (Cormorant Garamond, Manrope), `px` de espaçamento e tamanho, quebras de 900px e 520px. O `check:tokens` só passa ali porque não há `var()` para conferir.
+
+Além disso, a base de acesso dele não tem rota protegida, não separa 401 de 403 e não trata a sessão de 12h (comparação completa na conversa de 21/09; conflito de merge sobre a base atual: `adminService.js`, `Login.jsx`, `App.jsx` e `DESIGN.md`, este só por fim de linha).
+
+**Para a `Revisao` voltar:** o backend precisa ter as rotas (ou elas precisam estar acordadas com o time do backend), a tela precisa ser reescrita com tokens, os três estados e `requisitarAdmin`, entrar no grupo `<RotaAdminProtegida>` e sair da `Home` da loja. Aí o conflito se reduz à linha da rota e ao item de menu.
+
+## 13. Cores: paleta no painel e filtro na vitrine (21/09/2026)
+
+**Decidido:** cor virou vocabulário no backend (revisão 0007, branch `feat/cores` do backend; rotas no `docs/contrato-api-v1-adendo.json`, não no contrato v1.0). No frontend:
+
+- **`/admin/cores`** (`src/paginas/admin/Cores.jsx`, `coresService` com `requisitarAdmin`): lista com contagem de peças (contando as ocultas), criar, renomear, esconder do filtro, excluir e uma gaveta "peças nesta cor". Dentro do grupo protegido.
+- **Excluir cor em uso** é barrado duas vezes: a tela já mostra quantas peças usam a cor e desabilita o botão, e se a lista estiver velha o backend responde 409 `COR_EM_USO`, que a tela mostra. A saída sugerida é esconder a cor, que não mexe em peça nenhuma.
+- **Renomear** reescreve o texto em todas as variações; o slug (a URL do filtro) só muda se for mandado, e a tela avisa que link antigo quebra.
+- **Filtro de cor na vitrine** (`Listagem.jsx`): checkbox múltiplo com contagem, `?cor=slug1,slug2` na URL (OU entre as cores, como marca), entra no "Limpar filtros". A paleta vem de `GET /cores`, que só traz as ativas.
+
+**Testado contra a API real (21/09):** criar ("Lilás Teste" → slug `lilas-teste`), editar (renomear mantendo o slug, esconder → some de `GET /cores`), excluir cor sem peça, excluir cor em uso (botão desabilitado; DELETE forçado → 409 com `totalProdutos: 774`, cor intacta), gaveta de peças e `/feminino?cor=preta,bege` (873 peças, igual à API).
+
+**Limitação conhecida:** a gaveta "peças nesta cor" mostra só as 50 primeiras, sem paginação.
+
+## 14. `/todos`: o catálogo inteiro no menu (21/09/2026)
+
+**Decidido:** pedido do cliente. `/todos` é a `Listagem` em `modo="todos"`: `GET /produtos` sem filtro fixo, com todos os filtros da lateral (coleção, categoria, marca, cor) e os três estados da listagem. Entra no menu entre Marcas e Novidades — não vem da referência base44, que tem 8 itens.
+
+**Conferido:** com 9 itens, o menu cabe numa linha na menor largura em que ele aparece inteiro (1241px; abaixo de 1240px vira gaveta). Três estados checados no modo exemplo (`?exemplo=lento|vazio|erro`).
+
+## 15. Produtos no painel: listagem, dados, imagens, duplicar e a grade (22/09/2026)
+
+**Decidido:** `/admin/produtos` (branch `feat/produtos-painel` do frontend, saindo de `feat/cores`), em duas rodadas no mesmo dia.
+
+**Listagem (`Produtos.jsx`):** traz os ocultos, pagina por página (não por cursor), busca e filtros (marca, coleção, categoria, status) na URL, junto com a página. Trocar a coleção limpa a categoria. Três estados de sempre.
+
+**Produto (`Produto.jsx`):**
+- **Dados** (nome, descrição, marca, coleção/categoria, status, código): `PATCH` **parcial** — o formulário compara com o que veio da leitura e só manda o que mudou; `descricao` vazia vira `null` (apaga). **A "Coleção" do formulário é só filtro de tela**: o backend não tem `colecaoId` em criar/editar, só `categoriaId` (a categoria já diz a coleção); trocar a coleção troca as opções de categoria e limpa a escolhida, mas o que viaja é só `categoriaId`.
+- **Criar** (`/admin/produtos/novo`, mesmo formulário): código opcional, o backend gera no padrão da marca. Ao criar, navega para a edição — é lá que imagens e variações entram.
+- **Imagens:** acrescentar por URL (só https, máx. 10), excluir e reordenar (mover para cima/para baixo, sem arrastar — sem biblioteca de drag-and-drop no projeto). Reordenar manda a lista COMPLETA de ids; a de ordem 1 é a capa, marcada como tal na tela.
+- **Duplicar:** botão na listagem (coluna de ações) e na tela do produto, os dois com o mesmo componente (`BotaoDuplicar`) e o mesmo modal de aviso — a cópia nasce **oculta e sem destaque**, e o modal diz isso antes de confirmar. Ao duplicar, navega para a cópia com um aviso na tela.
+- **Grade de variações:** sem mudança nesta rodada (regra já registrada: `PATCH .../variacoes` substitui o conjunto inteiro, cor sempre com `corId` da leitura).
+- **`ROTULO_STATUS`** (`Na loja`/`Esgotado`/`Oculto`) vive em `rotulosProduto.js`, não em `Produtos.jsx`: `Produto.jsx` e `Produtos.jsx` passaram a importar um do outro (`BotaoDuplicar`), e os rótulos num arquivo à parte evitam um import circular entre os dois.
+
+**Modo exemplo (`npm run dev:exemplo`) ganhou as rotas do painel de produtos** (`servidorExemplo.js`): listar com todos os filtros, obter, criar, editar, duplicar, imagens (acrescentar/reordenar/excluir) e variações, mais `GET /admin/marcas`/`GET /admin/categorias`. Os produtos fixos de `catalogoExemplo.js` nunca são mutados — uma camada (`produtosPainel`, por id) guarda as edições, e os criados/duplicados vivem em `produtosCriados`, os dois no `localStorage`, no mesmo padrão de `coresExtras`. **A loja pública (`GET /produtos`, `GET /produtos/:codigo`) continua lendo só o catálogo fixo** — editar ou criar pelo painel no modo exemplo não aparece na vitrine simulada; é limitação conhecida, registrada em `docs/pendencias-frontend.md`.
+
+**Testado contra o backend local (22/09):** criar um produto (marca, coleção, categoria — trocar a coleção limpou a categoria), três imagens, trocar a capa (mover para cima), excluir uma imagem (a que sobrou renumerou), duplicar (a cópia nasceu `oculto`, `destaque: false`, com as imagens copiadas com ids novos), editar só o status (`PATCH` mandou `{"status":"normal"}`, nada mais), limpar a descrição (`PATCH` mandou `{"descricao":null}`), código duplicado (409 `CODIGO_EM_USO` sob o campo) e URL de imagem sem https (400 do validador do Pydantic). Banco revertido ao fim (produtos de teste excluídos).
+
+## 16. O botão passa a se chamar "Consultar valores no WhatsApp" e sai do cartão (21/09/2026)
+
+**Decidido pelo cliente:** o botão de compra se chama **"Consultar valores no WhatsApp"** (esgotado continua "Consultar disponibilidade"), e **só aparece na página do produto**. O cartão da listagem fica com "Ver detalhes →", que agora aparece também no celular (antes ele sumia no celular para dar lugar ao botão). Substitui o nome da decisão 2; o fluxo pelo backend (decisão 3) não muda. O texto vem de `rotuloCompra()` em `components/Produto.jsx`, e o título do diálogo de compra acompanha.
+
+**Não entrou, porque não foi pedido:** as contagens de peças em categorias e marcas e o texto do rodapé, que tinham sido tirados junto, voltaram.
+
+## 17. Cartão de produto da grade sem "Valor confirmado" (22/09/2026)
+
+**Decidido:** o `CartaoProduto` (grade de catálogo — usado em Home, Listagem, relacionados da página de produto e favoritos em Conta) não mostra mais a linha "Valor confirmado pelo atendimento.". O botão de compra já tinha saído do cartão na seção 16; esta rodada tira também o texto de valor, então o cartão passa a ter só marca, código, categoria e "Ver detalhes →" — a compra (texto e botão) fica reservada à página do produto.
+
+**Por quê:** pedido direto do time, a partir de um print do cartão.
+
+**Não mudou:** `src/contexto/CompraWhatsApp.jsx` e o fluxo pelo backend (seção 3) continuam do jeito que estavam.
+
+## 18. Marcas e Categorias no painel (22/09/2026)
+
+**Decidido:** `/admin/marcas` e `/admin/categorias` (branch `feat/painel-catalogo`, rebaseada sobre a main depois dos merges de produtos-painel/todos/botao-whatsapp), no mesmo padrão de `Cores.jsx`.
+
+- **Marcas:** listagem com `totalProdutos` (contando ocultos), criar, editar (nome e slug — slug só muda se vier explícito no corpo, mesma regra de Cores) e excluir. Excluir com produtos é barrado na tela (botão desabilitado) e reforçado pelo 409 `MARCA_COM_PRODUTOS` do backend, com a contagem na mensagem.
+- **Categorias:** mesmo CRUD, mas a coleção é escolhida na CRIAÇÃO e não muda depois (editar manda só nome/slug — trocar a coleção de uma categoria com produtos é 409 no backend, e a tela não expõe esse caminho). Listagem separada por coleção (`porColecao`, um bloco por `GET /colecoes`). O slug é único POR COLEÇÃO: "bolsas" existe em Feminino e Masculino como categorias diferentes, e o 409 `SLUG_EM_USO`/`CATEGORIA_COM_PRODUTOS` só dispara dentro da mesma coleção.
+- **`catalogoAdminService` (que só tinha a leitura de marcas/categorias, provisório desde o Dia de produtos no painel) foi substituído por `marcasService` e `categoriasService`** — um service por domínio, no padrão do resto do projeto, com o CRUD completo. `Produto.jsx` e `Produtos.jsx` do painel foram atualizados para os services novos.
+- Modo exemplo (`servidorExemplo.js`) ganhou o CRUD completo de marcas/categorias, incluindo `?exemplo=vazio` (antes só existia a leitura, sem respeitar os três estados).
+
+**Testado contra o backend local (22/09):** criar marca, renomear mantendo o slug, excluir marca com produtos (barrado, 409 com a contagem), excluir marca vazia (funcionou); criar categoria "bolsas" na Feminina com slug explícito igual ao já existente (409 `SLUG_EM_USO` sob o campo) e criar "Vestidos" na Masculina com o mesmo slug que já existe na Feminina (funcionou — confirma que o slug é único por coleção, não global). Banco revertido ao fim (marca e categoria de teste excluídas).
+
+## 19. Banners e Destaques no painel (22/09/2026)
+
+**Decidido:** `/admin/banners` e `/admin/destaques` (branch `feat/painel-home`, saindo da main já com Marcas/Categorias), lidos de `docs/para-o-frontend.md` — "Painel administrativo — marcas, categorias e banners" (tarefa 57) e "— destaques e consultas" (tarefa 58).
+
+- **Banners:** CRUD com `bannersService`, igual ao padrão de Marcas/Cores. `imagemUrl` obrigatória e só https (`imagemUrlMobile` também, quando vier); prévia ao vivo no formulário — um `<img>` ligado direto ao valor do campo, com o mesmo padrão de "sem foto" do resto do site. Teto de **4 banners ativos**: a quinta ativação (criar já ativo ou editar para ativo) volta 400 com `erro.campos.ativo`, mostrado como texto sob o checkbox — o formulário continua aberto, só o toggle falha. Reordenar (mover para cima/baixo, sem drag-and-drop) manda a lista COMPLETA de ids pra `PATCH /admin/banners/ordem`; a ordem vale para TODOS os banners, ativos e inativos juntos — só os ativos entram no carrossel da home, nessa ordem.
+- **Destaques:** duas grades independentes na mesma tela — produtos (teto 12) e categorias (teto 8) — no mesmo padrão da grade de variações de `Produto.jsx`: carrega o estado atual, edita uma cópia local (adicionar, remover, reordenar) e manda tudo de volta com um botão "Salvar destaques" (mais "Descartar alterações", que aparece só quando há mudança pendente). **A leitura do estado atual vem de `GET /home`** (`catalogoService.home`, rota pública) em vez de inventar uma leitura administrativa que o contrato não tem — é exatamente o que a home mostra, já na ordem gravada. Adicionar produto é por busca (nome ou código, reaproveitando `produtosAdminService.listar`); adicionar categoria é por um `<select>` (a lista inteira cabe, não precisa de busca). `PATCH /admin/destaques/produtos|categorias` devolve só os ids gravados — a tela não precisa reler, já tem os dados completos no buffer local.
+- **Produto oculto ou categoria inativa**: o backend recusa com 400 e os ids problemáticos vêm em `erro.detalhes.ocultos`/`erro.detalhes.inativas`. A tela cruza esses ids com o buffer local e marca a LINHA do item (borda e texto de erro), sem travar o formulário — dá pra remover só o item com problema e salvar de novo, sem perder o resto da edição.
+- **`GET /home` no modo exemplo estava com dois bugs**, corrigidos nesta rodada: banners sempre vinham da lista fixa (ignorando ativo/inativo e a ordem gravada), e a grade de categorias em destaque sempre mostrava as 8 primeiras do catálogo fixo, sem checar o campo `destaque` — nenhum dos dois refletia o que o painel gravava. Agora os três (banners, destaques de produto, categorias em destaque) vêm de `bannersDoPainel`/`produtosDoPainel`/`categoriasDoPainel`, com os mesmos filtros e limites do backend real.
+
+**Testado contra o backend local (22/09):** com o banco preparado (3 produtos e 6 categorias em destaque; banners existentes desativados) — criar 5 banners tentando ativar todos: os 4 primeiros ativaram, o 5º voltou "Já há 4 banners ativos." sob o checkbox, sem fechar o formulário; reordenar dois banners de teste (confirmado na tela); adicionar um 4º produto ao destaque (confirmado no banco: 4 ids gravados); remover o do meio (confirmado: os outros 3 continuaram, renumerados 1-3); buscar e tentar destacar um produto oculto — 400 com `erro.detalhes.ocultos`, item marcado na tela, buffer local preservado; mesmo teste com uma categoria trocada em Categorias em destaque. Home da loja conferida durante o teste: carrossel e "Escolhidas pela casa" refletiam exatamente o estado gravado, na ordem nova. Banco revertido ao fim (banners de teste excluídos, os 3 originais reativados; produtos e categorias em destaque devolvidos aos ids e à ordem originais) — conferido linha a linha contra o estado inicial.

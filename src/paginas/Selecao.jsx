@@ -94,7 +94,7 @@ export default function Selecao() {
         {topo}
         <div className="selecao__identificar">
           <p className="t-body-lg">
-            Informe o e-mail que você usou em Comprar no WhatsApp para ver as peças que guardou.
+            Informe o e-mail que você usou em Consultar valores no WhatsApp para ver as peças que guardou.
           </p>
           <FormIdentificacao idBase="selecao" rotuloBotao="Ver minha seleção" />
         </div>
@@ -113,7 +113,7 @@ export default function Selecao() {
       ) : itens.length === 0 ? (
         <EstadoVazio
           titulo="Sua seleção está vazia."
-          texto="Toque em Comprar no WhatsApp em qualquer peça e ela aparece aqui."
+          texto="Toque em Consultar valores no WhatsApp em qualquer peça e ela aparece aqui."
           acao={{ rotulo: 'Ver novidades', para: '/novidades' }}
         />
       ) : (

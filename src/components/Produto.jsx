@@ -2,9 +2,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useCompra } from '../contexto/CompraWhatsApp.jsx';
-import { IconeSeta, IconeWhatsApp } from './Icones.jsx';
-import Button from './ui/Button.jsx';
+import { IconeSeta } from './Icones.jsx';
 import Card from './ui/Card.jsx';
 import './Produto.css';
 
@@ -36,11 +34,10 @@ export function Etiqueta({ children }) {
 }
 
 export function rotuloCompra(status) {
-  return status === 'esgotado' ? 'Consultar disponibilidade' : 'Comprar no WhatsApp';
+  return status === 'esgotado' ? 'Consultar disponibilidade' : 'Consultar valores no WhatsApp';
 }
 
 export function CartaoProduto({ produto, carregamento }) {
-  const { comprar } = useCompra();
   const destino = `/produto/${encodeURIComponent(produto.codigo)}`;
   return (
     <Card como="article" className="cartao-produto">
@@ -52,16 +49,11 @@ export function CartaoProduto({ produto, carregamento }) {
         <p className="t-label-caps-sm t-muted cartao-produto__marca">{produto.marca.nome}</p>
         <h3 className="t-headline-sm">Código {produto.codigo}</h3>
         <p className="t-body-sm t-muted">{produto.categoria.nome}</p>
-        <p className="t-body-sm t-muted">Valor confirmado pelo atendimento.</p>
       </Link>
       <div className="cartao-produto__acoes">
         <Link to={destino} className="link-caps">
           Ver detalhes <IconeSeta />
         </Link>
-        <Button variante="texto" onClick={() => comprar({ produto })}>
-          <IconeWhatsApp />
-          <span>{rotuloCompra(produto.status)}</span>
-        </Button>
       </div>
     </Card>
   );

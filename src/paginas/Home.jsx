@@ -125,7 +125,8 @@ export default function Home() {
             Viu uma peça? A conversa começa <em>com um toque.</em>
           </h2>
           <p className="t-body-lg t-muted cta-final__texto">
-            Escolha no site, toque em Comprar no WhatsApp e o atendimento confirma valor, tamanho e entrega com você.
+            Escolha no site, toque em Consultar valores no WhatsApp e o atendimento confirma valor, tamanho e entrega
+            com você.
           </p>
           <div className="cta-final__botoes">
             <Button variante="sobre-primaria" para="/novidades">

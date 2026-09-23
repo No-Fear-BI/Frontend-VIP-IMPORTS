@@ -1,13 +1,14 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { useState } from 'react';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import Logo from '../../components/Logo.jsx';
+import Button from '../../components/ui/Button.jsx';
+import { useSessaoAdmin } from '../../contexto/SessaoAdmin.jsx';
 import './EstruturaAdmin.css';
 
 /*
- * Estrutura do painel administrativo — ESQUELETO do Dia 0 (a Trilha B preenche).
- * Separada da loja: sem cabeçalho/rodapé da loja e sem SessaoCliente.
- * Sessão do painel = cookie vip_sessao_admin (12h, não renova). Em rota /admin/*:
- * 401 = a sessão acabou → login; 403 = a sessão aberta é de CLIENTE, não de admin (mensagem própria).
- * Falta: contexto de sessão do admin (GET /admin/eu), rota protegida e o service do painel.
+ * Estrutura do painel administrativo, já DENTRO da rota protegida (Acesso.jsx): quando isto
+ * renderiza, há sessão de admin. Separada da loja: sem cabeçalho/rodapé da loja e sem SessaoCliente.
+ * Sessão do painel = cookie vip_sessao_admin (12h, não renova) — ver src/contexto/SessaoAdmin.jsx.
  */
 
 const MENU_ADMIN = [
@@ -15,6 +16,7 @@ const MENU_ADMIN = [
   { rotulo: 'Produtos', para: 'produtos' },
   { rotulo: 'Revisão', para: 'revisao' },
   { rotulo: 'Marcas', para: 'marcas' },
+  { rotulo: 'Cores', para: 'cores' },
   { rotulo: 'Categorias', para: 'categorias' },
   { rotulo: 'Banners', para: 'banners' },
   { rotulo: 'Destaques', para: 'destaques' },
@@ -38,10 +40,52 @@ export default function EstruturaAdmin() {
             ))}
           </ul>
         </nav>
+        <SessaoNaLateral />
       </aside>
       <main className="admin__conteudo">
         <Outlet />
       </main>
+    </div>
+  );
+}
+
+const formatoHora = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+function SessaoNaLateral() {
+  const { admin, sair } = useSessaoAdmin();
+  const navegar = useNavigate();
+  const [saindo, setSaindo] = useState(false);
+  const [erro, setErro] = useState(null);
+
+  async function aoSair() {
+    setSaindo(true);
+    setErro(null);
+    try {
+      await sair();
+      navegar('/admin/login', { replace: true });
+    } catch (falha) {
+      // Sem confirmação do backend, a sessão pode continuar valendo: não finge que saiu.
+      setErro(falha.mensagem);
+      setSaindo(false);
+    }
+  }
+
+  return (
+    <div className="admin__sessao">
+      <p className="t-body-sm">{admin?.nome}</p>
+      {admin?.ultimoLoginEm && (
+        <p className="t-label-caps-sm admin__sessao-detalhe">
+          Sessão iniciada às {formatoHora.format(new Date(admin.ultimoLoginEm))}
+        </p>
+      )}
+      <Button variante="contorno-sobre-primaria" onClick={aoSair} disabled={saindo}>
+        {saindo ? 'Saindo…' : 'Sair'}
+      </Button>
+      {erro && (
+        <p className="t-body-sm admin__sessao-detalhe" role="alert">
+          {erro}
+        </p>
+      )}
     </div>
   );
 }

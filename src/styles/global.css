@@ -125,20 +125,27 @@ button {
   font-family: var(--fonte-titulo);
   font-weight: var(--peso-regular);
   line-height: var(--altura-linha-titulo);
-  letter-spacing: var(--tracking-titulo);
 }
 
+/* Tracking por tamanho (DESIGN.md): cada vez mais negativo quanto maior o título. */
 .t-display {
   font-size: var(--texto-3xl);
+  letter-spacing: var(--tracking-display);
 }
 
-.t-headline-lg,
+.t-headline-lg {
+  font-size: var(--texto-headline-lg);
+  letter-spacing: var(--tracking-headline-lg);
+}
+
 .t-headline-md {
-  font-size: var(--texto-2xl);
+  font-size: var(--texto-headline-md);
+  letter-spacing: var(--tracking-headline-md);
 }
 
 .t-headline-sm {
   font-size: var(--texto-xl);
+  letter-spacing: var(--tracking-headline-sm);
 }
 
 .t-display em,
@@ -160,24 +167,26 @@ button {
 .t-label-caps,
 .t-label-caps-sm {
   font-family: var(--fonte-texto);
-  font-size: var(--texto-xs);
   line-height: var(--altura-linha-compacta);
-  letter-spacing: var(--tracking-versalete);
   text-transform: uppercase;
   font-feature-settings: 'case' 1;
 }
 
 .t-label-caps {
+  font-size: var(--texto-label-caps);
+  letter-spacing: var(--tracking-label-caps);
   font-weight: var(--peso-forte);
 }
 
 .t-label-caps-sm {
+  font-size: var(--texto-label-caps-sm);
+  letter-spacing: var(--tracking-label-caps-sm);
   font-weight: var(--peso-regular);
 }
 
 .t-codigo {
   font-family: var(--fonte-texto);
-  font-size: var(--texto-sm);
+  font-size: var(--texto-codigo);
   line-height: var(--altura-linha-compacta);
   letter-spacing: var(--tracking-codigo);
   text-transform: uppercase;
@@ -204,9 +213,9 @@ button {
   border: var(--borda-fina) solid transparent;
   border-radius: var(--raio);
   font-family: var(--fonte-texto);
-  font-size: var(--texto-xs);
+  font-size: var(--texto-botao);
   font-weight: var(--peso-forte);
-  letter-spacing: var(--tracking-versalete);
+  letter-spacing: var(--tracking-botao);
   line-height: 1;
   text-transform: uppercase;
   font-feature-settings: 'case' 1;
@@ -335,9 +344,9 @@ button {
   display: inline-flex;
   align-items: center;
   gap: var(--espaco-1);
-  font-size: var(--texto-xs);
+  font-size: var(--texto-label-caps);
   font-weight: var(--peso-forte);
-  letter-spacing: var(--tracking-versalete);
+  letter-spacing: var(--tracking-label-caps);
   line-height: var(--altura-linha-compacta);
   text-transform: uppercase;
   font-feature-settings: 'case' 1;

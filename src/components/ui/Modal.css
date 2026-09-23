@@ -14,6 +14,12 @@
   animation: modal-entra var(--duracao-media) var(--curva-suave);
 }
 
+/* Depois de .modal[open] na cascata: quando as duas classes coexistem (Modal.jsx segura o
+   <dialog> aberto até a animação terminar), a saída vence. */
+.modal--fechando {
+  animation: modal-sai var(--duracao-saida) var(--curva-saida) forwards;
+}
+
 .modal::backdrop {
   background: var(--cor-veu);
 }
@@ -58,6 +64,10 @@
   animation: gaveta-entra var(--duracao-media) var(--curva-suave);
 }
 
+.modal--lateral.modal--fechando {
+  animation: gaveta-sai var(--duracao-saida) var(--curva-saida) forwards;
+}
+
 @keyframes modal-entra {
   from {
     opacity: 0;
@@ -65,8 +75,21 @@
   }
 }
 
+@keyframes modal-sai {
+  to {
+    opacity: 0;
+    transform: translateY(var(--espaco-2));
+  }
+}
+
 @keyframes gaveta-entra {
   from {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes gaveta-sai {
+  to {
     transform: translateX(-100%);
   }
 }
