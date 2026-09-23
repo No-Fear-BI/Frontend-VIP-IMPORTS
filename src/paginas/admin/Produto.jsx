@@ -69,16 +69,51 @@ export default function AdminProduto() {
   );
 }
 
-/** Formulário de um produto novo. Ao criar, segue para a edição — é lá que imagens e variações entram. */
+/**
+ * Formulário de um produto novo. Ao criar, segue para a edição — é lá que a grade de variações
+ * entra. As imagens já podem ser escolhidas aqui: como o produto ainda não existe, elas ficam
+ * pendentes em memória (`imagensPendentes`) até o `POST /produtos` devolver o id — uma URL
+ * digitada só precisa do `POST /imagens` depois; um arquivo escolhido (ver `ImagensPendentes`)
+ * também precisa do `POST /imagens/upload`, que exige produtoId e por isso não dava pra chamar
+ * antes de o produto existir.
+ */
 export function AdminProdutoNovo() {
   const navegar = useNavigate();
+  const [imagensPendentes, setImagensPendentes] = useState([]);
 
   async function criar(dados) {
     const novo = await produtosAdminService.criar(dados);
-    navegar(`/admin/produtos/${novo.id}`, {
-      replace: true,
-      state: { aviso: 'Produto criado. Falta adicionar fotos e a grade de variações.' },
-    });
+    if (imagensPendentes.length === 0) {
+      navegar(`/admin/produtos/${novo.id}`, {
+        replace: true,
+        state: { aviso: 'Produto criado. Falta adicionar fotos e a grade de variações.' },
+      });
+      return novo;
+    }
+    try {
+      // Pendente de arquivo (ainda não tinha produtoId pra chamar o upload de
+      // verdade — ver ImagensPendentes) sobe agora, que o id já existe.
+      const resolvidas = await Promise.all(
+        imagensPendentes.map(async ({ url, alt, arquivo }) => {
+          if (arquivo) {
+            const enviada = await produtosAdminService.uploadImagem(novo.id, arquivo, alt || undefined);
+            return { url: enviada.url, ...(enviada.alt ? { alt: enviada.alt } : {}) };
+          }
+          return { url, ...(alt ? { alt } : {}) };
+        }),
+      );
+      await produtosAdminService.adicionarImagens(novo.id, resolvidas);
+      navegar(`/admin/produtos/${novo.id}`, {
+        replace: true,
+        state: { aviso: 'Produto criado. Falta a grade de variações.' },
+      });
+    } catch {
+      // O produto já existe — as imagens ficam para tentar de novo na tela dele.
+      navegar(`/admin/produtos/${novo.id}`, {
+        replace: true,
+        state: { aviso: 'Produto criado, mas as imagens não foram salvas. Tente adicioná-las aqui.' },
+      });
+    }
     return novo;
   }
 
@@ -92,6 +127,7 @@ export function AdminProdutoNovo() {
         <h1 className="t-headline-lg">Novo produto</h1>
       </header>
       <DadosProduto modo="criar" onSalvar={criar} />
+      <ImagensPendentes imagens={imagensPendentes} onMudar={setImagensPendentes} />
     </section>
   );
 }
@@ -116,6 +152,7 @@ function EstadoErroProduto() {
  */
 function ProdutoCarregado({ inicial, aviso }) {
   const [produto, setProduto] = useState(inicial);
+  const navegar = useNavigate();
 
   return (
     <>
@@ -129,14 +166,25 @@ function ProdutoCarregado({ inicial, aviso }) {
               {ROTULO_STATUS[produto.status]}
             </p>
           </div>
-          <BotaoDuplicar
-            produtoId={produto.id}
-            render={(abrir) => (
-              <Button variante="secundaria" onClick={abrir}>
-                Duplicar
-              </Button>
-            )}
-          />
+          <div className="admin-produto__acoes-topo">
+            <BotaoDuplicar
+              produtoId={produto.id}
+              render={(abrir) => (
+                <Button variante="secundaria" onClick={abrir}>
+                  Duplicar
+                </Button>
+              )}
+            />
+            <BotaoExcluir
+              produto={produto}
+              render={(abrir) => (
+                <Button variante="secundaria" onClick={abrir}>
+                  Excluir produto
+                </Button>
+              )}
+              onExcluido={(aviso) => navegar('/admin/produtos', { replace: true, state: { aviso } })}
+            />
+          </div>
         </div>
         {aviso && (
           <p className="t-body-sm admin-produto__aviso" role="status">
@@ -149,15 +197,15 @@ function ProdutoCarregado({ inicial, aviso }) {
         const atualizado = await produtosAdminService.editar(produto.id, patch);
         setProduto(atualizado);
         return atualizado;
-      }} />
+      }}>
+        <GradeVariacoes produtoId={produto.id} inicial={produto.variacoes} />
+      </DadosProduto>
 
       <ImagensProduto
         produtoId={produto.id}
         imagens={produto.imagens}
         onMudou={(imagens) => setProduto((atual) => ({ ...atual, imagens }))}
       />
-
-      <GradeVariacoes produtoId={produto.id} inicial={produto.variacoes} />
     </>
   );
 }
@@ -205,6 +253,54 @@ export function BotaoDuplicar({ produtoId, render }) {
   );
 }
 
+/**
+ * Excluir o produto, com confirmação explícita — é irreversível. Reutilizável (listagem e tela
+ * do produto): `render` decide a aparência do gatilho, `onExcluido` decide para onde ir depois.
+ * A mensagem de erro é a da API (`erro.mensagem`), sem texto genérico por cima.
+ */
+export function BotaoExcluir({ produto, render, onExcluido }) {
+  const [aberto, setAberto] = useState(false);
+  const [excluindo, setExcluindo] = useState(false);
+  const [erro, setErro] = useState(null);
+
+  async function excluir() {
+    setExcluindo(true);
+    setErro(null);
+    try {
+      await produtosAdminService.excluir(produto.id);
+      setAberto(false);
+      setExcluindo(false);
+      onExcluido(`Produto ${produto.codigo} (${produto.nome}) excluído.`);
+    } catch (falha) {
+      setErro(falha);
+      setExcluindo(false);
+    }
+  }
+
+  return (
+    <>
+      {render(() => {
+        setErro(null);
+        setAberto(true);
+      })}
+      <Modal aberto={aberto} onFechar={() => !excluindo && setAberto(false)} titulo="Excluir produto">
+        <div className="admin-produto__duplicar">
+          <p className="t-body-lg">
+            Excluir <strong>{produto.codigo} — {produto.nome}</strong>? <strong>Não dá para desfazer.</strong>{' '}
+            As imagens, as variações, os favoritos e os itens de seleção em aberto dele somem. As
+            seleções que já foram enviadas ao WhatsApp continuam no histórico, sem o link para
+            o produto.
+          </p>
+          {erro && <ErroGeral>{erro.mensagem}</ErroGeral>}
+          <Button variante="primaria" largo onClick={excluir} disabled={excluindo}>
+            {excluindo ? 'Excluindo…' : 'Excluir definitivamente'}
+          </Button>
+        </div>
+      </Modal>
+    </>
+  );
+}
+
 /** Primeiro erro de campo utilizável como mensagem geral, ou a mensagem da API. */
 function erroGeralDe(erro) {
   return Object.values(erro?.campos || {})[0] || erro?.mensagem;
@@ -216,7 +312,7 @@ function erroGeralDe(erro) {
  * `modo === 'editar'`: manda só o que mudou desde `inicial`, `descricao` vazia vira `null`
  * (`onSalvar` é o PATCH).
  */
-function DadosProduto({ modo, inicial, onSalvar }) {
+function DadosProduto({ modo, inicial, onSalvar, children }) {
   const [nome, setNome] = useState(inicial?.nome || '');
   const [descricao, setDescricao] = useState(inicial?.descricao || '');
   const [codigo, setCodigo] = useState(inicial?.codigo || '');
@@ -292,99 +388,104 @@ function DadosProduto({ modo, inicial, onSalvar }) {
   }
 
   return (
-    <form className="admin-produto__bloco admin-produto__dados" onSubmit={enviar}>
+    <section className="admin-produto__bloco admin-produto__dados">
       <h2 className="t-headline-md">Dados do produto</h2>
+      <form className="admin-produto__dados-form" onSubmit={enviar}>
 
-      <Field
-        id="produto-nome"
-        rotulo="Nome"
-        value={nome}
-        onChange={(e) => setNome(e.target.value)}
-        erro={erro?.campos?.nome}
-        maxLength={180}
-        required
-      />
-
-      <div className="campo">
-        <label htmlFor="produto-descricao" className="t-label-caps">
-          Descrição
-        </label>
-        <textarea
-          id="produto-descricao"
-          className="campo__input admin-produto__descricao"
-          value={descricao}
-          onChange={(e) => setDescricao(e.target.value)}
-          rows={4}
-        />
-      </div>
-
-      <div className="admin-produto__form-grade">
-        <CampoSelecao
-          id="produto-marca"
-          rotulo="Marca"
-          valor={marcaId}
-          onMudar={setMarcaId}
-          opcoes={marcas.dados?.map((m) => ({ valor: m.id, rotulo: m.ativa ? m.nome : `${m.nome} (inativa)` }))}
-          erro={erro?.campos?.marcaId}
+        <Field
+          id="produto-nome"
+          rotulo="Nome"
+          value={nome}
+          onChange={(e) => setNome(e.target.value)}
+          erro={erro?.campos?.nome}
+          className="admin-produto__meia"
+          maxLength={180}
           required
         />
-        <CampoSelecao
-          id="produto-colecao"
-          rotulo="Coleção"
-          valor={colecaoId}
-          onMudar={mudarColecao}
-          opcoes={colecoes.dados?.map((c) => ({ valor: c.id, rotulo: c.nome }))}
-          required
-        />
-        <CampoSelecao
-          id="produto-categoria"
-          rotulo="Categoria"
-          valor={categoriaId}
-          onMudar={setCategoriaId}
-          opcoes={colecaoId ? categorias.dados?.map((c) => ({ valor: c.id, rotulo: c.nome })) : []}
-          vazio={!colecaoId ? 'Escolha a coleção primeiro' : undefined}
-          erro={erro?.campos?.categoriaId}
-          disabled={!colecaoId}
-          required
-        />
-        <CampoSelecao
-          id="produto-status"
-          rotulo="Status"
-          valor={status}
-          onMudar={setStatus}
-          opcoes={Object.entries(ROTULO_STATUS).map(([valor, rotulo]) => ({ valor, rotulo }))}
-          erro={erro?.campos?.status}
-        />
-      </div>
 
-      <Field
-        id="produto-codigo"
-        rotulo="Código"
-        ajuda={modo === 'criar' ? 'Deixe vazio para o backend gerar (ex.: CHN-0042).' : undefined}
-        value={codigo}
-        onChange={(e) => setCodigo(e.target.value)}
-        erro={erro?.campos?.codigo}
-        maxLength={32}
-      />
+        <Field
+          id="produto-codigo"
+          rotulo="Código"
+          className="admin-produto__meia"
+          ajuda={modo === 'criar' ? 'Deixe vazio para o backend gerar (ex.: CHN-0042).' : undefined}
+          value={codigo}
+          onChange={(e) => setCodigo(e.target.value)}
+          erro={erro?.campos?.codigo}
+          maxLength={32}
+        />
 
-      {erro && !erro.campos && <ErroGeral>{erro.mensagem}</ErroGeral>}
-      {erro?.campos && Object.keys(erro.campos).some((c) => !['nome', 'descricao', 'codigo', 'status', 'marcaId', 'categoriaId'].includes(c)) && (
-        <ErroGeral>{erroGeralDe(erro)}</ErroGeral>
-      )}
+        <div className="campo admin-produto__campo-descricao">
+          <label htmlFor="produto-descricao" className="t-label-caps">
+            Descrição
+          </label>
+          <textarea
+            id="produto-descricao"
+            className="campo__input admin-produto__descricao"
+            value={descricao}
+            onChange={(e) => setDescricao(e.target.value)}
+            rows={4}
+          />
+        </div>
 
-      <div className="admin-produto__acoes">
-        <Button
-          variante="primaria"
-          type="submit"
-          disabled={salvando || (modo === 'criar' && faltaAlgoObrigatorio)}
-        >
-          {salvando ? 'Salvando…' : modo === 'criar' ? 'Criar produto' : 'Salvar dados'}
-        </Button>
-        <p className="t-body-sm t-muted" role="status">
-          {aviso}
-        </p>
-      </div>
-    </form>
+        <div className="admin-produto__form-grade">
+          <CampoSelecao
+            id="produto-marca"
+            rotulo="Marca"
+            valor={marcaId}
+            onMudar={setMarcaId}
+            opcoes={marcas.dados?.map((m) => ({ valor: m.id, rotulo: m.ativa ? m.nome : `${m.nome} (inativa)` }))}
+            erro={erro?.campos?.marcaId}
+            required
+          />
+          <CampoSelecao
+            id="produto-colecao"
+            rotulo="Coleção"
+            valor={colecaoId}
+            onMudar={mudarColecao}
+            opcoes={colecoes.dados?.map((c) => ({ valor: c.id, rotulo: c.nome }))}
+            required
+          />
+          <CampoSelecao
+            id="produto-categoria"
+            rotulo="Categoria"
+            valor={categoriaId}
+            onMudar={setCategoriaId}
+            opcoes={colecaoId ? categorias.dados?.map((c) => ({ valor: c.id, rotulo: c.nome })) : []}
+            vazio={!colecaoId ? 'Escolha a coleção primeiro' : undefined}
+            erro={erro?.campos?.categoriaId}
+            disabled={!colecaoId}
+            required
+          />
+          <CampoSelecao
+            id="produto-status"
+            rotulo="Status"
+            valor={status}
+            onMudar={setStatus}
+            opcoes={Object.entries(ROTULO_STATUS).map(([valor, rotulo]) => ({ valor, rotulo }))}
+            erro={erro?.campos?.status}
+          />
+        </div>
+
+        {erro && !erro.campos && <ErroGeral>{erro.mensagem}</ErroGeral>}
+        {erro?.campos && Object.keys(erro.campos).some((c) => !['nome', 'descricao', 'codigo', 'status', 'marcaId', 'categoriaId'].includes(c)) && (
+          <ErroGeral>{erroGeralDe(erro)}</ErroGeral>
+        )}
+
+        <div className="admin-produto__acoes">
+          <Button
+            variante="primaria"
+            type="submit"
+            disabled={salvando || (modo === 'criar' && faltaAlgoObrigatorio)}
+          >
+            {salvando ? 'Salvando…' : modo === 'criar' ? 'Criar produto' : 'Salvar dados'}
+          </Button>
+          <p className="t-body-sm t-muted" role="status">
+            {aviso}
+          </p>
+        </div>
+      </form>
+      {children}
+    </section>
   );
 }
 
@@ -432,18 +533,39 @@ function ImagensProduto({ produtoId, imagens, onMudou }) {
 
   const cheia = imagens.length >= 10;
 
+  /** Acrescenta pela URL (digitada ou vinda do upload) — mesma chamada, um lugar só. */
+  async function anexar(urlFinal, altFinal) {
+    const novas = await produtosAdminService.adicionarImagens(produtoId, [
+      { url: urlFinal, ...(altFinal ? { alt: altFinal } : {}) },
+    ]);
+    onMudou(novas);
+    setUrl('');
+    setAlt('');
+  }
+
   async function adicionar(evento) {
     evento.preventDefault();
     if (!url.trim() || cheia) return;
     setEnviando(true);
     setErro(null);
     try {
-      const novas = await produtosAdminService.adicionarImagens(produtoId, [
-        { url: url.trim(), ...(alt.trim() ? { alt: alt.trim() } : {}) },
-      ]);
-      onMudou(novas);
-      setUrl('');
-      setAlt('');
+      await anexar(url.trim(), alt.trim());
+    } catch (falha) {
+      setErro(falha);
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  async function enviarArquivo(evento) {
+    const arquivo = evento.target.files?.[0];
+    evento.target.value = ''; // deixa escolher o mesmo arquivo de novo, se precisar
+    if (!arquivo || cheia) return;
+    setEnviando(true);
+    setErro(null);
+    try {
+      const enviada = await produtosAdminService.uploadImagem(produtoId, arquivo, alt.trim() || undefined);
+      await anexar(enviada.url, enviada.alt || '');
     } catch (falha) {
       setErro(falha);
     } finally {
@@ -498,14 +620,16 @@ function ImagensProduto({ produtoId, imagens, onMudou }) {
                 <p className="t-body-sm t-muted admin-produto__imagem-url">{imagem.url}</p>
               </div>
               <div className="admin-produto__imagem-acoes">
-                <button
-                  type="button"
-                  className="link-caps"
-                  disabled={i === 0 || Boolean(ocupada)}
-                  onClick={() => mover(i, -1)}
-                >
-                  Mover para cima
-                </button>
+                {i > 0 && (
+                  <button
+                    type="button"
+                    className="link-caps"
+                    disabled={Boolean(ocupada)}
+                    onClick={() => mover(i, -1)}
+                  >
+                    Mover para cima
+                  </button>
+                )}
                 <button
                   type="button"
                   className="link-caps"
@@ -535,7 +659,7 @@ function ImagensProduto({ produtoId, imagens, onMudou }) {
         <Field
           id="imagem-url"
           rotulo="URL da imagem"
-          ajuda="Só https."
+          ajuda={AVISO_PROPORCAO_PRODUTO}
           className="admin-produto__nova-imagem-url"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
@@ -552,10 +676,141 @@ function ImagensProduto({ produtoId, imagens, onMudou }) {
         <Button variante="secundaria" type="submit" disabled={enviando || cheia || !url.trim()}>
           {enviando ? 'Adicionando…' : 'Adicionar'}
         </Button>
+        <label className="link-caps admin-produto__upload">
+          ou envie um arquivo
+          <input type="file" accept="image/*" capture hidden disabled={enviando || cheia} onChange={enviarArquivo} />
+        </label>
       </form>
       {cheia && (
         <p className="t-body-sm t-muted">Este produto já tem o máximo de 10 imagens.</p>
       )}
+    </div>
+  );
+}
+
+/** A vitrine (`FotoProduto`/`.vitrine-foto`, components/Produto.css) é 4:5 com object-fit:
+ * contain — a foto entra inteira, sem cortar, em qualquer tela do site. */
+const AVISO_PROPORCAO_PRODUTO = 'Só https. Proporção recomendada: 4:5 (retrato) — a foto entra inteira no quadro, sem cortar.';
+
+/**
+ * Fotos escolhidas antes do produto existir: como não há id ainda, ficam em memória
+ * (`imagens`/`onMudar`, estado do pai) e só viram `POST /imagens` depois que `AdminProdutoNovo`
+ * cria o produto. Mesma UI de `ImagensProduto`, sem chamada de API por item — reordenar e excluir
+ * mexem só na lista local.
+ */
+function ImagensPendentes({ imagens, onMudar }) {
+  const [url, setUrl] = useState('');
+  const [alt, setAlt] = useState('');
+  const cheia = imagens.length >= 10;
+
+  function adicionar(evento) {
+    evento.preventDefault();
+    if (!url.trim() || cheia) return;
+    onMudar([...imagens, { chave: `nova-${Math.random()}`, url: url.trim(), alt: alt.trim() }]);
+    setUrl('');
+    setAlt('');
+  }
+
+  function escolherArquivo(evento) {
+    const arquivo = evento.target.files?.[0];
+    evento.target.value = ''; // deixa escolher o mesmo arquivo de novo, se precisar
+    if (!arquivo || cheia) return;
+    // Sem produtoId ainda para chamar o upload de verdade (POST /imagens/upload exige um) —
+    // guarda o arquivo e mostra uma prévia local; o upload acontece em AdminProdutoNovo.criar,
+    // assim que o produto existe.
+    onMudar([
+      ...imagens,
+      { chave: `nova-${Math.random()}`, url: URL.createObjectURL(arquivo), alt: alt.trim(), arquivo },
+    ]);
+    setAlt('');
+  }
+
+  const remover = (chave) => onMudar(imagens.filter((i) => i.chave !== chave));
+
+  function mover(indice, direcao) {
+    const alvo = indice + direcao;
+    if (alvo < 0 || alvo >= imagens.length) return;
+    const proximas = [...imagens];
+    [proximas[indice], proximas[alvo]] = [proximas[alvo], proximas[indice]];
+    onMudar(proximas);
+  }
+
+  return (
+    <div className="admin-produto__bloco">
+      <h2 className="t-headline-md">Imagens</h2>
+      <p className="t-body-sm t-muted admin-produtos__ajuda">
+        A primeira é a <strong>capa</strong>. Ficam pendentes até "Criar produto" — depois disso,
+        mais imagens entram pela tela do produto.
+      </p>
+
+      {imagens.length === 0 ? (
+        <p className="t-body-sm t-muted">Nenhuma imagem ainda.</p>
+      ) : (
+        <ul className="admin-produto__imagens">
+          {imagens.map((imagem, i) => (
+            <li key={imagem.chave} className="admin-produto__imagem">
+              <FotoProduto url={imagem.url} alt={imagem.alt || ''} className="admin-produto__imagem-foto" />
+              <div className="admin-produto__imagem-info">
+                <p className="t-label-caps-sm">{i === 0 ? 'Capa' : `Ordem ${i + 1}`}</p>
+                <p className="t-body-sm t-muted admin-produto__imagem-url">
+                  {imagem.arquivo ? imagem.arquivo.name : imagem.url}
+                </p>
+              </div>
+              <div className="admin-produto__imagem-acoes">
+                {i > 0 && (
+                  <button type="button" className="link-caps" onClick={() => mover(i, -1)}>
+                    Mover para cima
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="link-caps"
+                  disabled={i === imagens.length - 1}
+                  onClick={() => mover(i, 1)}
+                >
+                  Mover para baixo
+                </button>
+                <button
+                  type="button"
+                  className="admin-produto__remover"
+                  onClick={() => remover(imagem.chave)}
+                  aria-label="Tirar esta imagem"
+                >
+                  <IconeFechar />
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <form className="admin-produto__nova-imagem" onSubmit={adicionar}>
+        <Field
+          id="imagem-pendente-url"
+          rotulo="URL da imagem"
+          ajuda={AVISO_PROPORCAO_PRODUTO}
+          className="admin-produto__nova-imagem-url"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          disabled={cheia}
+          placeholder="https://…"
+        />
+        <Field
+          id="imagem-pendente-alt"
+          rotulo="Texto alternativo"
+          value={alt}
+          onChange={(e) => setAlt(e.target.value)}
+          disabled={cheia}
+        />
+        <Button variante="secundaria" type="submit" disabled={cheia || !url.trim()}>
+          Adicionar
+        </Button>
+        <label className="link-caps admin-produto__upload">
+          ou envie um arquivo
+          <input type="file" accept="image/*" capture hidden disabled={cheia} onChange={escolherArquivo} />
+        </label>
+      </form>
+      {cheia && <p className="t-body-sm t-muted">Máximo de 10 imagens.</p>}
     </div>
   );
 }
@@ -622,8 +877,8 @@ function GradeVariacoes({ produtoId, inicial }) {
 
   return (
     <div className="admin-produto__grade">
-      <header className="admin-produto__grade-topo">
-        <h2 className="t-headline-md">Grade de variações</h2>
+      <header className="admin-produto__grade-topo admin-produto__grade-largo">
+        <h3 className="t-headline-md">Grade de variações</h3>
         <p className="t-body-sm t-muted admin-produtos__ajuda">
           O cliente escolhe tamanho e cor na página do produto. Tirar uma variação daqui também a
           tira da seleção de quem já tinha escolhido.
@@ -674,12 +929,12 @@ function GradeVariacoes({ produtoId, inicial }) {
       </fieldset>
 
       {erro && (
-        <ErroGeral>
-          {erro.campos?.variacoes || erro.campos?.corId || erro.mensagem}
-        </ErroGeral>
+        <div className="admin-produto__grade-largo">
+          <ErroGeral>{erro.campos?.variacoes || erro.campos?.corId || erro.mensagem}</ErroGeral>
+        </div>
       )}
 
-      <div className="admin-produto__acoes">
+      <div className="admin-produto__acoes admin-produto__grade-largo">
         <Button variante="primaria" onClick={salvar} disabled={!mudou || salvando}>
           {salvando ? 'Salvando…' : 'Salvar grade'}
         </Button>

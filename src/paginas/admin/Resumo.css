@@ -1,0 +1,99 @@
+/* A tela inicial do painel: seis números do resumo + produtos por marca. */
+
+.admin-resumo__topo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  margin-bottom: var(--espaco-8);
+}
+
+.admin-resumo__grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--espaco-4);
+  margin-bottom: var(--espaco-8);
+}
+
+.admin-resumo__estatistica {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  padding: var(--espaco-6);
+  border: var(--borda-fina) solid var(--cor-borda);
+}
+
+.admin-resumo__valor {
+  color: var(--cor-primaria);
+}
+
+.admin-resumo__esqueleto-valor {
+  display: block;
+  width: 4em;
+  height: 1.2em;
+}
+
+.admin-resumo__colunas {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--espaco-secao);
+  align-items: start;
+}
+
+.admin-resumo__bloco {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.admin-resumo__lateral {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-8);
+}
+
+.admin-resumo__cabecalho-bloco {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--espaco-2) var(--espaco-4);
+}
+
+.admin-resumo__cabecalho-bloco .link-caps {
+  white-space: nowrap;
+}
+
+.admin-resumo__lista-esqueleto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+}
+
+.admin-resumo__lista {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-resumo__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  padding-block: var(--espaco-3);
+  border-bottom: var(--borda-fina) solid var(--cor-borda);
+}
+
+.admin-resumo__lista li:first-child .admin-resumo__item {
+  padding-top: 0;
+}
+
+.admin-resumo__atalhos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+}
+
+@media (max-width: 1023px) {
+  .admin-resumo__colunas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

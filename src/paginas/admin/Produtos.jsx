@@ -19,7 +19,7 @@ import { catalogoService } from '../../services/catalogoService.js';
 import { categoriasService } from '../../services/categoriasService.js';
 import { marcasService } from '../../services/marcasService.js';
 import { produtosAdminService } from '../../services/produtosAdminService.js';
-import { BotaoDuplicar } from './Produto.jsx';
+import { BotaoDuplicar, BotaoExcluir } from './Produto.jsx';
 import { ROTULO_STATUS } from './rotulosProduto.js';
 import './Produtos.css';
 
@@ -29,6 +29,8 @@ const FILTROS = ['busca', 'marcaId', 'colecaoId', 'categoriaId', 'status'];
 export default function AdminProdutos() {
   const [params, setParams] = useSearchParams();
   const location = useLocation();
+  // Aviso de exclusão: vem da tela do produto (estado da rota) ou de um "Excluir" da própria lista.
+  const [aviso, setAviso] = useState(location.state?.aviso || '');
 
   const filtros = useMemo(() => {
     const lidos = Object.fromEntries(FILTROS.map((nome) => [nome, params.get(nome) || '']));
@@ -80,6 +82,12 @@ export default function AdminProdutos() {
           Novo produto
         </Button>
       </header>
+
+      {aviso && (
+        <p className="t-body-sm admin-produto__aviso" role="status">
+          {aviso}
+        </p>
+      )}
 
       <div className="admin-produtos__filtros" role="search">
         <FormBusca
@@ -212,6 +220,18 @@ export default function AdminProdutos() {
                           Duplicar
                         </button>
                       )}
+                    />
+                    <BotaoExcluir
+                      produto={produto}
+                      render={(abrir) => (
+                        <button type="button" className="link-caps" onClick={abrir}>
+                          Excluir
+                        </button>
+                      )}
+                      onExcluido={(texto) => {
+                        setAviso(texto);
+                        lista.recarregar();
+                      }}
                     />
                   </td>
                 </tr>

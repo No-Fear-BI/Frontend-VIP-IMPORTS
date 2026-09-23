@@ -141,9 +141,11 @@ function GradeDestaqueProdutos({ inicial }) {
                 )}
               </div>
               <div className="admin-destaques__item-acoes">
-                <button type="button" className="link-caps" disabled={i === 0 || salvando} onClick={() => mover(i, -1)}>
-                  Mover para cima
-                </button>
+                {i > 0 && (
+                  <button type="button" className="link-caps" disabled={salvando} onClick={() => mover(i, -1)}>
+                    Mover para cima
+                  </button>
+                )}
                 <button
                   type="button"
                   className="link-caps"
@@ -203,7 +205,7 @@ function BuscaProduto({ excluir, cheia, onAdicionar }) {
         <Field
           id="destaques-busca-produto"
           rotulo="Adicionar produto"
-          ajuda={cheia ? `Limite de ${TETO_PRODUTOS} produtos atingido.` : 'Nome ou código.'}
+          ajuda={cheia ? `Limite de ${TETO_PRODUTOS} produtos atingido. Remova produtos para adicionar mais.` : 'Nome ou código.'}
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
           disabled={cheia}
@@ -337,9 +339,11 @@ function GradeDestaqueCategorias({ inicial }) {
                 )}
               </div>
               <div className="admin-destaques__item-acoes">
-                <button type="button" className="link-caps" disabled={i === 0 || salvando} onClick={() => mover(i, -1)}>
-                  Mover para cima
-                </button>
+                {i > 0 && (
+                  <button type="button" className="link-caps" disabled={salvando} onClick={() => mover(i, -1)}>
+                    Mover para cima
+                  </button>
+                )}
                 <button
                   type="button"
                   className="link-caps"

@@ -103,14 +103,16 @@ export default function AdminBanners() {
                     {banner.ativo ? 'Ativo' : <span className="t-muted">Inativo</span>}
                   </td>
                   <td className="admin-banners__acoes">
-                    <button
-                      type="button"
-                      className="link-caps"
-                      disabled={i === 0 || Boolean(movendo)}
-                      onClick={() => mover(i, -1)}
-                    >
-                      Mover para cima
-                    </button>
+                    {i > 0 && (
+                      <button
+                        type="button"
+                        className="link-caps"
+                        disabled={Boolean(movendo)}
+                        onClick={() => mover(i, -1)}
+                      >
+                        Mover para cima
+                      </button>
+                    )}
                     <button
                       type="button"
                       className="link-caps"
@@ -187,6 +189,42 @@ function PreviaImagem({ url, alt, className = '' }) {
   );
 }
 
+/**
+ * "ou envie um arquivo" ao lado de um campo de URL: sobe o arquivo (`POST /banners/upload`) e
+ * devolve a URL pronta em `onEnviado`, que preenche o campo — o resto do formulário não muda.
+ * Sem `capture`: no celular deixa escolher entre câmera e galeria.
+ */
+function EnvioArquivo({ id, alt, onEnviado }) {
+  const [enviando, setEnviando] = useState(false);
+  const [erro, setErro] = useState(null);
+
+  async function enviar(evento) {
+    const arquivo = evento.target.files?.[0];
+    evento.target.value = ''; // deixa escolher o mesmo arquivo de novo
+    if (!arquivo) return;
+    setEnviando(true);
+    setErro(null);
+    try {
+      const enviada = await bannersService.uploadImagem(arquivo, alt.trim() || undefined);
+      onEnviado(enviada.url);
+    } catch (falha) {
+      setErro(falha);
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  return (
+    <div className="admin-banners__envio">
+      <label className="link-caps admin-banners__upload">
+        {enviando ? 'Enviando…' : 'ou envie um arquivo'}
+        <input id={id} type="file" accept="image/*" hidden disabled={enviando} onChange={enviar} />
+      </label>
+      {erro && <ErroGeral>{erro.campos?.arquivo || erro.mensagem}</ErroGeral>}
+    </div>
+  );
+}
+
 function FormBanner({ banner, onPronto }) {
   const edicao = Boolean(banner);
   const [imagemUrl, setImagemUrl] = useState(banner?.imagemUrl || '');
@@ -239,23 +277,25 @@ function FormBanner({ banner, onPronto }) {
       <Field
         id="banner-imagem-url"
         rotulo="Imagem (desktop)"
-        ajuda="Só https."
+        ajuda="Só https. Ocupa a largura toda do topo da home e é cortada nas bordas para preencher: use foto em paisagem e deixe o assunto no centro."
         value={imagemUrl}
         onChange={(e) => setImagemUrl(e.target.value)}
         erro={erro?.campos?.imagemUrl}
         placeholder="https://…"
         required
       />
+      <EnvioArquivo id="banner-arquivo-desktop" alt={alt} onEnviado={setImagemUrl} />
       <PreviaImagem url={imagemUrl} alt={alt} className="admin-banners__previa-form" />
       <Field
         id="banner-imagem-url-mobile"
         rotulo="Imagem (celular)"
-        ajuda="Opcional. Só https."
+        ajuda="Opcional. Só https. No celular o topo é estreito e alto, então uma foto em retrato aproveita melhor o espaço."
         value={imagemUrlMobile}
         onChange={(e) => setImagemUrlMobile(e.target.value)}
         erro={erro?.campos?.imagemUrlMobile}
         placeholder="https://…"
       />
+      <EnvioArquivo id="banner-arquivo-mobile" alt={alt} onEnviado={setImagemUrlMobile} />
       <Field
         id="banner-titulo"
         rotulo="Título"

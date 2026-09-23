@@ -6,7 +6,7 @@
  * é 400 com `erro.campos.ativo` explicando o limite. Banner inativo é rascunho, sem teto.
  */
 
-import { requisitarAdmin } from '../lib/apiAdmin.js';
+import { requisitarAdmin, requisitarArquivoAdmin } from '../lib/apiAdmin.js';
 
 export const bannersService = {
   /** GET /admin/banners — banners_listar. Ativos e inativos, na ordem do carrossel. */
@@ -18,6 +18,15 @@ export const bannersService = {
    * @param {{ imagemUrl: string, imagemUrlMobile?: string, titulo?: string, subtitulo?: string, alt?: string, linkUrl?: string, ativo?: boolean }} dados
    */
   criar: (dados) => requisitarAdmin('POST', '/admin/banners', { corpo: dados }),
+
+  /**
+   * POST /admin/banners/upload — envia um arquivo (computador/celular) em vez de digitar URL.
+   * Devolve `{url, alt}` e NÃO cria banner: a tela usa a `url` para preencher `imagemUrl` ou
+   * `imagemUrlMobile` e segue para o POST/PATCH de sempre. Não exige banner existente.
+   * @param {File} arquivo
+   * @param {string} [alt]
+   */
+  uploadImagem: (arquivo, alt) => requisitarArquivoAdmin('/admin/banners/upload', { arquivo, campos: { alt } }),
 
   /** PATCH /admin/banners/:id — banners_editar. Parcial: só o que vier no corpo muda. */
   editar: (id, dados) => requisitarAdmin('PATCH', `/admin/banners/${id}`, { corpo: dados }),

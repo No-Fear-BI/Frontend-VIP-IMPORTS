@@ -15,11 +15,18 @@
 /* Título (+ ajuda) de um lado, ação principal do outro — cabeçalho da listagem e do produto. */
 .admin-produtos__topo-linha,
 .admin-produto__topo-linha {
+  display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--espaco-4);
+}
+
+.admin-produto__acoes-topo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-3);
 }
 
 .admin-produto__aviso {
@@ -92,6 +99,15 @@
   text-align: right;
 }
 
+/* O modal mora dentro da célula; sem isto herda o alinhamento à direita do texto dela. */
+.admin-produtos__acoes .modal {
+  text-align: start;
+}
+
+.admin-produtos__acoes .link-caps ~ .link-caps {
+  margin-inline-start: var(--espaco-4);
+}
+
 /* ---------- Produto: grade de variações ---------- */
 
 .admin-produto__voltar {
@@ -99,18 +115,41 @@
   margin-bottom: var(--espaco-4);
 }
 
+/* Largura toda, com Tamanhos e Cores lado a lado: o que é título, erro e ações ocupa a linha
+   inteira (.admin-produto__grade-largo). */
 .admin-produto__grade {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espaco-6);
-  max-width: var(--largura-formulario);
+  padding-top: var(--espaco-6);
+  border-top: var(--borda-fina) solid var(--cor-borda);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espaco-6) var(--espaco-8);
+  align-items: start;
+}
+
+.admin-produto__grade-largo {
+  grid-column: 1 / -1;
 }
 
 /* ---------- Produto: dados ---------- */
 
+/* Dados em largura total, com a grade de variações dentro da mesma caixa; Imagens vem abaixo. */
 .admin-produto__dados {
-  max-width: var(--largura-formulario);
   margin-bottom: var(--espaco-8);
+}
+
+/* Campos em duas colunas; o que não é ".admin-produto__meia" ocupa a linha inteira. */
+.admin-produto__dados-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espaco-4) var(--espaco-8);
+}
+
+.admin-produto__dados-form > * {
+  grid-column: 1 / -1;
+}
+
+.admin-produto__dados-form > .admin-produto__meia {
+  grid-column: auto;
 }
 
 .admin-produto__descricao {
@@ -121,7 +160,7 @@
 
 .admin-produto__form-grade {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--espaco-4);
 }
 
@@ -136,21 +175,22 @@
 /* ---------- Produto: imagens ---------- */
 
 .admin-produto__imagens {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--espaco-8);
 }
 
 .admin-produto__imagem {
-  display: flex;
+  display: grid;
+  grid-template-columns: var(--largura-miniatura) minmax(0, 1fr);
   align-items: center;
-  gap: var(--espaco-4);
+  gap: var(--espaco-2) var(--espaco-4);
   padding-block: var(--espaco-3);
   border-bottom: var(--borda-fina) solid var(--cor-borda);
 }
 
 .admin-produto__imagem-foto {
-  width: var(--largura-miniatura-grande);
-  flex: none;
+  grid-row: 1 / span 2;
 }
 
 .admin-produto__imagem-info {
@@ -164,9 +204,9 @@
 
 .admin-produto__imagem-acoes {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--espaco-3);
-  flex: none;
 }
 
 .admin-produto__nova-imagem {
@@ -184,6 +224,13 @@
 .admin-produto__nova-imagem .admin-produto__nova-imagem-url {
   flex: 2;
   min-width: 0;
+}
+
+.admin-produto__upload {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--altura-controle);
+  cursor: pointer;
 }
 
 .admin-produto__grade-topo {
@@ -269,6 +316,15 @@
 }
 
 @media (max-width: 1240px) {
+  .admin-produto__grade,
+  .admin-produto__imagens {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-produto__form-grade {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .admin-produtos__filtros {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -279,17 +335,9 @@
 }
 
 @media (max-width: 767px) {
+  .admin-produto__dados-form,
   .admin-produto__form-grade {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .admin-produto__imagem {
-    flex-wrap: wrap;
-  }
-
-  .admin-produto__imagem-acoes {
-    width: 100%;
-    justify-content: flex-start;
   }
 }
 

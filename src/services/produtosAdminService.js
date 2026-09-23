@@ -8,7 +8,7 @@
  * - O produto abre por ID, não por código: no painel o código é editável.
  */
 
-import { requisitarAdmin } from '../lib/apiAdmin.js';
+import { requisitarAdmin, requisitarArquivoAdmin } from '../lib/apiAdmin.js';
 
 export const produtosAdminService = {
   /**
@@ -36,6 +36,13 @@ export const produtosAdminService = {
   editar: (id, patch) => requisitarAdmin('PATCH', `/admin/produtos/${id}`, { corpo: patch }),
 
   /**
+   * DELETE /admin/produtos/:id — responde `{ok: true}`. Leva junto imagens, variações, favoritos
+   * e itens de carrinho; as seleções já enviadas ficam (histórico congelado, sem o link). Sem
+   * recusa por status: o único erro esperado é 404, produto que já não existe.
+   */
+  excluir: (id) => requisitarAdmin('DELETE', `/admin/produtos/${id}`),
+
+  /**
    * POST /admin/produtos/:id/duplicar — responde 201 com a cópia: mesmas imagens e variações,
    * código novo, "(cópia)" no nome. A cópia nasce SEMPRE oculta e sem destaque.
    */
@@ -48,6 +55,18 @@ export const produtosAdminService = {
    */
   adicionarImagens: (id, imagens) =>
     requisitarAdmin('POST', `/admin/produtos/${id}/imagens`, { corpo: { imagens } }),
+
+  /**
+   * POST /admin/produtos/:id/imagens/upload — envia um arquivo (câmera/galeria/computador) em
+   * vez de digitar URL. NÃO acrescenta à galeria sozinho: devolve `{url, alt}`, que a tela então
+   * manda para `adicionarImagens` — as duas etapas ficam separadas de propósito, pra não duplicar
+   * a regra de limite/ordem/capa numa segunda rota.
+   * @param {number} id
+   * @param {File} arquivo
+   * @param {string} [alt]
+   */
+  uploadImagem: (id, arquivo, alt) =>
+    requisitarArquivoAdmin(`/admin/produtos/${id}/imagens/upload`, { arquivo, campos: { alt } }),
 
   /**
    * PATCH /admin/produtos/:id/imagens/ordem — a lista COMPLETA de ids na ordem desejada.
