@@ -1,0 +1,86 @@
+/* Listagem de seleções do painel e o detalhe de uma seleção. */
+
+.admin-selecoes__topo,
+.admin-selecao__topo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  margin-bottom: var(--espaco-6);
+}
+
+.admin-selecoes__ajuda {
+  max-width: var(--medida-curta);
+}
+
+.admin-selecoes__esqueleto {
+  height: var(--altura-controle);
+}
+
+.admin-selecoes__acoes {
+  text-align: right;
+}
+
+.admin-selecoes__paginacao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-4);
+  margin-top: var(--espaco-6);
+}
+
+/* ---------- Detalhe ---------- */
+
+.admin-selecao__voltar {
+  align-self: flex-start;
+  margin-bottom: var(--espaco-4);
+}
+
+.admin-selecao__cliente {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  padding: var(--espaco-4) var(--espaco-5);
+  margin-bottom: var(--espaco-6);
+  border: var(--borda-fina) solid var(--cor-borda);
+  border-radius: var(--raio);
+  max-width: var(--largura-formulario);
+}
+
+.admin-selecao__itens {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-selecao__item {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-4);
+  padding-block: var(--espaco-3);
+  border-bottom: var(--borda-fina) solid var(--cor-borda);
+}
+
+.admin-selecao__item-foto {
+  width: var(--largura-miniatura-grande);
+  flex: none;
+}
+
+.admin-selecao__item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-selecao__item-link {
+  text-decoration: underline;
+  text-underline-offset: var(--sublinhado-afastamento);
+}
+
+.admin-selecao__item-excluido {
+  text-decoration: none;
+}
+
+@media (max-width: 767px) {
+  .admin-selecao__item {
+    flex-wrap: wrap;
+  }
+}

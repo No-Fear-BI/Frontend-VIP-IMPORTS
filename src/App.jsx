@@ -13,6 +13,7 @@ import AdminMarcas from './paginas/admin/Marcas.jsx';
 import AdminProduto, { AdminProdutoNovo } from './paginas/admin/Produto.jsx';
 import AdminProdutos from './paginas/admin/Produtos.jsx';
 import AdminResumo from './paginas/admin/Resumo.jsx';
+import AdminSelecaoDetalhe from './paginas/admin/Selecao.jsx';
 import AdminSelecoes from './paginas/admin/Selecoes.jsx';
 import Categorias from './paginas/Categorias.jsx';
 import Conta from './paginas/Conta.jsx';
@@ -73,6 +74,7 @@ export default function App() {
             <Route path="banners" element={<AdminBanners />} />
             <Route path="destaques" element={<AdminDestaques />} />
             <Route path="selecoes" element={<AdminSelecoes />} />
+            <Route path="selecoes/:id" element={<AdminSelecaoDetalhe />} />
             <Route path="clientes" element={<AdminClientes />} />
             <Route path="*" element={<Navigate to="resumo" replace />} />
           </Route>
