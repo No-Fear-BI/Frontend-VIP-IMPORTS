@@ -1,0 +1,5 @@
+.destinos-produto { display: grid; gap: var(--espaco-3); min-width: 0; border: var(--borda-fina) solid var(--cor-borda); padding: var(--espaco-4); }
+.destinos-produto__colecao { display: grid; gap: var(--espaco-2); min-width: 0; }
+.destinos-produto__opcao { display: flex; align-items: center; gap: var(--espaco-2); cursor: pointer; }
+.destinos-produto__opcao input { accent-color: var(--cor-primaria); }
+.destinos-produto .campo__input { width: 100%; min-width: 0; }

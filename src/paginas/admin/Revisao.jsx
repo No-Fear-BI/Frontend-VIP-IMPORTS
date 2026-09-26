@@ -6,6 +6,9 @@ import Button from '../../components/ui/Button.jsx';
 import Field, { ErroGeral } from '../../components/ui/Field.jsx';
 import Card from '../../components/ui/Card.jsx';
 import './Revisao.css';
+import { categoriasService } from '../../services/categoriasService.js';
+import { catalogoService } from '../../services/catalogoService.js';
+import DestinosProduto, { destinosCompletos } from './DestinosProduto.jsx';
 
 export default function Revisao() {
   const [busca, setBusca] = useState('');
@@ -13,7 +16,13 @@ export default function Revisao() {
   const [pagina, setPagina] = useState(1);
   const [nomes, setNomes] = useState({});
   const [marcas, setMarcas] = useState({});
-  const [colecoes, setColecoes] = useState({});
+  const [destinos, setDestinos] = useState({});
+  const opcoes = useRequisicao(async (sinal) => {
+    const [colecoes, categorias] = await Promise.all([
+      catalogoService.colecoes(sinal), categoriasService.listar(undefined, sinal),
+    ]);
+    return { colecoes, categorias };
+  }, []);
   const [salvando, setSalvando] = useState(null);
   const [erroDecisao, setErroDecisao] = useState(null);
   const trava = useRef(false);
@@ -30,6 +39,10 @@ export default function Revisao() {
   const limpar = () => { setBusca(''); setCategoria('Todos'); setPagina(1); };
   const aprovar = async (item) => {
     if (trava.current) return;
+    if (!destinosCompletos(destinos[item.id] || {}) || !(marcas[item.id] || '').trim()) {
+      setErroDecisao({ itemId: item.id, mensagem: 'Informe a marca e escolha uma categoria para cada coleção marcada.', campos: {} });
+      return;
+    }
     trava.current = true;
     setSalvando(item.id);
     setErroDecisao(null);
@@ -39,11 +52,11 @@ export default function Revisao() {
         status: 'approved',
         translatedName: nomes[item.id] ?? item.translatedName,
         marca: marcas[item.id] ?? '',
-        colecao: colecoes[item.id] ?? '',
+        categoriasIds: Object.values(destinos[item.id]).map(Number),
       });
       setNomes((atual) => { const novo = { ...atual }; delete novo[item.id]; return novo; });
       setMarcas((atual) => { const novo = { ...atual }; delete novo[item.id]; return novo; });
-      setColecoes((atual) => { const novo = { ...atual }; delete novo[item.id]; return novo; });
+      setDestinos((atual) => { const novo = { ...atual }; delete novo[item.id]; return novo; });
       recarregar();
     } catch (falha) {
       setErroDecisao({ itemId: item.id, mensagem: falha.mensagem, campos: falha.campos || {} });
@@ -60,7 +73,7 @@ export default function Revisao() {
       </header>
       <div className="revisao__resumo" aria-live="polite">
         <strong className="t-headline-lg">{carregando ? '…' : total.toLocaleString('pt-BR')}</strong> itens aguardando revisão
-        <p>Confira a imagem e o título original, ajuste o nome em português e decida quais produtos publicar.</p>
+        <p>Confira a imagem e o nome, informe a marca e escolha as coleções e categorias em que o produto aparecerá.</p>
       </div>
       <div className="revisao__filtros">
         <label className="campo">Categoria
@@ -70,6 +83,8 @@ export default function Revisao() {
         </label>
         <Field id="busca-revisao" rotulo="Buscar pelo título original" value={busca} disabled={Boolean(salvando)} onChange={(e) => { setBusca(e.target.value); setPagina(1); }} />
       </div>
+      {opcoes.carregando && <p role="status">Carregando coleções e categorias…</p>}
+      {opcoes.erro && <EstadoErro erro={opcoes.erro} onTentar={opcoes.recarregar} />}
       {erroDecisao?.mensagem && !erroDecisao.campos?.marca && !erroDecisao.campos?.colecao && (
         <ErroGeral>{erroDecisao.mensagem}</ErroGeral>
       )}
@@ -97,24 +112,15 @@ export default function Revisao() {
                 erro={erroDecisao?.itemId === item.id ? erroDecisao.campos?.marca : undefined}
                 onChange={(e) => setMarcas((atual) => ({ ...atual, [item.id]: e.target.value }))}
               />
-              <label className="campo">Coleção
-                <select
-                  className="campo__input"
-                  value={colecoes[item.id] ?? ''}
-                  disabled={Boolean(salvando)}
-                  onChange={(e) => setColecoes((atual) => ({ ...atual, [item.id]: e.target.value }))}
-                >
-                  <option value="">Escolha…</option>
-                  <option value="feminino">Feminino</option>
-                  <option value="masculino">Masculino</option>
-                </select>
-              </label>
-              {erroDecisao?.itemId === item.id && erroDecisao.campos?.colecao && (
-                <p className="campo__erro t-body-sm">{erroDecisao.campos.colecao}</p>
-              )}
+              {opcoes.dados && <DestinosProduto
+                id={`destinos-${item.id}`} colecoes={opcoes.dados.colecoes} categorias={opcoes.dados.categorias}
+                valor={destinos[item.id] || {}} disabled={Boolean(salvando) || opcoes.carregando}
+                onMudar={(valor) => setDestinos((atual) => ({ ...atual, [item.id]: valor }))}
+                erro={erroDecisao?.itemId === item.id ? erroDecisao.campos?.categoriasIds : undefined}
+              />}
               <nav className="revisao__acoes">
                 <a href={item.sourceUrl} target="_blank" rel="noreferrer">Ver origem ↗</a>
-                <Button disabled={Boolean(salvando)} onClick={() => aprovar(item)}>{salvando === item.id ? 'Salvando…' : 'Aprovar'}</Button>
+                <Button disabled={Boolean(salvando) || opcoes.carregando || Boolean(opcoes.erro) || !destinosCompletos(destinos[item.id] || {}) || !(marcas[item.id] || "").trim()} onClick={() => aprovar(item)}>{salvando === item.id ? 'Salvando…' : 'Aprovar'}</Button>
               </nav>
             </div>
           </Card>

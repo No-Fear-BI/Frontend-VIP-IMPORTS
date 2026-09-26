@@ -34,6 +34,7 @@ import { marcasService } from '../../services/marcasService.js';
 import { produtosAdminService } from '../../services/produtosAdminService.js';
 import { ROTULO_STATUS } from './rotulosProduto.js';
 import './Produtos.css';
+import DestinosProduto, { destinosCompletos, destinosDosIds } from './DestinosProduto.jsx';
 
 export default function AdminProduto() {
   const { id } = useParams();
@@ -318,6 +319,7 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
   const [codigo, setCodigo] = useState(inicial?.codigo || '');
   const [status, setStatus] = useState(inicial?.status || 'normal');
   const [marcaId, setMarcaId] = useState(inicial?.marcaId ? String(inicial.marcaId) : '');
+  const [destinosEditados, setDestinosEditados] = useState(null);
   const [colecaoId, setColecaoId] = useState(inicial?.colecaoId ? String(inicial.colecaoId) : '');
   const [categoriaId, setCategoriaId] = useState(inicial?.categoriaId ? String(inicial.categoriaId) : '');
   const [salvando, setSalvando] = useState(false);
@@ -327,8 +329,8 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
   const marcas = useRequisicao((sinal) => marcasService.listar(sinal), []);
   const colecoes = useRequisicao((sinal) => catalogoService.colecoes(sinal), []);
   const categorias = useRequisicao(
-    (sinal) => (colecaoId ? categoriasService.listar(Number(colecaoId), sinal) : Promise.resolve([])),
-    [colecaoId],
+    (sinal) => categoriasService.listar(undefined, sinal),
+    [],
   );
 
   function mudarColecao(valor) {
@@ -336,12 +338,20 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
     setCategoriaId(''); // Trocar a coleção limpa a categoria: a lista de opções muda inteira.
   }
 
-  const faltaAlgoObrigatorio = !nome.trim() || !marcaId || !categoriaId;
+  const idsIniciais = inicial?.categoriasIds || (inicial?.categoriaId ? [inicial.categoriaId] : []);
+  const destinos = destinosEditados ?? destinosDosIds(idsIniciais, categorias.dados || []);
+  const opcoesCarregando = categorias.carregando || colecoes.carregando;
+  const erroOpcoes = categorias.erro || colecoes.erro;
+  const faltaAlgoObrigatorio = !nome.trim() || !marcaId || (modo === 'editar'
+    ? !destinosCompletos(destinos) || opcoesCarregando || Boolean(erroOpcoes)
+    : !categoriaId);
+  const recarregarOpcoes = () => { categorias.recarregar(); colecoes.recarregar(); };
 
   async function enviar(evento) {
     evento.preventDefault();
     setErro(null);
     setAviso('');
+    if (faltaAlgoObrigatorio) return;
 
     if (modo === 'criar') {
       if (faltaAlgoObrigatorio) return;
@@ -370,7 +380,12 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
     if (codigo.trim() && codigo.trim().toUpperCase() !== inicial.codigo) patch.codigo = codigo.trim();
     if (status !== inicial.status) patch.status = status;
     if (marcaId && Number(marcaId) !== inicial.marcaId) patch.marcaId = Number(marcaId);
-    if (categoriaId && Number(categoriaId) !== inicial.categoriaId) patch.categoriaId = Number(categoriaId);
+    const novosIds = Object.values(destinos).map(Number);
+    if (JSON.stringify([...novosIds].sort()) !== JSON.stringify([...idsIniciais].sort())) {
+      // Preserve a categoria principal quando ela ainda estiver selecionada.
+      patch.categoriasIds = novosIds.includes(inicial.categoriaId)
+        ? [inicial.categoriaId, ...novosIds.filter((id) => id !== inicial.categoriaId)] : novosIds;
+    }
 
     if (Object.keys(patch).length === 0) {
       setAviso('Nada para salvar: nada mudou.');
@@ -437,6 +452,7 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
             erro={erro?.campos?.marcaId}
             required
           />
+          {modo === 'criar' && <>
           <CampoSelecao
             id="produto-colecao"
             rotulo="Coleção"
@@ -450,12 +466,13 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
             rotulo="Categoria"
             valor={categoriaId}
             onMudar={setCategoriaId}
-            opcoes={colecaoId ? categorias.dados?.map((c) => ({ valor: c.id, rotulo: c.nome })) : []}
+            opcoes={colecaoId ? categorias.dados?.filter((c) => c.colecaoId === Number(colecaoId)).map((c) => ({ valor: c.id, rotulo: c.nome })) : []}
             vazio={!colecaoId ? 'Escolha a coleção primeiro' : undefined}
             erro={erro?.campos?.categoriaId}
             disabled={!colecaoId}
             required
           />
+          </>}
           <CampoSelecao
             id="produto-status"
             rotulo="Status"
@@ -466,8 +483,16 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
           />
         </div>
 
+        {opcoesCarregando && <p role="status">Carregando coleções e categorias…</p>}
+        {erroOpcoes && <EstadoErro erro={erroOpcoes} onTentar={recarregarOpcoes} />}
+        {modo === 'editar' && !opcoesCarregando && !erroOpcoes && <DestinosProduto
+          id="produto-destinos" colecoes={colecoes.dados || []} categorias={categorias.dados || []}
+          valor={destinos} onMudar={setDestinosEditados} disabled={salvando}
+          erro={erro?.campos?.categoriasIds}
+        />}
+
         {erro && !erro.campos && <ErroGeral>{erro.mensagem}</ErroGeral>}
-        {erro?.campos && Object.keys(erro.campos).some((c) => !['nome', 'descricao', 'codigo', 'status', 'marcaId', 'categoriaId'].includes(c)) && (
+        {erro?.campos && Object.keys(erro.campos).some((c) => !['nome', 'descricao', 'codigo', 'status', 'marcaId', 'categoriaId', 'categoriasIds'].includes(c)) && (
           <ErroGeral>{erroGeralDe(erro)}</ErroGeral>
         )}
 
@@ -475,7 +500,7 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
           <Button
             variante="primaria"
             type="submit"
-            disabled={salvando || (modo === 'criar' && faltaAlgoObrigatorio)}
+            disabled={salvando || faltaAlgoObrigatorio}
           >
             {salvando ? 'Salvando…' : modo === 'criar' ? 'Criar produto' : 'Salvar dados'}
           </Button>

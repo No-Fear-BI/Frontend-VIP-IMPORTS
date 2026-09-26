@@ -213,6 +213,13 @@ export default function AdminProdutos() {
                     {produto.destaque && <span className="t-muted"> · destaque</span>}
                   </td>
                   <td className="admin-produtos__acoes">
+                    <Link
+                      to={String(produto.id)}
+                      state={{ voltarPara: location.search }}
+                      className="link-caps"
+                    >
+                      Editar
+                    </Link>
                     <BotaoDuplicar
                       produtoId={produto.id}
                       render={(abrir) => (
