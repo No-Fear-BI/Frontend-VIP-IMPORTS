@@ -1,11 +1,3 @@
-.barra-aviso {
-  padding-block: var(--espaco-2);
-}
-
-.barra-aviso p {
-  color: var(--cor-sobre-primaria-suave);
-}
-
 .cabecalho {
   position: sticky;
   top: 0;

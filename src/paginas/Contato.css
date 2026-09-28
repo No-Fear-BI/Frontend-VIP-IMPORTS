@@ -1,0 +1,99 @@
+.contato {
+  padding-bottom: var(--espaco-secao);
+}
+
+.contato__grade {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: var(--espaco-secao);
+  align-items: start;
+  padding-top: var(--espaco-6);
+}
+
+.contato__atendimento {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-4);
+}
+
+.contato__atendimento .filete {
+  align-self: stretch;
+}
+
+/* ---------- Movimento ----------
+ * A cascata de entrada é o .entra de global.css (ordem no JSX). Aqui só o que é da página:
+ * o filete se desenha como o do cabeçalho de seção, e o erro do formulário só aparece. */
+
+/* Entre o Instagram (4) e o Horário (5): o traço do logo se desenhando. */
+.contato__atendimento .filete {
+  transform-origin: left center;
+  animation: contato-filete var(--duracao-muito-lenta) var(--curva-suave) backwards;
+  animation-delay: calc(4 * var(--atraso-cascata-pagina));
+}
+
+@keyframes contato-filete {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.contato__erro {
+  animation: contato-erro var(--duracao-media) var(--curva-padrao);
+}
+
+@keyframes contato-erro {
+  from {
+    opacity: 0;
+  }
+}
+
+.contato__bloco {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+}
+
+.contato__bloco a {
+  text-decoration: underline;
+  text-underline-offset: var(--espaco-1);
+}
+
+.contato__mensagem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-6);
+}
+
+.contato__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+  max-width: var(--largura-formulario);
+}
+
+/* O input tem altura fixa de controle; a área de texto cresce com as linhas. */
+.contato__textarea {
+  height: auto;
+  padding-block: var(--espaco-2);
+  resize: vertical;
+}
+
+@media (max-width: 1023px) {
+  .contato__grade {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--espaco-secao);
+  }
+
+  .contato__atendimento {
+    max-width: var(--largura-formulario);
+  }
+}
+
+/* Com movimento reduzido o atraso seguraria o filete invisível: aparece pronto. */
+@media (prefers-reduced-motion: reduce) {
+  .contato__atendimento .filete,
+  .contato__erro {
+    animation: none;
+  }
+}

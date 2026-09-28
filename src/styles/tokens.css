@@ -179,10 +179,8 @@
 
   /* ---------- Logo (wordmark provisório em texto, até chegar o SVG oficial) ---------- */
 
-  --logo-tamanho: 34px;
-  --logo-tamanho-assinatura: 8px;        /* "IMPORTS" */
-  --logo-tracking: 0.04em;
-  --logo-tracking-assinatura: 0.5em;
+  --logo-altura: 46px;                   /* wordmark completo; a largura segue a proporção */
+  --logo-altura-monograma: 72px;         /* só o V, para espaço estreito */
 
   /* ---------- Camadas ---------- */
 
@@ -197,13 +195,17 @@
 
   --duracao-rapida: 120ms;                 /* hover, troca de cor */
   --duracao-media: 220ms;                  /* modal e gaveta entrando, seta do link */
-  --duracao-lenta: 700ms;                  /* hero, brilho do botão, entrada do cabeçalho */
+  --duracao-lenta: 700ms;                  /* crossfade do hero, brilho do botão, entrada do cabeçalho */
   /* DESIGN.md separa isso em dois: 900ms para o filete do cabeçalho de seção se desenhando e
      1000ms para o zoom da foto no hover. Fiquei com o valor do zoom, que aparece bem mais vezes
      na tela; o filete se desenha 100ms mais devagar do que o especificado. */
   --duracao-muito-lenta: 1000ms;
   --duracao-carrossel: 7000ms;             /* tempo de cada slide do hero */
   --atraso-cascata: 90ms;
+  /* Entrada das páginas (.entra, .topo-pagina e o texto do slide do hero): lenta, para a
+     página se arrumar sem pressa. */
+  --duracao-entrada-pagina: 1200ms;
+  --atraso-cascata-pagina: 160ms;
 
   /* Saída do modal/gaveta (DESIGN.md: "saem em 160ms ease-in"). Usados em Modal.jsx/Modal.css. */
   --duracao-saida: 160ms;
@@ -223,6 +225,7 @@
     --duracao-media: 0ms;
     --duracao-lenta: 0ms;
     --duracao-muito-lenta: 0ms;
+    --duracao-entrada-pagina: 0ms;
     --duracao-saida: 0ms;
     --deslocamento-entrada: 0px;
     --deslocamento-seta: 0px;

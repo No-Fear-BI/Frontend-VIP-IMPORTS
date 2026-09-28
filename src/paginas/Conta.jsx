@@ -38,7 +38,7 @@ export default function Conta() {
       <div className="container conta">
         {topo}
         <div className="conta__identificar">
-          <p className="t-body-lg">Entre com seu e-mail para ver favoritos e seleções enviadas. Não tem senha.</p>
+          <p className="t-body-lg">Entre com seu e-mail para ver favoritos e seleções enviadas.</p>
           <FormIdentificacao idBase="conta" rotuloBotao="Entrar" />
         </div>
       </div>

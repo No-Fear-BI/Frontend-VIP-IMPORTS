@@ -371,6 +371,31 @@ a:hover > .link-caps svg {
   transform: translateX(var(--deslocamento-seta));
 }
 
+/* ---------- Entrada da página ----------
+ * Uma vez, quando a tela monta: sobe 16px e aparece, na curva "vitrine" — o texto do slide
+ * do hero, mais lento. `--ordem` (no style do JSX ou nas regras de .topo-pagina em
+ * paginas.css) multiplica o --atraso-cascata-pagina. Não use em cartão nem em nada disparado pelo scroll.
+ */
+
+.entra {
+  animation: entra var(--duracao-entrada-pagina) var(--curva-suave) backwards;
+  animation-delay: calc(var(--ordem, 0) * var(--atraso-cascata-pagina));
+}
+
+@keyframes entra {
+  from {
+    opacity: 0;
+    transform: translateY(var(--deslocamento-entrada));
+  }
+}
+
+/* Os tokens já zeram a duração, mas o atraso seguraria as peças invisíveis: aparece pronto. */
+@media (prefers-reduced-motion: reduce) {
+  .entra {
+    animation: none;
+  }
+}
+
 /* ---------- Filete ---------- */
 
 .filete {

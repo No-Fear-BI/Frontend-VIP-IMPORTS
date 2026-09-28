@@ -9,11 +9,7 @@ export default function Rodape() {
     <footer className="rodape faixa-primaria">
       <div className="container rodape__grade">
         <div className="rodape__marca">
-          <Logo tom="creme" />
-          <p className="t-body-sm t-muted rodape__texto">
-            Roupas e acessórios de grife importados. Você escolhe a peça no site e fecha a compra com o atendimento
-            pelo WhatsApp.
-          </p>
+          <Logo tom="creme" variante="monograma" />
         </div>
 
         <nav className="rodape__coluna" aria-label="Coleções">
@@ -56,6 +52,13 @@ export default function Rodape() {
             <li><Link to="/contato">Todas as formas de contato</Link></li>
           </ul>
         </div>
+
+        <nav className="rodape__coluna" aria-label="Administração">
+          <h2 className="t-label-caps t-muted">Administração</h2>
+          <ul>
+            <li><Link to="/admin/login">Painel administrativo</Link></li>
+          </ul>
+        </nav>
       </div>
       <div className="container">
         <hr className="filete" />

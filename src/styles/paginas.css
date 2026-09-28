@@ -59,6 +59,35 @@
   gap: var(--espaco-2);
 }
 
+/* Entrada da página (mesmo movimento de .entra, em global.css) sem precisar marcar o JSX:
+   as linhas do topo em cascata, depois o conteúdo em blocos. Toda página com .topo-pagina
+   ganha isso. O <dialog> (Modal) fica de fora: tem a entrada própria. */
+.topo-pagina > *,
+.topo-pagina ~ :not(dialog) {
+  animation: entra var(--duracao-entrada-pagina) var(--curva-suave) backwards;
+  animation-delay: calc(var(--ordem, 0) * var(--atraso-cascata-pagina));
+}
+
+.topo-pagina > :nth-child(2) {
+  --ordem: 1;
+}
+
+.topo-pagina > :nth-child(n + 3),
+.topo-pagina ~ :not(dialog) {
+  --ordem: 2;
+}
+
+.topo-pagina + * ~ :not(dialog) {
+  --ordem: 3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topo-pagina > *,
+  .topo-pagina ~ :not(dialog) {
+    animation: none;
+  }
+}
+
 .trilha {
   display: flex;
   flex-wrap: wrap;

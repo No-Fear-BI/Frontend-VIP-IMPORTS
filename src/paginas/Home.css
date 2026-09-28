@@ -37,17 +37,18 @@
   animation: hero-zoom var(--duracao-carrossel) linear both;
 }
 
-/* Texto do slide entra em cascata: legenda, título, link. */
+/* Texto do slide entra em cascata: legenda, título, link — no mesmo ritmo da entrada das
+   páginas internas. */
 .hero__slide--ativo .hero__texto > * {
-  animation: hero-texto var(--duracao-lenta) var(--curva-suave) both;
+  animation: hero-texto var(--duracao-entrada-pagina) var(--curva-suave) both;
 }
 
 .hero__slide--ativo .hero__texto > :nth-child(2) {
-  animation-delay: var(--atraso-cascata);
+  animation-delay: var(--atraso-cascata-pagina);
 }
 
 .hero__slide--ativo .hero__texto > :nth-child(3) {
-  animation-delay: calc(2 * var(--atraso-cascata));
+  animation-delay: calc(2 * var(--atraso-cascata-pagina));
 }
 
 .hero--pausado .hero__imagem,

@@ -51,9 +51,6 @@ export default function Cabecalho() {
 
   return (
     <>
-      <div className="barra-aviso faixa-primaria">
-        <p className="container t-label-caps-sm">Roupas e acessórios de grife importados · valor e disponibilidade pelo atendimento</p>
-      </div>
       <header className={`cabecalho ${rolou ? 'cabecalho--rolou' : ''}`}>
         <div className="container cabecalho__topo">
           <button

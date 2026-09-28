@@ -76,7 +76,7 @@ function DetalheProduto({ produto }) {
 
   return (
     <article className="container produto">
-      <nav className="trilha t-label-caps-sm produto__trilha" aria-label="Você está em">
+      <nav className="trilha t-label-caps-sm produto__trilha entra" aria-label="Você está em">
         <Link to="/">Início</Link>
         <span aria-hidden>/</span>
         <Link to={`/${produto.colecao.slug}`}>{produto.colecao.nome}</Link>
@@ -87,7 +87,7 @@ function DetalheProduto({ produto }) {
       </nav>
 
       <div className="produto__grade">
-        <div className="produto__galeria">
+        <div className="produto__galeria entra" style={{ '--ordem': 1 }}>
           <div className="produto__foto-principal">
             <FotoProduto url={foto?.url} alt={foto?.alt || produto.nome} carregamento="eager" />
             {produto.status === 'esgotado' && <span className="selo-esgotado t-label-caps-sm">Esgotado</span>}
@@ -111,7 +111,7 @@ function DetalheProduto({ produto }) {
           )}
         </div>
 
-        <div className="produto__info">
+        <div className="produto__info entra" style={{ '--ordem': 2 }}>
           <p className="t-label-caps t-muted">{produto.marca.nome}</p>
           <Etiqueta>Código {produto.codigo}</Etiqueta>
           <h1 className="t-headline-lg">{produto.nome}</h1>

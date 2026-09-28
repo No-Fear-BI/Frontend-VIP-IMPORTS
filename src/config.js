@@ -8,3 +8,9 @@ export const LINK_INSTAGRAM = import.meta.env.VITE_LINK_INSTAGRAM || '';
 // configurada, o painel da home é tipográfico (verde sobre creme).
 export const IMAGEM_COLECAO_FEMININA = import.meta.env.VITE_IMAGEM_COLECAO_FEMININA || '';
 export const IMAGEM_COLECAO_MASCULINA = import.meta.env.VITE_IMAGEM_COLECAO_MASCULINA || '';
+
+// Atendimento da loja. Diferente dos links acima, estes NAO vem do ambiente: sao dados
+// reais confirmados pela VIP Imports (o cabecalho do Institucional.jsx proibe inventar
+// horario e endereco — estes vieram do cliente, nao de suposicao).
+export const EMAIL_CONTATO = 'contato@vipimports.com.br';
+export const HORARIO_ATENDIMENTO = ['Seg a sex, 10h às 19h', 'Sábado, 10h às 14h'];

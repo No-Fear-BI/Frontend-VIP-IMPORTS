@@ -1,11 +1,8 @@
-// Páginas sem dado da API: Sobre, Contato e 404.
+// Páginas sem dado da API: Sobre e 404. Contato tem arquivo próprio (Contato.jsx).
 // TEXTO PROVISÓRIO: descreve só o funcionamento que o sistema já garante (catálogo sem
 // checkout, compra pelo WhatsApp). A história e os dados da loja precisam vir da VIP Imports
 // — não invente endereço, horário, ano de fundação ou garantia.
 
-import { Link } from 'react-router-dom';
-import { IconeWhatsApp } from '../components/Icones.jsx';
-import { LINK_INSTAGRAM, LINK_WHATSAPP_CONTATO } from '../config.js';
 import Button from '../components/ui/Button.jsx';
 
 export function Sobre() {
@@ -41,58 +38,18 @@ export function Sobre() {
   );
 }
 
-export function Contato() {
-  return (
-    <div className="container">
-      <header className="topo-pagina">
-        <p className="t-label-caps t-muted">Atendimento</p>
-        <h1 className="t-headline-lg">Contato</h1>
-      </header>
-      <div className="texto-corrido secao secao--proxima">
-        <p className="t-body-lg">
-          Para comprar, o caminho mais rápido é o botão Consultar valores no WhatsApp na própria peça: a mensagem já
-          chega com
-          o código certo.
-        </p>
-        {(LINK_WHATSAPP_CONTATO || LINK_INSTAGRAM) && (
-          <ul className="lista-contato">
-            {LINK_WHATSAPP_CONTATO && (
-              <li>
-                <p className="t-label-caps t-muted">Dúvidas gerais</p>
-                <Button variante="secundaria" href={LINK_WHATSAPP_CONTATO} target="_blank" rel="noopener noreferrer">
-                  <IconeWhatsApp />
-                  Falar no WhatsApp
-                </Button>
-              </li>
-            )}
-            {LINK_INSTAGRAM && (
-              <li>
-                <p className="t-label-caps t-muted">Novidades e bastidores</p>
-                <a href={LINK_INSTAGRAM} target="_blank" rel="noopener noreferrer" className="link-caps">
-                  Instagram
-                </a>
-              </li>
-            )}
-          </ul>
-        )}
-        <div>
-          <Link to="/novidades" className="link-caps">
-            Ver as peças que chegaram
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function NaoEncontrada() {
   return (
     <div className="container">
       <div className="estado">
-        <p className="t-label-caps t-muted">Página não encontrada</p>
-        <h1 className="t-headline-lg">Esta página saiu da vitrine.</h1>
-        <p className="estado__texto">O endereço pode ter mudado, ou a peça não está mais no catálogo.</p>
-        <div className="lista-botoes">
+        <p className="t-label-caps t-muted entra">Página não encontrada</p>
+        <h1 className="t-headline-lg entra" style={{ '--ordem': 1 }}>
+          Esta página saiu da vitrine.
+        </h1>
+        <p className="estado__texto entra" style={{ '--ordem': 2 }}>
+          O endereço pode ter mudado, ou a peça não está mais no catálogo.
+        </p>
+        <div className="lista-botoes entra" style={{ '--ordem': 3 }}>
           <Button variante="primaria" para="/novidades">
             Ver novidades
           </Button>

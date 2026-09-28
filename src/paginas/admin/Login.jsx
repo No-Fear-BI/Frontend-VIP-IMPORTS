@@ -50,8 +50,8 @@ export default function AdminLogin() {
     <EstruturaAcesso>
       <form className="acesso__formulario" onSubmit={enviar} noValidate>
         <header className="acesso__cabecalho">
-          <p className="t-label-caps-sm t-muted">Painel da loja</p>
-          <h1 className="t-headline-md">Entrar no painel</h1>
+          <p className="t-label-caps-sm t-muted">Área administrativa</p>
+          <h1 className="t-headline-md">Entrar</h1>
         </header>
 
         {avisoLogin && !erro && <ErroGeral>{avisoLogin}</ErroGeral>}

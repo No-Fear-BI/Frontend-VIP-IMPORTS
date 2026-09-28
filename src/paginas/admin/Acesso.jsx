@@ -1,7 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import Logo from '../../components/Logo.jsx';
 import { EstadoErro, Esqueleto } from '../../components/Estados.jsx';
-import Button from '../../components/ui/Button.jsx';
 import { useSessaoAdmin } from '../../contexto/SessaoAdmin.jsx';
 import './Acesso.css';
 
@@ -35,9 +34,10 @@ export function VerificandoSessao() {
 }
 
 /**
- * Envolve toda rota /admin/* menos /admin/login. Sem sessão (401) → login, guardando de onde
- * veio. Sessão de CLIENTE (403) → mensagem própria, sem mandar para o login: essa conta não
- * tem senha de admin (docs/para-o-frontend.md).
+ * Envolve toda rota /admin/* menos /admin/login. Sem sessão (401) e sessão de CLIENTE (403)
+ * caem no mesmo lugar: o login, guardando de onde veio. A tela "área restrita à equipe"
+ * existia para o caso do cliente, mas a equipe da loja navega identificada como cliente o
+ * tempo todo e batia nela para entrar no painel — o formulário se explica sozinho.
  */
 export default function RotaAdminProtegida() {
   const { situacao, erro, verificar } = useSessaoAdmin();
@@ -45,7 +45,6 @@ export default function RotaAdminProtegida() {
 
   if (situacao === 'verificando') return <VerificandoSessao />;
   if (situacao === 'dentro') return <Outlet />;
-  if (situacao === 'cliente') return <AreaDaEquipe mensagem={erro?.mensagem} />;
   if (situacao === 'erro') {
     return (
       <EstruturaAcesso>
@@ -54,25 +53,4 @@ export default function RotaAdminProtegida() {
     );
   }
   return <Navigate to="/admin/login" replace state={{ de: local.pathname + local.search }} />;
-}
-
-function AreaDaEquipe({ mensagem }) {
-  return (
-    <EstruturaAcesso>
-      <section className="acesso__bloco" role="alert">
-        <p className="t-label-caps-sm t-muted">Painel da loja</p>
-        <h1 className="t-headline-md">{mensagem || 'Esta área é restrita à equipe da loja.'}</h1>
-        <p className="t-body-sm t-muted">
-          Este navegador está identificado como cliente da loja. O painel tem um acesso separado,
-          com senha própria da equipe.
-        </p>
-        <div className="acesso__acoes">
-          <Button para="/">Voltar para a loja</Button>
-          <Button variante="texto" para="/admin/login">
-            <span>Sou da equipe: entrar no painel</span>
-          </Button>
-        </div>
-      </section>
-    </EstruturaAcesso>
-  );
 }

@@ -1,25 +1,33 @@
-/* A tela inicial do painel: seis números do resumo + produtos por marca. */
+/* Tela inicial do painel: quatro números numa faixa e as duas filas do dia. */
 
 .admin-resumo__topo {
   display: flex;
   flex-direction: column;
-  gap: var(--espaco-2);
-  margin-bottom: var(--espaco-8);
+  gap: var(--espaco-1);
+  padding-bottom: var(--espaco-6);
+  border-bottom: var(--borda-fina) solid var(--cor-borda);
 }
 
-.admin-resumo__grade {
+/* Faixa única com filetes entre as colunas, não cartões soltos: os quatro números
+   são a mesma leitura, e borda em cada um os transformaria em quatro blocos. */
+.admin-resumo__numeros {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: var(--espaco-4);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-bottom: var(--espaco-8);
+  border-bottom: var(--borda-fina) solid var(--cor-borda);
 }
 
-.admin-resumo__estatistica {
+.admin-resumo__numero {
   display: flex;
   flex-direction: column;
   gap: var(--espaco-2);
   padding: var(--espaco-6);
-  border: var(--borda-fina) solid var(--cor-borda);
+  border-left: var(--borda-fina) solid var(--cor-borda);
+}
+
+.admin-resumo__numero:first-child {
+  padding-left: 0;
+  border-left: 0;
 }
 
 .admin-resumo__valor {
@@ -28,13 +36,13 @@
 
 .admin-resumo__esqueleto-valor {
   display: block;
-  width: 4em;
+  width: 3em;
   height: 1.2em;
 }
 
 .admin-resumo__colunas {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--espaco-secao);
   align-items: start;
 }
@@ -43,12 +51,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--espaco-4);
-}
-
-.admin-resumo__lateral {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espaco-8);
 }
 
 .admin-resumo__cabecalho-bloco {
@@ -76,8 +78,9 @@
 
 .admin-resumo__item {
   display: flex;
-  flex-direction: column;
-  gap: var(--espaco-1);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-4);
   padding-block: var(--espaco-3);
   border-bottom: var(--borda-fina) solid var(--cor-borda);
 }
@@ -86,14 +89,58 @@
   padding-top: 0;
 }
 
-.admin-resumo__atalhos {
+.admin-resumo__item--com-foto {
+  justify-content: flex-start;
+}
+
+/* Quadrado fixo: a foto do fornecedor vem em proporção qualquer e sem isto
+   cada linha da fila ficaria de uma altura. */
+.admin-resumo__miniatura {
+  width: var(--espaco-10);
+  height: var(--espaco-10);
+  flex: none;
+  object-fit: cover;
+  background: var(--cor-fundo-campo);
+}
+
+.admin-resumo__texto {
   display: flex;
   flex-direction: column;
-  gap: var(--espaco-3);
+  gap: var(--espaco-1);
+  min-width: 0;
+}
+
+.admin-resumo__quando {
+  flex: none;
 }
 
 @media (max-width: 1023px) {
+  .admin-resumo__numeros {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-resumo__numero:nth-child(odd) {
+    padding-left: 0;
+    border-left: 0;
+  }
+
   .admin-resumo__colunas {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 599px) {
+  .admin-resumo__numeros {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-resumo__numero {
+    padding-inline: 0;
+    border-left: 0;
+    border-top: var(--borda-fina) solid var(--cor-borda);
+  }
+
+  .admin-resumo__numero:first-child {
+    border-top: 0;
   }
 }
