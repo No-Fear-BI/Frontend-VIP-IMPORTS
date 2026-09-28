@@ -152,6 +152,11 @@
   grid-column: auto;
 }
 
+/* Ajuda e erro descem para depois do input, para os inputs da linha ficarem alinhados. */
+.admin-produto__dados-form > .admin-produto__meia > p {
+  order: 1;
+}
+
 .admin-produto__descricao {
   height: auto;
   padding-block: var(--espaco-2);

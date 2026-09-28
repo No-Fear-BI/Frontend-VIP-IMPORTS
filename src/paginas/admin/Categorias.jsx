@@ -85,12 +85,12 @@ export default function AdminCategorias() {
               {itens.length === 0 ? (
                 <p className="t-body-sm t-muted">Nenhuma categoria nesta coleção ainda.</p>
               ) : (
-                <table className="admin-tabela">
+                <table className="admin-tabela admin-categorias__tabela">
                   <thead>
                     <tr>
-                      <th scope="col" className="t-label-caps-sm">Categoria</th>
-                      <th scope="col" className="t-label-caps-sm">Endereço na loja</th>
-                      <th scope="col" className="t-label-caps-sm">Peças</th>
+                      <th scope="col" className="t-label-caps-sm admin-categorias__col-nome">Categoria</th>
+                      <th scope="col" className="t-label-caps-sm admin-categorias__col-slug">Endereço na loja</th>
+                      <th scope="col" className="t-label-caps-sm admin-categorias__col-pecas">Peças</th>
                       <th scope="col"><span className="visualmente-oculto">Ações</span></th>
                     </tr>
                   </thead>
@@ -108,13 +108,15 @@ export default function AdminCategorias() {
                             <span className="t-muted">nenhuma</span>
                           )}
                         </td>
-                        <td className="admin-categorias__acoes">
-                          <button type="button" className="link-caps" onClick={() => setEditando(categoria)}>
-                            Editar
-                          </button>
-                          <button type="button" className="link-caps" onClick={() => setExcluindo(categoria)}>
-                            Excluir
-                          </button>
+                        <td>
+                          <div className="admin-tabela__acoes">
+                            <button type="button" className="link-caps" onClick={() => setEditando(categoria)}>
+                              Editar
+                            </button>
+                            <button type="button" className="link-caps" onClick={() => setExcluindo(categoria)}>
+                              Excluir
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}

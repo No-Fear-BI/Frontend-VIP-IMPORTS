@@ -118,6 +118,15 @@
   border-bottom-color: var(--cor-borda-forte);
 }
 
+/* Ações da linha (Editar, Excluir...). Vão num <div> dentro do <td>: display:flex direto na
+   célula tira ela do layout de tabela e quebra a borda e o alinhamento da linha. */
+.admin-tabela__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-4);
+  justify-content: flex-end;
+}
+
 @media (max-width: 767px) {
   .admin-tabela thead {
     display: none;
@@ -133,6 +142,11 @@
   .admin-tabela td {
     padding: 0;
     border: 0;
+  }
+
+  .admin-tabela__acoes {
+    justify-content: flex-start;
+    margin-top: var(--espaco-2);
   }
 }
 

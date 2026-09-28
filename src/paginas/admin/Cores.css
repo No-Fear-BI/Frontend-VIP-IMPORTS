@@ -16,12 +16,6 @@
   color: var(--cor-texto-suave);
 }
 
-.admin-cores__acoes {
-  display: flex;
-  gap: var(--espaco-4);
-  justify-content: flex-end;
-}
-
 .admin-cores__form {
   display: flex;
   flex-direction: column;
@@ -54,9 +48,3 @@
   border-bottom: var(--borda-fina) solid var(--cor-borda);
 }
 
-@media (max-width: 767px) {
-  .admin-cores__acoes {
-    justify-content: flex-start;
-    margin-top: var(--espaco-2);
-  }
-}

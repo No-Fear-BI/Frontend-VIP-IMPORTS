@@ -102,31 +102,33 @@ export default function AdminBanners() {
                   <td className="t-body-sm">
                     {banner.ativo ? 'Ativo' : <span className="t-muted">Inativo</span>}
                   </td>
-                  <td className="admin-banners__acoes">
-                    {i > 0 && (
+                  <td>
+                    <div className="admin-tabela__acoes">
+                      {i > 0 && (
+                        <button
+                          type="button"
+                          className="link-caps"
+                          disabled={Boolean(movendo)}
+                          onClick={() => mover(i, -1)}
+                        >
+                          Mover para cima
+                        </button>
+                      )}
                       <button
                         type="button"
                         className="link-caps"
-                        disabled={Boolean(movendo)}
-                        onClick={() => mover(i, -1)}
+                        disabled={i === banners.length - 1 || Boolean(movendo)}
+                        onClick={() => mover(i, 1)}
                       >
-                        Mover para cima
+                        Mover para baixo
                       </button>
-                    )}
-                    <button
-                      type="button"
-                      className="link-caps"
-                      disabled={i === banners.length - 1 || Boolean(movendo)}
-                      onClick={() => mover(i, 1)}
-                    >
-                      Mover para baixo
-                    </button>
-                    <button type="button" className="link-caps" onClick={() => setEditando(banner)}>
-                      Editar
-                    </button>
-                    <button type="button" className="link-caps" onClick={() => setExcluindo(banner)}>
-                      Excluir
-                    </button>
+                      <button type="button" className="link-caps" onClick={() => setEditando(banner)}>
+                        Editar
+                      </button>
+                      <button type="button" className="link-caps" onClick={() => setExcluindo(banner)}>
+                        Excluir
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

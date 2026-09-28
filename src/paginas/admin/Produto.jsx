@@ -422,7 +422,7 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
           id="produto-codigo"
           rotulo="Código"
           className="admin-produto__meia"
-          ajuda={modo === 'criar' ? 'Deixe vazio para o backend gerar (ex.: CHN-0042).' : undefined}
+          ajuda={modo === 'criar' ? 'Deixe vazio para geração automática' : undefined}
           value={codigo}
           onChange={(e) => setCodigo(e.target.value)}
           erro={erro?.campos?.codigo}

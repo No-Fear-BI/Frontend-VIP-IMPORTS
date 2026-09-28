@@ -24,14 +24,27 @@
   gap: var(--espaco-4);
 }
 
-.admin-categorias__slug {
-  color: var(--cor-texto-suave);
+/* Uma tabela por coleção: com colunas automáticas cada uma ficava de um tamanho. Largura fixa
+   em % mantém Categoria/Endereço/Peças alinhadas de uma coleção para a outra. */
+.admin-categorias__tabela {
+  table-layout: fixed;
 }
 
-.admin-categorias__acoes {
-  display: flex;
-  gap: var(--espaco-4);
-  justify-content: flex-end;
+.admin-categorias__col-nome {
+  width: 25%;
+}
+
+.admin-categorias__col-slug {
+  width: 40%;
+}
+
+.admin-categorias__col-pecas {
+  width: 15%;
+}
+
+.admin-categorias__slug {
+  overflow-wrap: anywhere;
+  color: var(--cor-texto-suave);
 }
 
 .admin-categorias__form {
@@ -45,9 +58,3 @@
   border-left: var(--borda-grossa) solid var(--cor-primaria);
 }
 
-@media (max-width: 767px) {
-  .admin-categorias__acoes {
-    justify-content: flex-start;
-    margin-top: var(--espaco-2);
-  }
-}

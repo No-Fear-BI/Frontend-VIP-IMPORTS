@@ -91,13 +91,15 @@ export default function AdminCores() {
                 <td className="t-body-sm">
                   {cor.ativa ? 'Aparece' : <span className="t-muted">Escondida</span>}
                 </td>
-                <td className="admin-cores__acoes">
-                  <button type="button" className="link-caps" onClick={() => setEditando(cor)}>
-                    Editar
-                  </button>
-                  <button type="button" className="link-caps" onClick={() => setExcluindo(cor)}>
-                    Excluir
-                  </button>
+                <td>
+                  <div className="admin-tabela__acoes">
+                    <button type="button" className="link-caps" onClick={() => setEditando(cor)}>
+                      Editar
+                    </button>
+                    <button type="button" className="link-caps" onClick={() => setExcluindo(cor)}>
+                      Excluir
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

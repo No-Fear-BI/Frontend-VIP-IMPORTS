@@ -80,13 +80,15 @@ export default function AdminMarcas() {
                     <span className="t-muted">nenhuma</span>
                   )}
                 </td>
-                <td className="admin-marcas__acoes">
-                  <button type="button" className="link-caps" onClick={() => setEditando(marca)}>
-                    Editar
-                  </button>
-                  <button type="button" className="link-caps" onClick={() => setExcluindo(marca)}>
-                    Excluir
-                  </button>
+                <td>
+                  <div className="admin-tabela__acoes">
+                    <button type="button" className="link-caps" onClick={() => setEditando(marca)}>
+                      Editar
+                    </button>
+                    <button type="button" className="link-caps" onClick={() => setExcluindo(marca)}>
+                      Excluir
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
