@@ -1,0 +1,127 @@
+# Publicação do site — trilha de DevOps (Dev 4), tarefa 13.
+#
+#   merge na main  ->  constrói e publica em HOMOLOGAÇÃO sozinho
+#   produção       ->  Actions > Publicar > Run workflow > ambiente: producao
+#
+# Publica SÓ o site (`publicar.sh <ambiente> --web <tag>`). A versão da API no
+# ar não é tocada — backend e frontend viram versão em momentos diferentes e
+# nenhum dos dois espera pelo outro.
+#
+# ATENÇÃO À DIFERENÇA EM RELAÇÃO AO BACKEND: num site estático não existe
+# configuração em tempo de execução. O Vite grava os valores das variáveis
+# VITE_* DENTRO do bundle, no momento do build — então a imagem de homologação
+# e a de produção são arquivos diferentes, construídos com valores diferentes,
+# e a mesma tag aponta para conteúdos distintos em cada ambiente. É por isso
+# que o build acontece uma vez por ambiente, e não uma vez só.
+
+name: Publicar
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "design/**"
+      - "**/*.md"
+  workflow_dispatch:
+    inputs:
+      ambiente:
+        description: "Onde publicar"
+        required: true
+        default: homologacao
+        type: choice
+        options: [homologacao, producao]
+      confirmar:
+        description: "Para publicar em PRODUÇÃO, digite PUBLICAR. Ignorado em homologação."
+        required: false
+        default: ""
+        type: string
+
+concurrency:
+  group: publicar-frontend
+  cancel-in-progress: false
+
+jobs:
+  verificar:
+    uses: ./.github/workflows/build.yml
+
+  publicar:
+    needs: verificar
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    environment:
+      name: ${{ github.event_name == 'push' && 'homologacao' || inputs.ambiente }}
+      url: https://${{ vars.DOMINIO }}
+    steps:
+      # O ambiente "producao" existe em Settings > Environments, mas a
+      # proteção "Required reviewers" NÃO ESTÁ VALENDO: a organização está no
+      # GitHub Free e, no Free, ela só é aplicada em repositório PÚBLICO. Em
+      # repositório privado fica "Not enforced" — pior que não ter, porque
+      # parece que tem. Enquanto isso, a trava é a confirmação digitada.
+      - name: Conferir a confirmação
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.ambiente == 'producao' }}
+        run: |
+          set -euo pipefail
+          if [ "${{ inputs.confirmar }}" != "PUBLICAR" ]; then
+            echo "::error::Para publicar em produção, preencha o campo 'confirmar' com PUBLICAR."
+            echo "Nada foi publicado. O site continua na versão anterior."
+            exit 1
+          fi
+          echo "Confirmado. Publicando em produção."
+
+      - uses: actions/checkout@v4
+
+      - name: Definir ambiente e versão
+        id: alvo
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "ambiente=homologacao" >> "$GITHUB_OUTPUT"
+          else
+            echo "ambiente=${{ inputs.ambiente }}" >> "$GITHUB_OUTPUT"
+          fi
+          # A tag carrega o ambiente porque o bundle é diferente em cada um.
+          # `abc1234-producao` e `abc1234-homologacao` saem do mesmo commit e
+          # NÃO são o mesmo arquivo.
+          echo "sha=$(git rev-parse --short=7 HEAD)" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Nome do dono em minúsculas
+        id: dono
+        run: echo "nome=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Construir e enviar a imagem
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ steps.dono.outputs.nome }}/vip-imports-web:${{ steps.alvo.outputs.sha }}-${{ steps.alvo.outputs.ambiente }}
+          build-args: |
+            VITE_API_URL=/api/v1
+            VITE_LINK_WHATSAPP_CONTATO=${{ vars.VITE_LINK_WHATSAPP_CONTATO }}
+            VITE_LINK_INSTAGRAM=${{ vars.VITE_LINK_INSTAGRAM }}
+            VITE_IMAGEM_COLECAO_FEMININA=${{ vars.VITE_IMAGEM_COLECAO_FEMININA }}
+            VITE_IMAGEM_COLECAO_MASCULINA=${{ vars.VITE_IMAGEM_COLECAO_MASCULINA }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - uses: ./.github/actions/publicar-no-servidor
+        with:
+          ambiente: ${{ steps.alvo.outputs.ambiente }}
+          componente: web
+          tag: ${{ steps.alvo.outputs.sha }}-${{ steps.alvo.outputs.ambiente }}
+          servidor: ${{ secrets.SSH_SERVIDOR }}
+          usuario: ${{ secrets.SSH_USUARIO }}
+          chave: ${{ secrets.SSH_CHAVE }}
+          hosts_conhecidos: ${{ secrets.SSH_HOSTS_CONHECIDOS }}
+          porta: ${{ vars.SSH_PORTA }}
+          caminho_infra: ${{ vars.CAMINHO_INFRA }}
