@@ -21,7 +21,7 @@
 
 .arte__bloco {
   position: absolute;
-  animation: arte-entra var(--duracao-lenta) var(--curva-suave) both;
+  animation: arte-entra var(--duracao-portao) var(--curva-suave) both;
 }
 
 .arte__bloco--1 {
@@ -43,7 +43,7 @@
   padding: var(--espaco-8) var(--espaco-10);
   background: var(--cor-secundaria);
   color: var(--cor-sobre-secundaria);
-  animation-delay: var(--atraso-cascata);
+  animation-delay: var(--atraso-cascata-portao);
 }
 
 .arte__bloco--3 {
@@ -52,7 +52,7 @@
   width: 39%;
   height: 5%;
   background: var(--cor-primaria-hover);
-  animation-delay: calc(var(--atraso-cascata) * 2);
+  animation-delay: calc(var(--atraso-cascata-portao) * 2);
 }
 
 .arte__bloco--4 {
@@ -61,7 +61,7 @@
   right: 0;
   height: 15%;
   background: var(--cor-primaria-hover);
-  animation-delay: calc(var(--atraso-cascata) * 3);
+  animation-delay: calc(var(--atraso-cascata-portao) * 3);
 }
 
 .arte__bloco--5 {
@@ -75,7 +75,7 @@
   gap: var(--espaco-2);
   padding: var(--espaco-12);
   background: var(--cor-borda-sobre-primaria);
-  animation-delay: calc(var(--atraso-cascata) * 4);
+  animation-delay: calc(var(--atraso-cascata-portao) * 4);
 }
 
 .arte__etiqueta-topo {
@@ -236,6 +236,26 @@
 /* O .estado da loja tem respiro de seção; dentro do portão ele já está centralizado. */
 .portao .estado {
   padding-block: 0;
+}
+
+/* Entrada do painel: logo, conteúdo e rodapé começam junto com o primeiro bloco da esquerda,
+   sem atraso, mas com duração maior, curva sem arranque e subida curta, para aparecerem
+   como uma revelação suave. O painel em si não anima, para o fundo não piscar. */
+.portao__logo,
+.portao__conteudo,
+.portao__rodape {
+  animation: painel-entra var(--duracao-portao-painel) var(--curva-portao-painel) both;
+}
+
+@keyframes painel-entra {
+  from {
+    opacity: 0;
+    transform: translateY(var(--deslocamento-portao-painel));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* --- Celular: a arte some, a logo centraliza e o conteúdo ocupa a largura ------------- */

@@ -170,6 +170,11 @@
   --texto-arte-etiqueta: clamp(24px, 2.4vw, 36px); /* "Vitrine reservada", itálico na etiqueta da arte */
   --texto-arte-marca: clamp(30px, 3vw, 44px);      /* "VIP Imports" no pé da arte */
   --ilhos-arte: 14px;                      /* furo da etiqueta na arte */
+  --duracao-portao: 1400ms;                /* entrada da arte do portão, mais lenta que o resto do site */
+  --atraso-cascata-portao: 220ms;          /* intervalo entre os blocos da arte do portão */
+  --duracao-portao-painel: 2200ms;         /* entrada do painel do "bem-vindo", mais lenta que a arte */
+  --curva-portao-painel: cubic-bezier(0.4, 0, 0.2, 1); /* parte devagar e assenta devagar, sem arranque */
+  --deslocamento-portao-painel: 8px;       /* subida do painel na entrada, mais curta que a da arte */
 
   /* ---------- Forma ---------- */
 
@@ -233,6 +238,9 @@
     --duracao-rapida: 0ms;
     --duracao-media: 0ms;
     --duracao-lenta: 0ms;
+    --duracao-portao: 0ms;
+    --duracao-portao-painel: 0ms;
+    --deslocamento-portao-painel: 0px;
     --duracao-muito-lenta: 0ms;
     --duracao-entrada-pagina: 0ms;
     --duracao-saida: 0ms;
