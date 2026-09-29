@@ -114,7 +114,9 @@ export const produtos = produtosBrutos.map(([codigo, nome, marcaSlug, categoriaI
     colecao: { nome: colecao.nome, slug: colecao.slug },
     imagens,
     variacoes: lista,
-    criadoEm: new Date(Date.UTC(2026, 8, 14) - i * 86400000).toISOString(),
+    // Relativo a hoje, de 3 em 3 dias: os primeiros caem na janela de Novidades (14 dias) e o resto
+    // não, para dar para ver o filtro funcionando em qualquer dia.
+    criadoEm: new Date(Date.now() - i * 3 * 86400000).toISOString(),
   };
 });
 

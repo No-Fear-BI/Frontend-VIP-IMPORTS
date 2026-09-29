@@ -1,6 +1,8 @@
 /*
  * Listagem pública (GET /produtos). Serve Feminino, Masculino, Novidades, busca e página de marca.
  * Filtros vivem na URL (?colecao=&categoria=&marca=a,b&busca=&ordem=), então o link é compartilhável.
+ * Novidades (modo 'novidades') manda `novidades: true`: só peças dos últimos 14 dias (regra do
+ * cliente, 29/09/2026), na primeira página e em "Carregar mais". Não vem da URL.
  * Paginação por CURSOR: "Carregar mais" manda o proximoCursor da página anterior.
  * `categoria` só vai junto com `colecao` — o slug de categoria é único por coleção.
  */
@@ -38,6 +40,8 @@ export default function Listagem({ modo, colecaoFixa }) {
       marca: modo === 'marca' ? marcaDaRota : params.get('marca') || '',
       cor: params.get('cor') || '',
       busca: params.get('busca') || '',
+      // '' some da query (apiClient); só o modo 'novidades' manda ?novidades=true.
+      novidades: modo === 'novidades' ? true : '',
       ordem: params.get('ordem') || 'recentes',
     }),
     [params, colecaoFixa, modo, marcaDaRota],
@@ -177,25 +181,31 @@ export default function Listagem({ modo, colecaoFixa }) {
           ) : produtos.length === 0 ? (
             <EstadoVazio
               titulo={
-                filtros.busca
-                  ? `Nada encontrado para "${filtros.busca}".`
-                  : temFiltroAtivo
-                    ? 'Nenhuma peça com esses filtros.'
-                    : 'Nenhuma peça por aqui ainda.'
+                modo === 'novidades'
+                  ? 'Nenhuma novidade por enquanto.'
+                  : filtros.busca
+                    ? `Nada encontrado para "${filtros.busca}".`
+                    : temFiltroAtivo
+                      ? 'Nenhuma peça com esses filtros.'
+                      : 'Nenhuma peça por aqui ainda.'
               }
               texto={
-                filtros.busca
-                  ? 'Tente o código da peça (como X030), o nome da marca ou uma palavra mais curta.'
-                  : temFiltroAtivo
-                    ? 'Tire um filtro para ver mais peças.'
-                    : 'O catálogo está sendo atualizado. Volte em breve.'
+                modo === 'novidades'
+                  ? 'As novidades ficam aqui por duas semanas.'
+                  : filtros.busca
+                    ? 'Tente o código da peça (como X030), o nome da marca ou uma palavra mais curta.'
+                    : temFiltroAtivo
+                      ? 'Tire um filtro para ver mais peças.'
+                      : 'O catálogo está sendo atualizado. Volte em breve.'
               }
               acao={
-                temFiltroAtivo
-                  ? { rotulo: 'Limpar filtros', onClick: limparFiltros }
-                  : modo === 'novidades'
-                    ? { rotulo: 'Voltar ao início', para: '/' }
-                    : { rotulo: 'Ver novidades', para: '/novidades' }
+                modo === 'novidades'
+                  ? { rotulo: 'Ver todas as peças', para: '/todos' }
+                  : temFiltroAtivo
+                    ? { rotulo: 'Limpar filtros', onClick: limparFiltros }
+                    : modo === 'todos'
+                      ? { rotulo: 'Voltar ao início', para: '/' }
+                      : { rotulo: 'Ver todas as peças', para: '/todos' }
               }
             />
           ) : (

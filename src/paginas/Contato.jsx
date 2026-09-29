@@ -3,6 +3,7 @@ import { IconeSeta, IconeWhatsApp } from '../components/Icones.jsx';
 import {
   EMAIL_CONTATO,
   HORARIO_ATENDIMENTO,
+  INSTAGRAM_ARROBA,
   LINK_INSTAGRAM,
   LINK_WHATSAPP_CONTATO,
 } from '../config.js';
@@ -27,19 +28,7 @@ function linkComTexto(base, texto) {
   return `${base}${base.includes('?') ? '&' : '?'}text=${encodeURIComponent(texto)}`;
 }
 
-/** @vipimports a partir da URL. Link sem caminho (só o domínio) não vira arroba nenhuma. */
-function arrobaInstagram(url) {
-  try {
-    const caminho = new URL(url).pathname.replace(/^\/+|\/+$/g, '');
-    return caminho ? `@${caminho}` : '';
-  } catch {
-    return '';
-  }
-}
-
 export default function Contato() {
-  const arroba = LINK_INSTAGRAM ? arrobaInstagram(LINK_INSTAGRAM) : '';
-
   return (
     <div className="container contato">
       <div className="contato__grade">
@@ -78,7 +67,7 @@ export default function Contato() {
               className="link-caps entra"
               {...entra(4)}
             >
-              Instagram {arroba} <IconeSeta />
+              Instagram {INSTAGRAM_ARROBA} <IconeSeta />
             </a>
           )}
 

@@ -132,7 +132,7 @@ export function AdminProdutoNovo() {
   );
 }
 
-/** 404 do painel: o EstadoErro da loja mandaria para "Ver novidades", que aqui não faz sentido. */
+/** 404 do painel: o EstadoErro da loja mandaria para "Ver todas as peças", que aqui não faz sentido. */
 function EstadoErroProduto() {
   return (
     <div className="estado estado--erro" role="alert">

@@ -1,6 +1,7 @@
 /*
- * Permissões de acesso, vistas pelo painel (backend, seção 05). Não existe GET administrativo da
- * configuração: modo e mensagem atuais vêm de `acessoService.estado`, que é público.
+ * Permissões de acesso, vistas pelo painel (backend, seção 05): a fila de pedidos e a decisão.
+ * O painel não edita a configuração (mensagem de bloqueio): a loja é sempre fechada e sem
+ * mensagem o portão usa o texto padrão.
  */
 
 import { requisitarAdmin } from '../lib/apiAdmin.js';
@@ -19,10 +20,4 @@ export const acessoAdminService = {
     requisitarAdmin('PATCH', `/admin/acesso/${clienteId}`, {
       corpo: { situacao, ...(motivo ? { motivo } : {}) },
     }),
-
-  /**
-   * PATCH /admin/configuracao/acesso — parcial. `mensagemBloqueio`:
-   * texto, ou null para apagar.
-   */
-  configurar: (corpo) => requisitarAdmin('PATCH', '/admin/configuracao/acesso', { corpo }),
 };

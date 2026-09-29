@@ -1,11 +1,7 @@
 /*
- * Permissões de Acesso (/admin/permissoes): escreve a mensagem que o visitante barrado lê e
- * decide a fila de pedidos (backend, seção 05). A loja é SEMPRE fechada (modo aprovação): não há
- * mais seletor de modo aqui.
- *
- * Não existe GET administrativo da configuração: a mensagem atual vem de GET /acesso/estado,
- * que é público (mesma exceção da tela de Destaques, que lê a home pública). Depois de salvar,
- * o ProvedorAcesso da loja é reconsultado para não ficar com a mensagem antiga.
+ * Permissões de Acesso (/admin/permissoes): decide a fila de pedidos de acesso (backend, seção 05).
+ * A loja é SEMPRE fechada (modo aprovação): não há seletor de modo nem edição da mensagem de
+ * bloqueio aqui — sem mensagem, o portão usa o texto padrão do backend.
  *
  * Recusar 3 vezes seguidas deixa a pessoa 3 dias sem poder pedir de novo (regra do backend, vale
  * também para revogação de acesso). A tela avisa a equipe disso antes de recusar.
@@ -17,11 +13,9 @@ import { Esqueleto, EstadoErro, EstadoVazio } from '../../components/Estados.jsx
 import Button from '../../components/ui/Button.jsx';
 import { ErroGeral } from '../../components/ui/Field.jsx';
 import Modal from '../../components/ui/Modal.jsx';
-import { useAcesso } from '../../contexto/AcessoLoja.jsx';
 import { useRequisicao } from '../../hooks/useRequisicao.js';
 import { ErroApi } from '../../lib/apiClient.js';
 import { acessoAdminService } from '../../services/acessoAdminService.js';
-import { acessoService } from '../../services/acessoService.js';
 import './Permissoes.css';
 
 const POR_PAGINA = 20;
@@ -31,8 +25,6 @@ const formatoData = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeS
 const comoErro = (falha, mensagem) => (falha instanceof ErroApi ? falha : new ErroApi({ mensagem }));
 
 export default function AdminPermissoes() {
-  const config = useRequisicao((sinal) => acessoService.estado(sinal), []);
-
   return (
     <section className="admin__pagina">
       <header className="admin-permissoes__topo">
@@ -42,95 +34,8 @@ export default function AdminPermissoes() {
         </p>
       </header>
 
-      <div className="admin-permissoes__bloco">
-        <h2 className="t-headline-md">Tela de bloqueio</h2>
-        {config.carregando && !config.dados ? (
-          <div className="estado-carregando" aria-busy="true" aria-label="Carregando a configuração">
-            <Esqueleto className="esqueleto--controle" />
-            <Esqueleto className="esqueleto--controle" />
-            <Esqueleto className="esqueleto--linha" />
-          </div>
-        ) : config.erro ? (
-          <EstadoErro
-            erro={config.erro}
-            onTentar={config.recarregar}
-            titulo="Não conseguimos carregar a configuração."
-          />
-        ) : (
-          <FormConfiguracao inicial={config.dados} />
-        )}
-      </div>
-
       <Fila />
     </section>
-  );
-}
-
-function FormConfiguracao({ inicial }) {
-  const { reconsultar } = useAcesso();
-  const [salvo, setSalvo] = useState(inicial.mensagemBloqueio || '');
-  const [mensagem, setMensagem] = useState(salvo);
-  const [salvando, setSalvando] = useState(false);
-  const [erro, setErro] = useState(null);
-  const [feito, setFeito] = useState(false);
-
-  const alterado = mensagem.trim() !== salvo.trim();
-
-  async function salvar(evento) {
-    evento.preventDefault();
-    setSalvando(true);
-    setErro(null);
-    setFeito(false);
-    try {
-      const resposta = await acessoAdminService.configurar({
-        mensagemBloqueio: mensagem.trim() || null,
-      });
-      const proximo = resposta.mensagemBloqueio || '';
-      setSalvo(proximo);
-      setMensagem(proximo);
-      setFeito(true);
-      reconsultar();
-    } catch (falha) {
-      setErro(comoErro(falha, 'Não foi possível salvar agora.'));
-    } finally {
-      setSalvando(false);
-    }
-  }
-
-  return (
-    <form className="admin__formulario admin-permissoes__form" onSubmit={salvar} noValidate>
-      <div className="campo">
-        <label htmlFor="permissoes-mensagem" className="t-label-caps">
-          Mensagem de bloqueio
-        </label>
-        <p id="permissoes-mensagem-ajuda" className="t-body-sm t-muted">
-          É o que o visitante barrado lê na tela de acesso. Deixe vazio para usar o texto padrão.
-        </p>
-        <textarea
-          id="permissoes-mensagem"
-          className="campo__input admin-permissoes__mensagem"
-          rows={3}
-          aria-describedby="permissoes-mensagem-ajuda"
-          value={mensagem}
-          onChange={(e) => {
-            setMensagem(e.target.value);
-            setFeito(false);
-          }}
-        />
-      </div>
-
-      {erro && <ErroGeral>{erro.mensagem}</ErroGeral>}
-      <div className="admin-permissoes__acoes">
-        <Button variante="primaria" type="submit" disabled={salvando || !alterado}>
-          {salvando ? 'Salvando…' : 'Salvar'}
-        </Button>
-        {feito && (
-          <span className="t-body-sm" role="status">
-            Salvo.
-          </span>
-        )}
-      </div>
-    </form>
   );
 }
 

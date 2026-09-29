@@ -66,6 +66,8 @@ const erroLimiteBanners = () =>
     campos: { ativo: `Já há ${LIMITE_BANNERS_ATIVOS} banners ativos.` },
   });
 
+const DIAS_NOVIDADE = 14;
+
 const item = (p) => ({
   id: p.id,
   codigo: p.codigo,
@@ -910,6 +912,11 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
     if (q.get('busca')) {
       const termo = normalizar(q.get('busca'));
       lista = lista.filter((p) => normalizar(`${p.nome} ${p.marca.nome} ${p.codigo}`).includes(termo));
+    }
+    if (q.get('novidades') === 'true') {
+      // Mesma janela do backend: criado nos últimos 14 dias (DIAS_NOVIDADE em servicos/catalogo.py).
+      const inicio = Date.now() - DIAS_NOVIDADE * 86400000;
+      lista = lista.filter((p) => new Date(p.criadoEm).getTime() >= inicio);
     }
     if (q.get('ordem') === 'nome') lista.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
     const porPagina = Math.min(Number(q.get('porPagina')) || 24, 60);

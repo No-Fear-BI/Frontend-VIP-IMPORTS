@@ -25,7 +25,7 @@ export function EstadoErro({ erro, onTentar, titulo = 'Não conseguimos carregar
         {erro?.mensagem || 'Algo deu errado do nosso lado. Tente de novo em instantes.'}
       </p>
       {naoEncontrado ? (
-        <AcaoDoEstado rotulo="Ver novidades" para="/novidades" />
+        <AcaoDoEstado rotulo="Ver todas as peças" para="/todos" />
       ) : (
         onTentar && <AcaoDoEstado rotulo="Tentar de novo" onClick={onTentar} />
       )}

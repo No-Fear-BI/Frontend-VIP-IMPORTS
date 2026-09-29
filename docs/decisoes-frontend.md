@@ -53,7 +53,7 @@ Fluxo (`src/contexto/CompraWhatsApp.jsx`):
 ## 5. Conteúdo que a API não fornece (15/09/2026)
 
 - **Imagem dos painéis "Coleção Feminina/Masculina":** `GET /colecoes` não tem imagem. Sem `VITE_IMAGEM_COLECAO_*`, o painel é tipográfico, em verde sobre creme (combinação oficial).
-- **Link de contato geral** (rodapé, página Contato, "Falar no WhatsApp" do CTA): não existe rota pública com o número da loja. Por enquanto vem de `VITE_LINK_WHATSAPP_CONTATO` / `VITE_LINK_INSTAGRAM`, e vazio esconde o elemento. Isso **não** é o link da compra. Pendência em `pendencias-frontend.md`.
+- **Link de contato geral** (rodapé, página Contato, "Falar no WhatsApp" do CTA): não existe rota pública com o número da loja. Por enquanto vem de `VITE_LINK_WHATSAPP_CONTATO` / `VITE_LINK_INSTAGRAM`, com os dados oficiais da VIP Imports como padrão em `src/config.js` (o botão não some por variável vazia); e-mail, telefone e @ de exibição também moram em `config.js`. Isso **não** é o link da compra. Pendência em `pendencias-frontend.md`.
 - **Textos de Sobre e Contato:** provisórios. Descrevem só o funcionamento que o sistema garante. Não inventar endereço, horário, ano de fundação ou garantia de originalidade.
 - **Logo:** `src/components/Logo.jsx` monta o wordmark em texto até o SVG oficial chegar.
 
@@ -226,3 +226,14 @@ Além disso, a base de acesso dele não tem rota protegida, não separa 401 de 4
 - **Fila trancada, sem F5:** o estado "pedido na fila" tem botão "Conferir de novo"; não há polling.
 - **Painel:** `/admin/permissoes`. Modo e mensagem atuais vêm de `GET /acesso/estado` (não há GET administrativo). Recusar abre diálogo com motivo opcional e avisa da regra das 3 recusas.
 - **Pendência de produto:** revogar o acesso de um aprovado grava uma recusa e conta nas 3. Separar exigiria campo novo no backend.
+
+## 21. Novidades: só os últimos 14 dias (29/09/2026)
+
+**Decisão do cliente:** todo produto fica **no máximo 2 semanas (14 dias)** na página Novidades. Depois sai de lá e continua aparecendo nas categorias dele, em `/todos`, na busca e nas páginas de marca e coleção. Nada é apagado nem alterado no produto: é só um recorte por data.
+
+- **Antes:** `/novidades` era `Listagem` em `modo="novidades"` chamando `GET /produtos` sem filtro, ou seja, igual a `/todos`.
+- **Agora:** o backend ganhou `GET /produtos?novidades=true` (janela rolante de 14 dias sobre `criado_em`, sem coluna nova nem tarefa agendada; ver `docs/para-o-frontend.md` do backend). O `catalogoService.produtos` aceita `novidades` e a `Listagem` manda `novidades: true` no modo `novidades`, na primeira página e em "carregar mais". O filtro entra na chave que reinicia a lista. Nenhuma outra listagem muda.
+- **Estado vazio de Novidades:** "Nenhuma novidade por enquanto." e "As novidades ficam aqui por duas semanas.", com a saída "Ver todas as peças" para `/todos` (mandar para `/novidades` seria um laço). O mesmo vale para o 404 genérico de `EstadoErro` e para o vazio das outras listagens: a saída deixou de ser "Ver novidades" e virou "Ver todas as peças".
+- **Modo exemplo:** `catalogoExemplo.js` gera `criadoEm` relativo a hoje (de 3 em 3 dias) e o `servidorExemplo.js` entende `novidades=true`, então dá para ver produtos recentes e antigos. `?exemplo=vazio` mostra o estado vazio.
+- **Limitação (backend):** a janela conta do `criado_em`; produto ocultado e reexibido depois de mais de 14 dias não volta a Novidades. Registrada em `docs/limitacoes-conhecidas.md` do backend.
+- **Pendência:** outros estados vazios da loja (Home, Conta, Marcas, Seleção) ainda têm a saída "Ver novidades" para `/novidades`, que pode estar vazia. Não foram tocados nesta tarefa.

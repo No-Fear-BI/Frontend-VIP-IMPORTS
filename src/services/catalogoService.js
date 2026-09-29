@@ -15,7 +15,9 @@ export const catalogoService = {
    * da página anterior em `cursor`; nunca traga tudo de uma vez.
    * `categoria` só vale junto com `colecao` (o slug de categoria é único por coleção).
    * `cor` aceita vários slugs separados por vírgula, com OU entre eles (como `marca`).
-   * @param {{ colecao?, categoria?, marca?, cor?, busca?, ordem?: 'recentes'|'nome', cursor?, porPagina? }} filtros
+   * `novidades: true` manda `?novidades=true`: só as peças criadas nos últimos 14 dias (página
+   * Novidades). Falso/ausente não manda nada. O cursor da paginação é amarrado a esse filtro.
+   * @param {{ colecao?, categoria?, marca?, cor?, busca?, novidades?: true, ordem?: 'recentes'|'nome', cursor?, porPagina? }} filtros
    */
   produtos: (filtros, sinal) => requisitar('GET', '/produtos', { query: filtros, sinal }),
 

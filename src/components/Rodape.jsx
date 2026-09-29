@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { LINK_INSTAGRAM, LINK_WHATSAPP_CONTATO } from '../config.js';
+import { INSTAGRAM_ARROBA, LINK_INSTAGRAM, LINK_WHATSAPP_CONTATO } from '../config.js';
 import { IconeWhatsApp } from './Icones.jsx';
 import Logo from './Logo.jsx';
 import './Rodape.css';
@@ -45,7 +45,7 @@ export default function Rodape() {
             {LINK_INSTAGRAM && (
               <li>
                 <a href={LINK_INSTAGRAM} target="_blank" rel="noopener noreferrer">
-                  Instagram
+                  {INSTAGRAM_ARROBA}
                 </a>
               </li>
             )}
