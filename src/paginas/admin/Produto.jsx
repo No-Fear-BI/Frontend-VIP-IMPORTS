@@ -124,7 +124,6 @@ export function AdminProdutoNovo() {
         ← Produtos
       </Link>
       <header className="admin-produto__topo">
-        <p className="t-label-caps-sm t-muted">/admin/produtos/novo</p>
         <h1 className="t-headline-lg">Novo produto</h1>
       </header>
       <DadosProduto modo="criar" onSalvar={criar} />

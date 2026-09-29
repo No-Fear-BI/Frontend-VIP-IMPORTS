@@ -52,7 +52,6 @@ export default function AdminCategorias() {
     <section className="admin__pagina">
       <header className="admin-categorias__topo">
         <div>
-          <p className="t-label-caps-sm t-muted">/admin/categorias</p>
           <h1 className="t-headline-lg">Categorias</h1>
           <p className="t-body-sm t-muted admin-categorias__ajuda">
             Uma por coleção: "Bolsas" no Feminino e "Bolsas" no Masculino são categorias diferentes.

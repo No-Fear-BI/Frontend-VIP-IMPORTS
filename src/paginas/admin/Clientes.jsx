@@ -48,7 +48,6 @@ export default function AdminClientes() {
   return (
     <section className="admin__pagina">
       <header className="admin-clientes__topo">
-        <p className="t-label-caps-sm t-muted">/admin/clientes</p>
         <h1 className="t-headline-lg">Clientes</h1>
         <p className="t-body-sm t-muted admin-clientes__ajuda">
           Quem já se identificou na loja. Sem edição por aqui — é só consulta.

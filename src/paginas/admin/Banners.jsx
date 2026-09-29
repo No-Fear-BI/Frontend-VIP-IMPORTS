@@ -52,7 +52,6 @@ export default function AdminBanners() {
     <section className="admin__pagina">
       <header className="admin-banners__topo">
         <div>
-          <p className="t-label-caps-sm t-muted">/admin/banners</p>
           <h1 className="t-headline-lg">Banners</h1>
           <p className="t-body-sm t-muted admin-banners__ajuda">
             O carrossel da home. No máximo 4 ativos por vez — o resto fica como rascunho.

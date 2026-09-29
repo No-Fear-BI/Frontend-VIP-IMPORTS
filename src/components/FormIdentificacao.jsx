@@ -8,7 +8,13 @@ import Button from './ui/Button.jsx';
  * Identificação por e-mail, sem senha. POST /clientes/identificar responde 200 para conta
  * nova E existente: esta tela nunca diz "bem-vindo de volta" nem "conta criada".
  */
-export default function FormIdentificacao({ onIdentificado, rotuloBotao = 'Continuar', idBase = 'identificacao' }) {
+export default function FormIdentificacao({
+  onIdentificado,
+  rotuloBotao = 'Continuar',
+  idBase = 'identificacao',
+  placeholder,
+  largo = true,
+}) {
   const { identificar } = useSessaoCliente();
   const [email, setEmail] = useState('');
   const [enviando, setEnviando] = useState(false);
@@ -39,13 +45,14 @@ export default function FormIdentificacao({ onIdentificado, rotuloBotao = 'Conti
         name="email"
         autoComplete="email"
         inputMode="email"
+        placeholder={placeholder}
         required
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         erro={erroDoCampo}
       />
       {erro && !erroDoCampo && <ErroGeral>{erro.mensagem}</ErroGeral>}
-      <Button variante="primaria" largo type="submit" disabled={enviando || !email.trim()}>
+      <Button variante="primaria" largo={largo} type="submit" disabled={enviando || !email.trim()}>
         {enviando ? 'Um instante…' : rotuloBotao}
       </Button>
     </form>

@@ -162,6 +162,15 @@
   --icone-lg: 28px;
   --selo-tamanho: 18px;                    /* contador da seleção no cabeçalho */
 
+  /* ---------- Tela de bloqueio (portão de acesso) ---------- */
+
+  --largura-portao: 520px;                 /* coluna do conteúdo, à direita da arte */
+  --portao-respiro-vertical: 56px;         /* topo, fim e entorno do conteúdo */
+  --portao-respiro-extra: clamp(0px, 6vw, 120px); /* recuo a mais na esquerda do painel, cresce com a tela */
+  --texto-arte-etiqueta: clamp(24px, 2.4vw, 36px); /* "Vitrine reservada", itálico na etiqueta da arte */
+  --texto-arte-marca: clamp(30px, 3vw, 44px);      /* "VIP Imports" no pé da arte */
+  --ilhos-arte: 14px;                      /* furo da etiqueta na arte */
+
   /* ---------- Forma ---------- */
 
   --raio: 0px;                              /* "Não existe raio de 4, 8 ou 16px" — quadrado ou círculo, nada no meio */

@@ -19,6 +19,25 @@
 const BASE = import.meta.env.VITE_API_URL || '/api/v1';
 const MODO_EXEMPLO = import.meta.env.VITE_API_EXEMPLO === '1';
 
+const CODIGOS_DO_PORTAO = ['ACESSO_PENDENTE', 'ACESSO_RECUSADO', 'ACESSO_EM_ESPERA'];
+const ouvintesDoPortao = new Set();
+
+/**
+ * Registra quem reage ao portão da loja (o ProvedorAcesso): qualquer chamada que volte 403
+ * ACESSO_PENDENTE, ACESSO_RECUSADO ou ACESSO_EM_ESPERA avisa o ouvinte com o `ErroApi`, e o erro
+ * continua sendo lançado para a tela. Devolve a função que cancela o registro.
+ */
+export function aoBarrarPeloPortao(ouvinte) {
+  ouvintesDoPortao.add(ouvinte);
+  return () => ouvintesDoPortao.delete(ouvinte);
+}
+
+function avisarPortao(erro) {
+  if (erro instanceof ErroApi && erro.status === 403 && CODIGOS_DO_PORTAO.includes(erro.codigo)) {
+    ouvintesDoPortao.forEach((ouvinte) => ouvinte(erro));
+  }
+}
+
 export class ErroApi extends Error {
   constructor({ status, codigo, mensagem, campos, detalhes, rastreio }) {
     super(mensagem);
@@ -68,7 +87,7 @@ async function _executar(url, opcoesFetch, sinal) {
 
   if (!resposta.ok) {
     const erro = dados && dados.erro ? dados.erro : {};
-    throw new ErroApi({
+    const falha = new ErroApi({
       status: resposta.status,
       codigo: erro.codigo || 'ERRO_INTERNO',
       mensagem: erro.mensagem || 'Algo deu errado do nosso lado. Tente de novo em instantes.',
@@ -76,6 +95,8 @@ async function _executar(url, opcoesFetch, sinal) {
       detalhes: erro.detalhes,
       rastreio: resposta.headers.get('X-Rastreio'),
     });
+    avisarPortao(falha);
+    throw falha;
   }
 
   return dados;
@@ -92,7 +113,12 @@ export async function requisitar(metodo, caminho, { corpo, query, sinal } = {}) 
   if (MODO_EXEMPLO) {
     // Import dinâmico: o catálogo de exemplo não entra no pacote de produção.
     const { responderExemplo } = await import('./exemplo/servidorExemplo.js');
-    return responderExemplo(metodo, url, corpo, sinal);
+    try {
+      return await responderExemplo(metodo, url, corpo, sinal);
+    } catch (falha) {
+      avisarPortao(falha);
+      throw falha;
+    }
   }
 
   return _executar(

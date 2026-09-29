@@ -72,7 +72,6 @@ export default function AdminProdutos() {
     <section className="admin__pagina">
       <header className="admin-produtos__topo admin-produtos__topo-linha">
         <div>
-          <p className="t-label-caps-sm t-muted">/admin/produtos</p>
           <h1 className="t-headline-lg">Produtos</h1>
           <p className="t-body-sm t-muted admin-produtos__ajuda">
             O catálogo inteiro, inclusive o que está oculto da loja.

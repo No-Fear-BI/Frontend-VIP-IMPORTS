@@ -34,7 +34,6 @@ export default function AdminCores() {
     <section className="admin__pagina">
       <header className="admin-cores__topo">
         <div>
-          <p className="t-label-caps-sm t-muted">/admin/cores</p>
           <h1 className="t-headline-lg">Cores</h1>
           <p className="t-body-sm t-muted admin-cores__ajuda">
             A paleta que o cliente vê como filtro na loja. Cada peça escolhe as cores desta lista.

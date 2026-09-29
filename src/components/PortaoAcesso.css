@@ -1,0 +1,264 @@
+/* Tela de bloqueio da loja (modo aprovação). Sem cabeçalho nem rodapé: a loja inteira some.
+   Duas colunas: arte (esquerda, PortaoArte) e conteúdo (direita). No celular a arte some e o
+   conteúdo ocupa a tela. Layout e medidas vêm do design "Login" aprovado; só var(--token). */
+
+.portao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+}
+
+/* --- Esquerda: arte (blocos posicionados em % da coluna) ------------------------------- */
+
+.portao__arte {
+  position: relative;
+  overflow: hidden;
+  background: var(--cor-primaria);
+  color: var(--cor-sobre-primaria);
+}
+
+.arte__bloco {
+  position: absolute;
+  animation: arte-entra var(--duracao-lenta) var(--curva-suave) both;
+}
+
+.arte__bloco--1 {
+  left: 0;
+  top: 0;
+  width: 39%;
+  height: 10%;
+  background: var(--cor-borda-sobre-primaria);
+}
+
+.arte__bloco--2 {
+  left: 39%;
+  top: 10%;
+  right: 0;
+  height: 27.5%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--espaco-8) var(--espaco-10);
+  background: var(--cor-secundaria);
+  color: var(--cor-sobre-secundaria);
+  animation-delay: var(--atraso-cascata);
+}
+
+.arte__bloco--3 {
+  left: 0;
+  top: 37.5%;
+  width: 39%;
+  height: 5%;
+  background: var(--cor-primaria-hover);
+  animation-delay: calc(var(--atraso-cascata) * 2);
+}
+
+.arte__bloco--4 {
+  left: 45%;
+  top: 51%;
+  right: 0;
+  height: 15%;
+  background: var(--cor-primaria-hover);
+  animation-delay: calc(var(--atraso-cascata) * 3);
+}
+
+.arte__bloco--5 {
+  left: 0;
+  top: 66%;
+  width: 68%;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: var(--espaco-2);
+  padding: var(--espaco-12);
+  background: var(--cor-borda-sobre-primaria);
+  animation-delay: calc(var(--atraso-cascata) * 4);
+}
+
+.arte__etiqueta-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-4);
+}
+
+.arte__ilhos {
+  flex: none;
+  width: var(--ilhos-arte);
+  height: var(--ilhos-arte);
+  border-radius: var(--raio-circulo);
+  background: var(--cor-primaria);
+}
+
+.arte__etiqueta-titulo {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-style: italic;
+  font-size: var(--texto-arte-etiqueta);
+  line-height: var(--altura-linha-titulo);
+}
+
+.arte__marca {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-size: var(--texto-arte-marca);
+  line-height: 1;
+}
+
+@keyframes arte-entra {
+  from {
+    opacity: 0;
+    transform: translateY(var(--deslocamento-entrada));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* --- Direita: logo no alto, conteúdo ao centro, rodapé no fim ------------------------- */
+
+.portao__painel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: var(--portao-respiro-vertical) var(--container-margem) var(--portao-respiro-vertical)
+    calc(var(--container-margem) + var(--portao-respiro-extra));
+}
+
+.portao__interno {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: min(var(--largura-portao), 100%);
+}
+
+.portao__conteudo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-10);
+  margin-block: auto;
+  padding-block: var(--portao-respiro-vertical);
+}
+
+/* A logo tem altura fixa e largura pela proporção do arquivo: sem isso o flex a estica. */
+.portao__logo {
+  align-self: flex-start;
+}
+
+/* Botão do tamanho do rótulo, à esquerda (o design não estica o botão pela coluna). */
+.portao .botao:not(.botao--largo) {
+  align-self: flex-start;
+}
+
+/* .form-identificacao (CompraWhatsApp.css) tem vão de 16px; aqui vale o de 24px do design. */
+.portao .form-identificacao {
+  gap: var(--espaco-6);
+}
+
+.portao__cabecalho {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+}
+
+.portao__cabecalho p {
+  margin: 0;
+}
+
+.portao__formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-6);
+}
+
+.portao__espera {
+  padding-left: var(--espaco-3);
+  border-left: var(--borda-grossa) solid var(--cor-borda-forte);
+}
+
+/* Pedido enviado: traço de 2px na esquerda, sem caixa (a paleta não tem cor de aviso). */
+.portao__enviado {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-4);
+  padding: var(--espaco-6) 0 var(--espaco-6) var(--espaco-4);
+  border-left: var(--borda-grossa) solid var(--cor-primaria);
+}
+
+.portao__enviado p {
+  max-width: 44ch;
+  margin: 0;
+}
+
+.portao__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-6);
+}
+
+/* "Ainda não possui uma conta?" — filete no alto, texto curto e um link. */
+.portao__conta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-3);
+  padding-top: var(--espaco-8);
+  border-top: var(--borda-fina) solid var(--cor-borda);
+}
+
+.portao__conta p {
+  max-width: 44ch;
+  margin: 0;
+  color: var(--cor-texto-suave);
+}
+
+.portao__conta .link-caps {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: var(--fonte-texto);
+  cursor: pointer;
+}
+
+.portao__rodape {
+  color: var(--cor-texto-suave);
+}
+
+/* O .estado da loja tem respiro de seção; dentro do portão ele já está centralizado. */
+.portao .estado {
+  padding-block: 0;
+}
+
+/* --- Celular: a arte some, a logo centraliza e o conteúdo ocupa a largura ------------- */
+
+@media (max-width: 767px) {
+  .portao {
+    grid-template-columns: 1fr;
+  }
+
+  .portao__arte {
+    display: none;
+  }
+
+  .portao__painel {
+    align-items: stretch;
+    padding: var(--espaco-8) var(--container-margem-celular);
+  }
+
+  .portao__interno {
+    width: 100%;
+  }
+
+  .portao__logo {
+    align-self: center;
+  }
+}

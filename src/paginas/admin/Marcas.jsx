@@ -33,7 +33,6 @@ export default function AdminMarcas() {
     <section className="admin__pagina">
       <header className="admin-marcas__topo">
         <div>
-          <p className="t-label-caps-sm t-muted">/admin/marcas</p>
           <h1 className="t-headline-lg">Marcas</h1>
           <p className="t-body-sm t-muted admin-marcas__ajuda">
             As grifes do catálogo. Cada produto pertence a uma marca desta lista.

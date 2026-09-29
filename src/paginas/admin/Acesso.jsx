@@ -1,4 +1,4 @@
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Link, Navigate, Outlet, useLocation } from 'react-router-dom';
 import Logo from '../../components/Logo.jsx';
 import { EstadoErro, Esqueleto } from '../../components/Estados.jsx';
 import { useSessaoAdmin } from '../../contexto/SessaoAdmin.jsx';
@@ -14,7 +14,9 @@ export function EstruturaAcesso({ children }) {
   return (
     <main className="acesso">
       <div className="acesso__caixa">
-        <Logo tom="verde" />
+        <Link to="/" className="acesso__logo" aria-label="Ir para a loja">
+          <Logo tom="verde" />
+        </Link>
         {children}
       </div>
     </main>

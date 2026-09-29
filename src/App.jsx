@@ -10,6 +10,7 @@ import AdminDestaques from './paginas/admin/Destaques.jsx';
 import EstruturaAdmin from './paginas/admin/EstruturaAdmin.jsx';
 import AdminLogin from './paginas/admin/Login.jsx';
 import AdminMarcas from './paginas/admin/Marcas.jsx';
+import AdminPermissoes from './paginas/admin/Permissoes.jsx';
 import AdminProduto, { AdminProdutoNovo } from './paginas/admin/Produto.jsx';
 import AdminProdutos from './paginas/admin/Produtos.jsx';
 import AdminResumo from './paginas/admin/Resumo.jsx';
@@ -28,6 +29,8 @@ import Selecao from './paginas/Selecao.jsx';
 
 /*
  * Mapa de rotas.
+ * - Portão de acesso (modo aprovação): mora em <Estrutura>, ou seja, cobre SÓ a loja. /admin/* fica
+ *   fora dele de propósito — a equipe entra sem sessão de cliente e é do painel que se desliga o portão.
  * - Loja: dentro de <Estrutura> (cabeçalho, rodapé, sessão do CLIENTE).
  * - Painel: /admin/*, FORA da estrutura da loja, dentro de <ProvedorSessaoAdmin> (cookie
  *   vip_sessao_admin, não lê nada de SessaoCliente). /admin/login fica aberto; todo o resto passa
@@ -78,6 +81,7 @@ export default function App() {
             <Route path="selecoes" element={<AdminSelecoes />} />
             <Route path="selecoes/:id" element={<AdminSelecaoDetalhe />} />
             <Route path="clientes" element={<AdminClientes />} />
+            <Route path="permissoes" element={<AdminPermissoes />} />
             <Route path="revisao" element={<AdminRevisao />} />
             <Route path="*" element={<Navigate to="resumo" replace />} />
           </Route>

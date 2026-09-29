@@ -44,7 +44,6 @@ export default function AdminSelecoes() {
   return (
     <section className="admin__pagina">
       <header className="admin-selecoes__topo">
-        <p className="t-label-caps-sm t-muted">/admin/selecoes</p>
         <h1 className="t-headline-lg">Seleções</h1>
         <p className="t-body-sm t-muted admin-selecoes__ajuda">
           O que os clientes mandaram pelo WhatsApp, mais recente primeiro.

@@ -21,6 +21,13 @@
   padding: var(--espaco-6);
 }
 
+.admin__logo {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
 .admin__menu {
   display: flex;
   flex-direction: column;

@@ -38,7 +38,6 @@ export default function AdminDestaques() {
   return (
     <section className="admin__pagina">
       <header className="admin-destaques__topo">
-        <p className="t-label-caps-sm t-muted">/admin/destaques</p>
         <h1 className="t-headline-lg">Destaques</h1>
         <p className="t-body-sm t-muted admin-destaques__ajuda">
           O que a home mostra em "Escolhidas pela casa" e na grade de categorias.

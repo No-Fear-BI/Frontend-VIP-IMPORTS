@@ -1,0 +1,119 @@
+/* Permissões de Acesso do painel: modo, mensagem de bloqueio e fila de pedidos. */
+
+.admin-permissoes__topo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  margin-bottom: var(--espaco-8);
+}
+
+.admin-permissoes__ajuda {
+  max-width: var(--medida-curta);
+}
+
+.admin-permissoes__bloco {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  margin-bottom: var(--espaco-12);
+}
+
+.admin-permissoes__form {
+  margin-top: 0;
+}
+
+.admin-permissoes__modos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  min-width: 0;
+  padding: 0;
+  border: 0;
+}
+
+.admin-permissoes__modos legend {
+  padding: 0;
+  margin-bottom: var(--espaco-3);
+}
+
+.admin-permissoes__modo {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaco-3);
+  padding: var(--espaco-4);
+  border: var(--borda-fina) solid var(--cor-borda);
+  cursor: pointer;
+}
+
+.admin-permissoes__modo--marcado {
+  border-color: var(--cor-borda-forte);
+  border-width: var(--borda-grossa);
+  padding: calc(var(--espaco-4) - (var(--borda-grossa) - var(--borda-fina)));
+}
+
+.admin-permissoes__modo:has(input:focus-visible) {
+  outline: var(--foco-espessura) solid var(--cor-texto);
+  outline-offset: var(--foco-afastamento);
+}
+
+.admin-permissoes__modo-texto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+}
+
+.admin-permissoes__situacao {
+  padding-left: var(--espaco-3);
+  border-left: var(--borda-grossa) solid var(--cor-borda-forte);
+}
+
+.admin-permissoes__mensagem {
+  width: 100%;
+  resize: vertical;
+}
+
+.admin-permissoes__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-4);
+}
+
+.admin-permissoes__contagem {
+  min-height: var(--altura-linha-texto);
+}
+
+.admin-permissoes__esqueleto {
+  height: var(--altura-controle);
+}
+
+.admin-permissoes__erro-linha {
+  margin-top: var(--espaco-2);
+  padding-left: var(--espaco-3);
+  border-left: var(--borda-grossa) solid var(--cor-erro);
+  text-align: left;
+}
+
+.admin-permissoes__paginacao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-4);
+  margin-top: var(--espaco-6);
+}
+
+.admin-permissoes__recusa {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.admin-permissoes__so-leitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

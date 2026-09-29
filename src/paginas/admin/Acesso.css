@@ -15,8 +15,15 @@
   max-width: var(--largura-formulario);
 }
 
-.acesso__caixa > :not(.logo) {
+.acesso__caixa > :not(.acesso__logo) {
   width: 100%;
+}
+
+.acesso__logo {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .acesso__formulario {

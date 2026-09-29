@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import Logo from '../../components/Logo.jsx';
 import Button from '../../components/ui/Button.jsx';
 import { useSessaoAdmin } from '../../contexto/SessaoAdmin.jsx';
@@ -22,13 +22,16 @@ const MENU_ADMIN = [
   { rotulo: 'Destaques', para: 'destaques' },
   { rotulo: 'Seleções', para: 'selecoes' },
   { rotulo: 'Clientes', para: 'clientes' },
+  { rotulo: 'Permissões de Acesso', para: 'permissoes' },
 ];
 
 export default function EstruturaAdmin() {
   return (
     <div className="admin">
       <aside className="admin__lateral faixa-primaria">
-        <Logo tom="creme" />
+        <Link to="/" className="admin__logo" aria-label="Ir para a loja">
+          <Logo tom="creme" />
+        </Link>
         <nav aria-label="Painel">
           <ul className="admin__menu">
             {MENU_ADMIN.map((item) => (
@@ -91,10 +94,9 @@ function SessaoNaLateral() {
 }
 
 /** Conteúdo provisório das páginas do painel enquanto cada uma não é construída. */
-export function PaginaAdminVazia({ titulo, rota }) {
+export function PaginaAdminVazia({ titulo }) {
   return (
     <section className="admin__pagina">
-      <p className="t-label-caps-sm t-muted">{rota}</p>
       <h1 className="t-headline-lg">{titulo}</h1>
       <p className="t-body-sm t-muted">Página ainda não construída.</p>
     </section>

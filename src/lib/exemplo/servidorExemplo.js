@@ -78,6 +78,38 @@ const item = (p) => ({
   capa: p.imagens[0] ? { url: p.imagens[0].url, alt: p.imagens[0].alt } : null,
 });
 
+/** Portão de acesso do modo exemplo: nasce aberto e só tranca se a equipe ligar em /admin/permissoes. */
+function acessoExemplo(estado) {
+  return (
+    estado.acesso || {
+      modo: 'aberto',
+      mensagemBloqueio: null,
+      situacaoCliente: 'aprovado',
+      proximoId: 3,
+      fila: [
+        { id: 1, clienteId: 101, email: 'ana@exemplo.com', nome: 'Ana Souza', telefone: '11999990001', criadoEm: '2026-09-28T13:10:00Z' },
+        { id: 2, clienteId: 102, email: 'bruno@exemplo.com', nome: null, telefone: null, criadoEm: '2026-09-29T09:45:00Z' },
+      ],
+    }
+  );
+}
+
+function estadoDeAcessoExemplo(estado) {
+  const acesso = acessoExemplo(estado);
+  const trancada = acesso.modo === 'aprovacao';
+  const situacao = estado.cliente ? acesso.situacaoCliente : null;
+  return {
+    modo: acesso.modo,
+    podeNavegar: !trancada || situacao === 'aprovado',
+    identificado: Boolean(estado.cliente),
+    situacao,
+    solicitacaoPendente: Boolean(estado.cliente) && acesso.fila.some((f) => f.email === estado.cliente.email),
+    mensagemBloqueio: acesso.mensagemBloqueio,
+    podeSolicitar: true,
+    bloqueadoAte: null,
+  };
+}
+
 function exigirCliente(estado) {
   if (!estado.cliente) throw erro(401, 'NAO_IDENTIFICADO', 'Identifique-se com seu e-mail para continuar.');
 }
@@ -142,6 +174,29 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
     }
     if (!estado.admin) throw erro(401, 'NAO_IDENTIFICADO', 'Faça login para acessar o painel.');
     if (rota === 'GET /admin/eu') return estado.admin;
+
+    if (rota === 'GET /admin/acesso/fila') {
+      const fila = acessoExemplo(estado).fila;
+      return { dados: vazio ? [] : fila, paginacao: { total: vazio ? 0 : fila.length, porPagina: 20, pagina: 1 } };
+    }
+
+    if ((m = rota.match(/^PATCH \/admin\/acesso\/(\d+)$/))) {
+      const acesso = acessoExemplo(estado);
+      const clienteId = Number(m[1]);
+      const linha = acesso.fila.find((f) => f.clienteId === clienteId);
+      acesso.fila = acesso.fila.filter((f) => f.clienteId !== clienteId);
+      if (estado.cliente?.id === clienteId) acesso.situacaoCliente = corpo.situacao;
+      gravar({ ...estado, acesso });
+      return { clienteId, email: linha?.email || '', situacao: corpo.situacao, motivo: corpo.motivo || null, decididoEm: new Date().toISOString() };
+    }
+
+    if (rota === 'PATCH /admin/configuracao/acesso') {
+      const acesso = acessoExemplo(estado);
+      if ('modo' in corpo) acesso.modo = corpo.modo;
+      if ('mensagemBloqueio' in corpo) acesso.mensagemBloqueio = corpo.mensagemBloqueio;
+      gravar({ ...estado, acesso });
+      return { modo: acesso.modo, mensagemBloqueio: acesso.mensagemBloqueio, atualizadoEm: new Date().toISOString() };
+    }
 
     /*
      * Paleta do painel. As cores nascem das variações dos produtos (ver catalogoExemplo),
@@ -915,6 +970,29 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
       : { id: 1, email, nome: null, telefone: null, criadoEm: new Date().toISOString() };
     gravar(estado);
     return estado.cliente;
+  }
+
+  // Portão de acesso (seção 05). Nasce ABERTO: o modo exemplo só tranca se a equipe ligar no painel.
+  if (rota === 'GET /acesso/estado') return estadoDeAcessoExemplo(estado);
+
+  if (rota === 'POST /acesso/solicitar') {
+    exigirCliente(estado);
+    const acesso = acessoExemplo(estado);
+    if (acesso.modo === 'aprovacao' && acesso.situacaoCliente !== 'aprovado') {
+      acesso.situacaoCliente = 'pendente';
+      if (!acesso.fila.some((f) => f.email === estado.cliente.email)) {
+        acesso.fila.push({
+          id: acesso.proximoId++,
+          clienteId: estado.cliente.id,
+          email: estado.cliente.email,
+          nome: corpo?.nome || null,
+          telefone: corpo?.telefone || null,
+          criadoEm: new Date().toISOString(),
+        });
+      }
+      gravar({ ...estado, acesso });
+    }
+    return estadoDeAcessoExemplo({ ...estado, acesso });
   }
 
   if (rota === 'GET /clientes/eu') {

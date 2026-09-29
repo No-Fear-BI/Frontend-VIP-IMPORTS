@@ -34,3 +34,4 @@ npm run lint:design    # só depois que DESIGN.md existir
 ```
 
 Ao terminar uma tela: suba o dev server, tire screenshot em desktop e em ~390px de largura, confirme os três estados e confirme que nenhum valor solto (fora de `var(--token)`) entrou no CSS ou no JSX.
+- Portão de acesso (modo aprovação): mora em `<Estrutura>` (`components/Estrutura.jsx`) e cobre SÓ a loja — `/admin/*` nunca pode passar por ele, senão a equipe não consegue desligá-lo. Estado em `src/contexto/AcessoLoja.jsx`; detalhes em `CLAUDE.md` e `docs/decisoes-frontend.md` (seção 20).
