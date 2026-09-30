@@ -365,7 +365,7 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
         destaque: false,
         destaqueOrdem: null,
         ordem: 0,
-        ativa: true,
+        ativa: corpo?.ativa !== false,
         totalProdutos: 0,
         criadoEm: agora,
         atualizadoEm: agora,
@@ -391,9 +391,10 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
         return { ok: true };
       }
 
-      // Esta tela não manda colecaoId no PATCH (ver comentário de Categorias.jsx): só nome e slug.
+      // Esta tela não manda colecaoId no PATCH (ver comentário de Categorias.jsx): nome, slug e ativa.
       const mudancas = {};
       if (corpo?.nome) mudancas.nome = String(corpo.nome).trim();
+      if (typeof corpo?.ativa === 'boolean') mudancas.ativa = corpo.ativa;
       if (corpo?.slug) {
         const slug = slugDeCor(corpo.slug);
         const naMesmaColecao = categoriasDoPainel(estado).filter((c) => c.id !== id && c.colecaoId === atual.colecaoId);
@@ -956,7 +957,8 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
     if (!colecoes.some((c) => c.slug === m[1])) {
       throw erro(404, 'COLECAO_NAO_ENCONTRADA', 'Coleção não encontrada.');
     }
-    return (vazio ? [] : categorias.filter((c) => c.colecao === m[1])).map((c) => ({
+    // Categoria escondida (`ativa: false`) sai da navegação, como no backend.
+    return (vazio ? [] : categoriasDoPainel(estado).filter((c) => c.colecaoSlug === m[1] && c.ativa !== false)).map((c) => ({
       id: c.id,
       nome: c.nome,
       slug: c.slug,

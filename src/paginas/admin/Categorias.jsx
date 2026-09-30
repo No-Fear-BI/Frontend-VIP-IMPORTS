@@ -12,6 +12,11 @@
  *    produtos também dá 409 (o caminho é criar a categoria na coleção certa e mover os produtos
  *    por `PATCH /admin/produtos/lote`) — esta tela não oferece esse caminho: editar não muda a
  *    coleção, só nome e endereço.
+ * 5. `ativa` esconde a categoria da vitrine (menu, filtros, destaques da home, link direto) sem
+ *    apagar o cadastro nem mexer nos produtos: eles seguem em /todos, busca, marca e nas outras
+ *    categorias. O formulário avisa isso antes de salvar.
+ * 6. Um tema ("Coleção de verão") é uma categoria dentro das duas coleções, não uma coleção nova.
+ *    Ao criar, dá para criar a mesma categoria na outra coleção de uma vez (duas chamadas POST).
  */
 
 import { useMemo, useState } from 'react';
@@ -20,6 +25,7 @@ import Button from '../../components/ui/Button.jsx';
 import Field, { ErroGeral } from '../../components/ui/Field.jsx';
 import Modal from '../../components/ui/Modal.jsx';
 import { useRequisicao } from '../../hooks/useRequisicao.js';
+import { cn } from '../../lib/cn.js';
 import { catalogoService } from '../../services/catalogoService.js';
 import { categoriasService } from '../../services/categoriasService.js';
 import './Categorias.css';
@@ -90,12 +96,16 @@ export default function AdminCategorias() {
                       <th scope="col" className="t-label-caps-sm admin-categorias__col-nome">Categoria</th>
                       <th scope="col" className="t-label-caps-sm admin-categorias__col-slug">Endereço na loja</th>
                       <th scope="col" className="t-label-caps-sm admin-categorias__col-pecas">Peças</th>
+                      <th scope="col" className="t-label-caps-sm admin-categorias__col-situacao">Na loja</th>
                       <th scope="col"><span className="visualmente-oculto">Ações</span></th>
                     </tr>
                   </thead>
                   <tbody>
                     {itens.map((categoria) => (
-                      <tr key={categoria.id}>
+                      <tr
+                        key={categoria.id}
+                        className={cn(!categoria.ativa && 'admin-categorias__linha--escondida')}
+                      >
                         <td className="t-body-sm">{categoria.nome}</td>
                         <td className="t-codigo admin-categorias__slug">
                           ?colecao={colecao.slug}&amp;categoria={categoria.slug}
@@ -106,6 +116,9 @@ export default function AdminCategorias() {
                           ) : (
                             <span className="t-muted">nenhuma</span>
                           )}
+                        </td>
+                        <td className="t-body-sm">
+                          {categoria.ativa ? 'Aparece' : <span className="t-muted">Escondida</span>}
                         </td>
                         <td>
                           <div className="admin-tabela__acoes">
@@ -134,6 +147,8 @@ export default function AdminCategorias() {
             setCriando(false);
             recarregar();
           }}
+          onCriadaParcial={recarregar}
+          onFechar={() => setCriando(false)}
         />
       </Modal>
 
@@ -165,16 +180,23 @@ export default function AdminCategorias() {
   );
 }
 
-function FormCategoria({ categoria, colecoes, onPronto }) {
+function FormCategoria({ categoria, colecoes, onPronto, onCriadaParcial, onFechar }) {
   const edicao = Boolean(categoria);
   const [nome, setNome] = useState(categoria?.nome || '');
   const [slug, setSlug] = useState(categoria?.slug || '');
   const [colecaoId, setColecaoId] = useState(categoria ? String(categoria.colecaoId) : '');
+  const [ativa, setAtiva] = useState(categoria ? categoria.ativa : true);
+  const [criarNaOutra, setCriarNaOutra] = useState(false);
+  const [parcial, setParcial] = useState(null);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState(null);
 
   const slugMudou = edicao && slug.trim() !== categoria.slug;
   const colecaoNome = (id) => colecoes.find((c) => c.id === Number(id))?.nome;
+  // As coleções são duas e fixas: a "outra" só existe quando uma já foi escolhida.
+  const outraColecao = !edicao && colecaoId ? colecoes.find((c) => c.id !== Number(colecaoId)) : null;
+  const escondendo = edicao && categoria.ativa && !ativa;
+  const avisoEsconder = escondendo && (categoria.totalProdutos > 0 || categoria.destaque);
 
   async function salvar(evento) {
     evento.preventDefault();
@@ -186,13 +208,36 @@ function FormCategoria({ categoria, colecoes, onPronto }) {
         const dados = {};
         if (nome.trim() !== categoria.nome) dados.nome = nome.trim();
         if (slugMudou) dados.slug = slug.trim();
+        if (ativa !== categoria.ativa) dados.ativa = ativa;
         await categoriasService.editar(categoria.id, dados);
       } else {
-        await categoriasService.criar({
+        const criada = await categoriasService.criar({
           colecaoId: Number(colecaoId),
           nome: nome.trim(),
+          ativa,
           ...(slug.trim() ? { slug: slug.trim() } : {}),
         });
+        if (criarNaOutra && outraColecao) {
+          try {
+            // Mesmo endereço da primeira: é o que dá ao tema a mesma URL nas duas coleções, e
+            // faz uma colisão na outra coleção virar 409 em vez de um sufixo "-2" silencioso.
+            await categoriasService.criar({
+              colecaoId: outraColecao.id,
+              nome: nome.trim(),
+              slug: criada.slug,
+              ativa,
+            });
+          } catch (falha) {
+            const motivo =
+              falha.status === 409
+                ? `no ${outraColecao.nome} já existe uma categoria com esse endereço`
+                : `no ${outraColecao.nome} não foi possível criar: ${falha.mensagem}`;
+            setParcial(`Criada no ${colecaoNome(colecaoId)}; ${motivo}.`);
+            setSalvando(false);
+            onCriadaParcial();
+            return;
+          }
+        }
       }
       onPronto();
     } catch (falha) {
@@ -250,15 +295,47 @@ function FormCategoria({ categoria, colecoes, onPronto }) {
           <span className="t-codigo">?categoria={categoria.slug}</span>.
         </p>
       )}
+      <label className="admin-categorias__checkbox">
+        <input type="checkbox" checked={ativa} onChange={(e) => setAtiva(e.target.checked)} />
+        <span className="t-body-sm">Mostrar na loja</span>
+      </label>
+      {avisoEsconder && (
+        <p className="t-body-sm admin-categorias__aviso" role="status">
+          Escondida, a categoria sai do menu, dos filtros e dos destaques da home.
+          {categoria.totalProdutos > 0 &&
+            ` ${categoria.totalProdutos === 1 ? 'A peça continua' : `As ${categoria.totalProdutos} peças continuam`} no catálogo.`}
+        </p>
+      )}
+      {erro?.campos?.ativa && <ErroGeral>{erro.campos.ativa}</ErroGeral>}
+      {outraColecao && (
+        <label className="admin-categorias__checkbox">
+          <input
+            type="checkbox"
+            checked={criarNaOutra}
+            onChange={(e) => setCriarNaOutra(e.target.checked)}
+            disabled={Boolean(parcial)}
+          />
+          <span className="t-body-sm">Criar também no {outraColecao.nome}</span>
+        </label>
+      )}
       {erro && !erro.campos && <ErroGeral>{erro.mensagem}</ErroGeral>}
-      <Button
-        variante="primaria"
-        largo
-        type="submit"
-        disabled={salvando || !nome.trim() || (!edicao && !colecaoId)}
-      >
-        {salvando ? 'Salvando…' : edicao ? 'Salvar' : 'Criar categoria'}
-      </Button>
+      {parcial ? (
+        <>
+          <ErroGeral>{parcial}</ErroGeral>
+          <Button variante="primaria" largo onClick={onFechar}>
+            Fechar
+          </Button>
+        </>
+      ) : (
+        <Button
+          variante="primaria"
+          largo
+          type="submit"
+          disabled={salvando || !nome.trim() || (!edicao && !colecaoId)}
+        >
+          {salvando ? 'Salvando…' : edicao ? 'Salvar' : 'Criar categoria'}
+        </Button>
+      )}
     </form>
   );
 }

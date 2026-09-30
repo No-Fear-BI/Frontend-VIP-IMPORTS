@@ -31,15 +31,25 @@
 }
 
 .admin-categorias__col-nome {
-  width: 25%;
+  width: 22%;
 }
 
 .admin-categorias__col-slug {
-  width: 40%;
+  width: 34%;
 }
 
 .admin-categorias__col-pecas {
-  width: 15%;
+  width: 13%;
+}
+
+.admin-categorias__col-situacao {
+  width: 13%;
+}
+
+/* Escondida da loja: texto no tom suave (contraste já validado nos tokens). Some da vitrine,
+   não some da leitura do painel. */
+.admin-categorias__linha--escondida td:not(:last-child) {
+  color: var(--cor-texto-suave);
 }
 
 .admin-categorias__slug {
@@ -51,6 +61,12 @@
   display: flex;
   flex-direction: column;
   gap: var(--espaco-4);
+}
+
+.admin-categorias__checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
 }
 
 .admin-categorias__aviso {
