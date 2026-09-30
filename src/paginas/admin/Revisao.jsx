@@ -74,6 +74,7 @@ export default function Revisao() {
       <div className="revisao__resumo" aria-live="polite">
         <strong className="t-headline-lg">{carregando ? '…' : total.toLocaleString('pt-BR')}</strong> itens aguardando revisão
         <p>Confira a imagem e o nome, informe a marca e escolha as coleções e categorias em que o produto aparecerá.</p>
+        <p className="t-body-sm t-muted"><span aria-hidden="true">*</span> Campo obrigatório para aprovar.</p>
       </div>
       <div className="revisao__filtros">
         <label className="campo">Categoria
@@ -107,6 +108,7 @@ export default function Revisao() {
               <Field
                 id={`marca-${item.id}`}
                 rotulo="Marca"
+                obrigatorio
                 value={marcas[item.id] ?? ''}
                 disabled={Boolean(salvando)}
                 erro={erroDecisao?.itemId === item.id ? erroDecisao.campos?.marca : undefined}
@@ -114,7 +116,7 @@ export default function Revisao() {
               />
               {opcoes.dados && <DestinosProduto
                 id={`destinos-${item.id}`} colecoes={opcoes.dados.colecoes} categorias={opcoes.dados.categorias}
-                valor={destinos[item.id] || {}} disabled={Boolean(salvando) || opcoes.carregando}
+                valor={destinos[item.id] || {}} disabled={Boolean(salvando) || opcoes.carregando} obrigatorio
                 onMudar={(valor) => setDestinos((atual) => ({ ...atual, [item.id]: valor }))}
                 erro={erroDecisao?.itemId === item.id ? erroDecisao.campos?.categoriasIds : undefined}
               />}
