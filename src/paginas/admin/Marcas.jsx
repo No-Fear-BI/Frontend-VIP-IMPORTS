@@ -14,7 +14,7 @@
 import { useState } from 'react';
 import { EstadoErro, EstadoVazio, Esqueleto } from '../../components/Estados.jsx';
 import Button from '../../components/ui/Button.jsx';
-import Field, { ErroGeral } from '../../components/ui/Field.jsx';
+import Field, { ErroGeral, LegendaObrigatorio } from '../../components/ui/Field.jsx';
 import Modal from '../../components/ui/Modal.jsx';
 import { useRequisicao } from '../../hooks/useRequisicao.js';
 import { marcasService } from '../../services/marcasService.js';
@@ -163,9 +163,11 @@ function FormMarca({ marca, onPronto }) {
 
   return (
     <form className="admin-marcas__form" onSubmit={salvar}>
+      <LegendaObrigatorio />
       <Field
         id="marca-nome"
         rotulo="Nome"
+        obrigatorio
         value={nome}
         onChange={(e) => setNome(e.target.value)}
         erro={erro?.campos?.nome}

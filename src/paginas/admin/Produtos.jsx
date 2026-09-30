@@ -24,6 +24,11 @@ import { ROTULO_STATUS } from './rotulosProduto.js';
 import './Produtos.css';
 
 const POR_PAGINA = 50;
+/** Mesma janela do backend (DIAS_NOVIDADE): só quem ainda está nos 14 dias tem o que remover. */
+const DIAS_NOVIDADE = 14;
+const nasNovidades = (produto) =>
+  produto.emNovidades && Date.now() - new Date(produto.criadoEm).getTime() < DIAS_NOVIDADE * 86400000;
+
 const FILTROS = ['busca', 'marcaId', 'colecaoId', 'categoriaId', 'status'];
 
 export default function AdminProdutos() {
@@ -46,21 +51,39 @@ export default function AdminProdutos() {
 
   const marcas = useRequisicao((sinal) => marcasService.listar(sinal), []);
   const colecoes = useRequisicao((sinal) => catalogoService.colecoes(sinal), []);
-  const categorias = useRequisicao(
-    (sinal) => categoriasService.listar(filtros.colecaoId || undefined, sinal),
-    [filtros.colecaoId],
-  );
+  const categorias = useRequisicao((sinal) => categoriasService.listar(sinal), []);
 
-  /** Qualquer filtro novo volta para a página 1; trocar a coleção limpa a categoria. */
+  /** Qualquer filtro novo volta para a página 1. */
   function mudarFiltro(mudancas) {
     const proximo = new URLSearchParams(params);
     for (const [nome, valor] of Object.entries(mudancas)) {
       if (valor) proximo.set(nome, valor);
       else proximo.delete(nome);
     }
-    if ('colecaoId' in mudancas) proximo.delete('categoriaId');
     if (!('pagina' in mudancas)) proximo.delete('pagina');
     setParams(proximo, { replace: !('pagina' in mudancas) });
+  }
+
+  async function removerDasNovidades(produto) {
+    setAviso('');
+    try {
+      await produtosAdminService.editar(produto.id, { emNovidades: false });
+      setAviso(`${produto.codigo} saiu das novidades.`);
+      lista.recarregar();
+    } catch (falha) {
+      setAviso(falha.mensagem);
+    }
+  }
+
+  async function realocarNasNovidades(produto) {
+    setAviso('');
+    try {
+      await produtosAdminService.editar(produto.id, { emNovidades: true });
+      setAviso(`${produto.codigo} voltou para as novidades.`);
+      lista.recarregar();
+    } catch (falha) {
+      setAviso(falha.mensagem);
+    }
   }
 
   const limpar = () => setParams(new URLSearchParams(), { replace: true });
@@ -104,7 +127,7 @@ export default function AdminProdutos() {
         />
         <Selecao
           id="filtro-colecao"
-          rotulo="Coleção"
+          rotulo="Público"
           valor={filtros.colecaoId}
           onMudar={(colecaoId) => mudarFiltro({ colecaoId })}
           opcoes={colecoes.dados?.map((c) => ({ valor: c.id, rotulo: c.nome }))}
@@ -115,11 +138,7 @@ export default function AdminProdutos() {
           rotulo="Categoria"
           valor={filtros.categoriaId}
           onMudar={(categoriaId) => mudarFiltro({ categoriaId })}
-          opcoes={categorias.dados?.map((c) => ({
-            valor: c.id,
-            // Sem coleção escolhida, "Bolsas" aparece duas vezes: o slug só é único por coleção.
-            rotulo: filtros.colecaoId ? c.nome : `${c.nome} · ${c.colecaoSlug}`,
-          }))}
+          opcoes={categorias.dados?.map((c) => ({ valor: c.id, rotulo: c.nome }))}
           falhou={Boolean(categorias.erro)}
         />
         <Selecao
@@ -210,6 +229,8 @@ export default function AdminProdutos() {
                       {ROTULO_STATUS[produto.status]}
                     </span>
                     {produto.destaque && <span className="t-muted"> · destaque</span>}
+                    {nasNovidades(produto) && <span className="t-muted"> · em novidades</span>}
+                    {!produto.emNovidades && <span className="t-muted"> · fora das novidades</span>}
                   </td>
                   <td className="admin-produtos__acoes">
                     <Link
@@ -219,6 +240,16 @@ export default function AdminProdutos() {
                     >
                       Editar
                     </Link>
+                    {nasNovidades(produto) && (
+                      <button type="button" className="link-caps" onClick={() => removerDasNovidades(produto)}>
+                        Remover das novidades
+                      </button>
+                    )}
+                    {!produto.emNovidades && (
+                      <button type="button" className="link-caps" onClick={() => realocarNasNovidades(produto)}>
+                        Realocar nas novidades
+                      </button>
+                    )}
                     <BotaoDuplicar
                       produtoId={produto.id}
                       render={(abrir) => (

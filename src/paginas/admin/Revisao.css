@@ -4,12 +4,12 @@
 .revisao__resumo p { margin-top: var(--espaco-2); }
 .revisao__filtros { margin-bottom: var(--espaco-6); align-items: end; }
 .revisao__filtros .campo { flex: 1; min-width: 0; }
-.revisao__grade { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--espaco-5); }
+.revisao__grade { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--espaco-8); }
 .revisao__card { min-width: 0; padding: 0; overflow: hidden; }
 .revisao__card img { width: 100%; aspect-ratio: 1; object-fit: contain; background: var(--cor-fundo-foto); }
-.revisao__conteudo { padding: var(--espaco-4); display: grid; gap: var(--espaco-3); overflow-wrap: anywhere; }
+.revisao__conteudo { padding: var(--espaco-6); display: grid; gap: var(--espaco-4); overflow-wrap: anywhere; }
 .revisao__conteudo small { color: var(--cor-texto-suave); }
 .revisao__paginacao { margin-block: var(--espaco-6); }
-.revisao__acoes { margin-top: var(--espaco-3); }
-@media (max-width: 1023px) { .revisao__grade { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.revisao__acoes { margin-top: var(--espaco-4); padding-top: var(--espaco-4); border-top: var(--borda-fina) solid var(--cor-borda); }
+@media (max-width: 1240px) { .revisao__grade { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 480px) { .revisao { padding: var(--espaco-4); } .revisao__cabecalho, .revisao__filtros { align-items: stretch; flex-direction: column; } .revisao__grade { grid-template-columns: 1fr; } }

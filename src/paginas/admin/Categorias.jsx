@@ -1,58 +1,41 @@
 /*
- * Categorias do painel (/admin/categorias). CRUD por coleção, mesmo padrão de Cores.jsx/Marcas.jsx.
+ * Categorias do painel (/admin/categorias). CRUD simples, mesmo padrão de Cores.jsx/Marcas.jsx.
  *
  * O que o backend impõe (docs/para-o-frontend.md, "Painel administrativo — marcas, categorias e
- * banners"):
- * 1. O slug é único POR COLEÇÃO, não global — "bolsas" existe em Feminino e em Masculino como
- *    categorias diferentes. Por isso a tela separa a listagem por coleção em vez de uma tabela
- *    só, e o slug só precisa ser único dentro da coleção escolhida.
+ * banners" e "Feminino e Masculino viram o público do produto"):
+ * 1. Desde a migração 0015 a categoria NÃO pertence a coleção. Feminino e Masculino são o
+ *    PÚBLICO do produto (`publicos`, os dois = unissex), escolhido no produto; "Bolsas" existe
+ *    uma vez só e vale para os dois públicos. O slug é único na tabela toda.
  * 2. O slug nasce do nome na criação e NÃO muda sozinho depois — mesma regra de marca/cor.
  * 3. Categoria com produto não é excluída: 409 `CATEGORIA_COM_PRODUTOS` com a contagem.
- * 4. A coleção é escolha de quando a categoria NASCE. Trocar a coleção de uma categoria com
- *    produtos também dá 409 (o caminho é criar a categoria na coleção certa e mover os produtos
- *    por `PATCH /admin/produtos/lote`) — esta tela não oferece esse caminho: editar não muda a
- *    coleção, só nome e endereço.
- * 5. `ativa` esconde a categoria da vitrine (menu, filtros, destaques da home, link direto) sem
+ * 4. `ativa` esconde a categoria da vitrine (menu, filtros, destaques da home, link direto) sem
  *    apagar o cadastro nem mexer nos produtos: eles seguem em /todos, busca, marca e nas outras
  *    categorias. O formulário avisa isso antes de salvar.
- * 6. Um tema ("Coleção de verão") é uma categoria dentro das duas coleções, não uma coleção nova.
- *    Ao criar, dá para criar a mesma categoria na outra coleção de uma vez (duas chamadas POST).
+ * 5. Um tema ("Coleção de verão") é uma categoria como as outras.
+ * 6. "Card Esquerda" / "Card Direita" (0016): a categoria ocupa um dos dois cards de coleção da home
+ *    (esquerda = no lugar do Feminina, direita = no lugar do Masculina), com a imagem que o dono
+ *    enviar. Cada lado tem UMA categoria: quem marcar toma o lugar de quem estava.
  */
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { EstadoErro, EstadoVazio, Esqueleto } from '../../components/Estados.jsx';
 import Button from '../../components/ui/Button.jsx';
-import Field, { ErroGeral } from '../../components/ui/Field.jsx';
+import Field, { ErroGeral, LegendaObrigatorio } from '../../components/ui/Field.jsx';
 import Modal from '../../components/ui/Modal.jsx';
 import { useRequisicao } from '../../hooks/useRequisicao.js';
 import { cn } from '../../lib/cn.js';
-import { catalogoService } from '../../services/catalogoService.js';
+import { EnvioArquivo, PreviaImagem } from './Banners.jsx';
 import { categoriasService } from '../../services/categoriasService.js';
 import './Categorias.css';
 
 export default function AdminCategorias() {
-  const categorias = useRequisicao((sinal) => categoriasService.listar(undefined, sinal), []);
-  const colecoes = useRequisicao((sinal) => catalogoService.colecoes(sinal), []);
+  const { dados: categorias, erro, carregando, recarregar } = useRequisicao(
+    (sinal) => categoriasService.listar(sinal),
+    [],
+  );
   const [criando, setCriando] = useState(false);
   const [editando, setEditando] = useState(null);
   const [excluindo, setExcluindo] = useState(null);
-
-  const carregando = categorias.carregando || colecoes.carregando;
-  const erro = categorias.erro || colecoes.erro;
-  const recarregar = () => {
-    categorias.recarregar();
-    colecoes.recarregar();
-  };
-
-  const porColecao = useMemo(() => {
-    if (!categorias.dados || !colecoes.dados) return [];
-    return colecoes.dados.map((colecao) => ({
-      colecao,
-      itens: categorias.dados.filter((c) => c.colecaoId === colecao.id),
-    }));
-  }, [categorias.dados, colecoes.dados]);
-
-  const semNenhuma = categorias.dados?.length === 0;
 
   return (
     <section className="admin__pagina">
@@ -60,10 +43,11 @@ export default function AdminCategorias() {
         <div>
           <h1 className="t-headline-lg">Categorias</h1>
           <p className="t-body-sm t-muted admin-categorias__ajuda">
-            Uma por coleção: "Bolsas" no Feminino e "Bolsas" no Masculino são categorias diferentes.
+            Tipos de peça e temas ("Bolsas", "Coleção de verão"). Feminino e Masculino são o público de
+            cada produto, escolhido no cadastro da peça.
           </p>
         </div>
-        <Button variante="primaria" onClick={() => setCriando(true)} disabled={!colecoes.dados?.length}>
+        <Button variante="primaria" onClick={() => setCriando(true)}>
           Nova categoria
         </Button>
       </header>
@@ -76,79 +60,69 @@ export default function AdminCategorias() {
         </div>
       ) : erro ? (
         <EstadoErro erro={erro} onTentar={recarregar} titulo="Não conseguimos carregar as categorias." />
-      ) : semNenhuma ? (
+      ) : categorias.length === 0 ? (
         <EstadoVazio
           titulo="Nenhuma categoria cadastrada ainda."
-          texto="Cadastre as categorias das duas coleções: todo produto precisa de uma."
+          texto="Cadastre as categorias da loja: todo produto precisa de uma."
           acao={{ rotulo: 'Nova categoria', onClick: () => setCriando(true) }}
         />
       ) : (
-        <div className="admin-categorias__colecoes">
-          {porColecao.map(({ colecao, itens }) => (
-            <section key={colecao.id} className="admin-categorias__bloco">
-              <h2 className="t-headline-md">{colecao.nome}</h2>
-              {itens.length === 0 ? (
-                <p className="t-body-sm t-muted">Nenhuma categoria nesta coleção ainda.</p>
-              ) : (
-                <table className="admin-tabela admin-categorias__tabela">
-                  <thead>
-                    <tr>
-                      <th scope="col" className="t-label-caps-sm admin-categorias__col-nome">Categoria</th>
-                      <th scope="col" className="t-label-caps-sm admin-categorias__col-slug">Endereço na loja</th>
-                      <th scope="col" className="t-label-caps-sm admin-categorias__col-pecas">Peças</th>
-                      <th scope="col" className="t-label-caps-sm admin-categorias__col-situacao">Na loja</th>
-                      <th scope="col"><span className="visualmente-oculto">Ações</span></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {itens.map((categoria) => (
-                      <tr
-                        key={categoria.id}
-                        className={cn(!categoria.ativa && 'admin-categorias__linha--escondida')}
-                      >
-                        <td className="t-body-sm">{categoria.nome}</td>
-                        <td className="t-codigo admin-categorias__slug">
-                          ?colecao={colecao.slug}&amp;categoria={categoria.slug}
-                        </td>
-                        <td className="t-body-sm">
-                          {categoria.totalProdutos > 0 ? (
-                            `${categoria.totalProdutos} ${categoria.totalProdutos === 1 ? 'peça' : 'peças'}`
-                          ) : (
-                            <span className="t-muted">nenhuma</span>
-                          )}
-                        </td>
-                        <td className="t-body-sm">
-                          {categoria.ativa ? 'Aparece' : <span className="t-muted">Escondida</span>}
-                        </td>
-                        <td>
-                          <div className="admin-tabela__acoes">
-                            <button type="button" className="link-caps" onClick={() => setEditando(categoria)}>
-                              Editar
-                            </button>
-                            <button type="button" className="link-caps" onClick={() => setExcluindo(categoria)}>
-                              Excluir
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </section>
-          ))}
-        </div>
+        <table className="admin-tabela admin-categorias__tabela">
+          <thead>
+            <tr>
+              <th scope="col" className="t-label-caps-sm admin-categorias__col-nome">Categoria</th>
+              <th scope="col" className="t-label-caps-sm admin-categorias__col-slug">Endereço na loja</th>
+              <th scope="col" className="t-label-caps-sm admin-categorias__col-pecas">Peças</th>
+              <th scope="col" className="t-label-caps-sm admin-categorias__col-situacao">Na loja</th>
+              <th scope="col"><span className="visualmente-oculto">Ações</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {categorias.map((categoria) => (
+              <tr
+                key={categoria.id}
+                className={cn(!categoria.ativa && 'admin-categorias__linha--escondida')}
+              >
+                <td className="t-body-sm">
+                  {categoria.nome}
+                  {categoria.cardHome && (
+                    <span className="t-label-caps-sm t-muted"> · Card {categoria.cardHome}</span>
+                  )}
+                </td>
+                <td className="t-codigo admin-categorias__slug">?categoria={categoria.slug}</td>
+                <td className="t-body-sm">
+                  {categoria.totalProdutos > 0 ? (
+                    `${categoria.totalProdutos} ${categoria.totalProdutos === 1 ? 'peça' : 'peças'}`
+                  ) : (
+                    <span className="t-muted">nenhuma</span>
+                  )}
+                </td>
+                <td className="t-body-sm">
+                  {categoria.ativa ? 'Aparece' : <span className="t-muted">Escondida</span>}
+                </td>
+                <td>
+                  <div className="admin-tabela__acoes">
+                    <button type="button" className="link-caps" onClick={() => setEditando(categoria)}>
+                      Editar
+                    </button>
+                    <button type="button" className="link-caps" onClick={() => setExcluindo(categoria)}>
+                      Excluir
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
 
       <Modal aberto={criando} onFechar={() => setCriando(false)} titulo="Nova categoria">
         <FormCategoria
-          colecoes={colecoes.dados || []}
+          categorias={categorias || []}
           onPronto={() => {
             setCriando(false);
             recarregar();
           }}
-          onCriadaParcial={recarregar}
-          onFechar={() => setCriando(false)}
         />
       </Modal>
 
@@ -156,7 +130,7 @@ export default function AdminCategorias() {
         {editando && (
           <FormCategoria
             categoria={editando}
-            colecoes={colecoes.dados || []}
+            categorias={categorias || []}
             onPronto={() => {
               setEditando(null);
               recarregar();
@@ -180,64 +154,62 @@ export default function AdminCategorias() {
   );
 }
 
-function FormCategoria({ categoria, colecoes, onPronto, onCriadaParcial, onFechar }) {
+const LADOS = [
+  { valor: 'esquerda', rotulo: 'Card Esquerda', quem: 'Feminina' },
+  { valor: 'direita', rotulo: 'Card Direita', quem: 'Masculina' },
+];
+
+function FormCategoria({ categoria, categorias, onPronto }) {
   const edicao = Boolean(categoria);
   const [nome, setNome] = useState(categoria?.nome || '');
   const [slug, setSlug] = useState(categoria?.slug || '');
-  const [colecaoId, setColecaoId] = useState(categoria ? String(categoria.colecaoId) : '');
   const [ativa, setAtiva] = useState(categoria ? categoria.ativa : true);
-  const [criarNaOutra, setCriarNaOutra] = useState(false);
-  const [parcial, setParcial] = useState(null);
+  const [card, setCard] = useState(categoria?.cardHome || '');
+  const [cardImagem, setCardImagem] = useState(categoria?.cardHomeImagemUrl || '');
+  const [erroNome, setErroNome] = useState('');
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState(null);
 
   const slugMudou = edicao && slug.trim() !== categoria.slug;
-  const colecaoNome = (id) => colecoes.find((c) => c.id === Number(id))?.nome;
-  // As coleções são duas e fixas: a "outra" só existe quando uma já foi escolhida.
-  const outraColecao = !edicao && colecaoId ? colecoes.find((c) => c.id !== Number(colecaoId)) : null;
   const escondendo = edicao && categoria.ativa && !ativa;
   const avisoEsconder = escondendo && (categoria.totalProdutos > 0 || categoria.destaque);
+  // Quem ocupa hoje o lado escolhido (se não for esta categoria): ela sai do card ao salvar.
+  const ocupante = card ? categorias.find((c) => c.cardHome === card && c.id !== categoria?.id) : null;
+
+  function alternarCard(lado, marcado) {
+    setCard(marcado ? lado : '');
+    if (!marcado) setCardImagem('');
+  }
 
   async function salvar(evento) {
     evento.preventDefault();
+    // O nome é obrigatório: sem ele a categoria não é criada (nem editada).
+    if (!nome.trim()) {
+      setErroNome('Informe o nome da categoria.');
+      return;
+    }
+    setErroNome('');
     setSalvando(true);
     setErro(null);
     try {
       if (edicao) {
-        // Coleção não muda aqui: é escolha de quando a categoria nasce (ver comentário do topo).
         const dados = {};
         if (nome.trim() !== categoria.nome) dados.nome = nome.trim();
         if (slugMudou) dados.slug = slug.trim();
         if (ativa !== categoria.ativa) dados.ativa = ativa;
+        if (card !== (categoria.cardHome || '')) dados.cardHome = card || null;
+        if (card && cardImagem.trim() !== (categoria.cardHomeImagemUrl || '')) {
+          dados.cardHomeImagemUrl = cardImagem.trim() || null;
+        }
         await categoriasService.editar(categoria.id, dados);
       } else {
-        const criada = await categoriasService.criar({
-          colecaoId: Number(colecaoId),
+        await categoriasService.criar({
           nome: nome.trim(),
           ativa,
           ...(slug.trim() ? { slug: slug.trim() } : {}),
+          ...(card ? { cardHome: card } : {}),
+          ...(card && cardImagem.trim() ? { cardHomeImagemUrl: cardImagem.trim() } : {}),
         });
-        if (criarNaOutra && outraColecao) {
-          try {
-            // Mesmo endereço da primeira: é o que dá ao tema a mesma URL nas duas coleções, e
-            // faz uma colisão na outra coleção virar 409 em vez de um sufixo "-2" silencioso.
-            await categoriasService.criar({
-              colecaoId: outraColecao.id,
-              nome: nome.trim(),
-              slug: criada.slug,
-              ativa,
-            });
-          } catch (falha) {
-            const motivo =
-              falha.status === 409
-                ? `no ${outraColecao.nome} já existe uma categoria com esse endereço`
-                : `no ${outraColecao.nome} não foi possível criar: ${falha.mensagem}`;
-            setParcial(`Criada no ${colecaoNome(colecaoId)}; ${motivo}.`);
-            setSalvando(false);
-            onCriadaParcial();
-            return;
-          }
-        }
       }
       onPronto();
     } catch (falha) {
@@ -247,37 +219,18 @@ function FormCategoria({ categoria, colecoes, onPronto, onCriadaParcial, onFecha
   }
 
   return (
-    <form className="admin-categorias__form" onSubmit={salvar}>
-      {edicao ? (
-        <p className="t-body-sm t-muted">Coleção: {colecaoNome(colecaoId)}</p>
-      ) : (
-        <div className="campo">
-          <label htmlFor="categoria-colecao" className="t-label-caps">
-            Coleção
-          </label>
-          <select
-            id="categoria-colecao"
-            className="campo__input"
-            value={colecaoId}
-            onChange={(e) => setColecaoId(e.target.value)}
-            required
-          >
-            <option value="">Selecione</option>
-            {colecoes.map((c) => (
-              <option key={c.id} value={String(c.id)}>
-                {c.nome}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
+    <form className="admin-categorias__form" onSubmit={salvar} noValidate>
+      <LegendaObrigatorio />
       <Field
         id="categoria-nome"
         rotulo="Nome"
+        obrigatorio
         value={nome}
-        onChange={(e) => setNome(e.target.value)}
-        erro={erro?.campos?.nome}
-        required
+        onChange={(e) => {
+          setNome(e.target.value);
+          if (erroNome) setErroNome('');
+        }}
+        erro={erroNome || erro?.campos?.nome}
         maxLength={80}
       />
       <Field
@@ -307,35 +260,50 @@ function FormCategoria({ categoria, colecoes, onPronto, onCriadaParcial, onFecha
         </p>
       )}
       {erro?.campos?.ativa && <ErroGeral>{erro.campos.ativa}</ErroGeral>}
-      {outraColecao && (
-        <label className="admin-categorias__checkbox">
-          <input
-            type="checkbox"
-            checked={criarNaOutra}
-            onChange={(e) => setCriarNaOutra(e.target.checked)}
-            disabled={Boolean(parcial)}
-          />
-          <span className="t-body-sm">Criar também no {outraColecao.nome}</span>
-        </label>
-      )}
+
+      <fieldset className="admin-categorias__card">
+        <legend className="t-label-caps">Card na página inicial</legend>
+        <p className="t-body-sm t-muted">
+          Esquerda ocupa o lugar do card Feminina e Direita, o do card Masculina. Só uma categoria por lado.
+        </p>
+        {LADOS.map((lado) => (
+          <label key={lado.valor} className="admin-categorias__checkbox">
+            <input
+              type="checkbox"
+              checked={card === lado.valor}
+              onChange={(e) => alternarCard(lado.valor, e.target.checked)}
+            />
+            <span className="t-body-sm">{lado.rotulo}</span>
+          </label>
+        ))}
+        {ocupante && (
+          <p className="t-body-sm admin-categorias__aviso" role="status">
+            Hoje este card é da categoria {ocupante.nome}. Ao salvar, ela sai dele.
+          </p>
+        )}
+        {card && (
+          <>
+            <Field
+              id="categoria-card-imagem"
+              rotulo="Imagem do card"
+              ajuda="Endereço da imagem (https://…) ou envie um arquivo. Sem imagem, vale a imagem da categoria."
+              value={cardImagem}
+              onChange={(e) => setCardImagem(e.target.value)}
+              erro={erro?.campos?.cardHomeImagemUrl}
+            />
+            <EnvioArquivo id="categoria-card-arquivo" alt={nome} onEnviado={setCardImagem} />
+            <PreviaImagem url={cardImagem} alt={nome} className="admin-categorias__previa" />
+            <p className="t-body-sm t-muted">
+              Proporção recomendada: quadrada (1:1), por exemplo 1200 × 1200 px. No celular o card fica
+              mais largo que alto, então deixe o assunto da foto no centro.
+            </p>
+          </>
+        )}
+      </fieldset>
       {erro && !erro.campos && <ErroGeral>{erro.mensagem}</ErroGeral>}
-      {parcial ? (
-        <>
-          <ErroGeral>{parcial}</ErroGeral>
-          <Button variante="primaria" largo onClick={onFechar}>
-            Fechar
-          </Button>
-        </>
-      ) : (
-        <Button
-          variante="primaria"
-          largo
-          type="submit"
-          disabled={salvando || !nome.trim() || (!edicao && !colecaoId)}
-        >
-          {salvando ? 'Salvando…' : edicao ? 'Salvar' : 'Criar categoria'}
-        </Button>
-      )}
+      <Button variante="primaria" largo type="submit" disabled={salvando || !nome.trim()}>
+        {salvando ? 'Salvando…' : edicao ? 'Salvar' : 'Criar categoria'}
+      </Button>
     </form>
   );
 }
@@ -361,7 +329,8 @@ function ConfirmarExclusao({ categoria, onPronto }) {
       {categoria.totalProdutos > 0 ? (
         <p className="t-body-lg">
           {categoria.totalProdutos} {categoria.totalProdutos === 1 ? 'peça usa' : 'peças usam'} a
-          categoria {categoria.nome}. Mova ou exclua essas peças antes de excluir a categoria.
+          categoria {categoria.nome}. Mova ou exclua essas peças antes de excluir a categoria — ou
+          esconda a categoria da loja, que não mexe em peça nenhuma.
         </p>
       ) : (
         <p className="t-body-lg">Excluir a categoria {categoria.nome}? Nenhuma peça usa esta categoria.</p>

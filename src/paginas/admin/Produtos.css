@@ -355,3 +355,10 @@
     padding: var(--espaco-4);
   }
 }
+
+/* Editar, novidades, Duplicar e Excluir ficam na mesma linha; no celular a linha vira bloco e pode quebrar. */
+@media (min-width: 768px) {
+  .admin-produtos__acoes {
+    white-space: nowrap;
+  }
+}

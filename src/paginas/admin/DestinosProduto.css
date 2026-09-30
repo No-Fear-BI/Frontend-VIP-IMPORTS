@@ -3,3 +3,7 @@
 .destinos-produto__opcao { display: flex; align-items: center; gap: var(--espaco-2); cursor: pointer; }
 .destinos-produto__opcao input { accent-color: var(--cor-primaria); }
 .destinos-produto .campo__input { width: 100%; min-width: 0; }
+.destinos-produto__linha { display: flex; flex-wrap: wrap; gap: var(--espaco-4); }
+.destinos-produto__remover, .destinos-produto__adicionar { justify-self: start; }
+
+.destinos-produto__adicionar, .destinos-produto__adicionar:hover { text-decoration: none; font-weight: var(--peso-forte); }

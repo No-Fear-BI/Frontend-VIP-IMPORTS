@@ -106,15 +106,15 @@ function ListagemDaColecao() {
 }
 
 /*
- * O slug de categoria só é único DENTRO de uma coleção (GET /produtos exige `colecao` junto com
- * `categoria`). Por isso /categorias/:categoria precisa de ?colecao=… e vira a listagem da coleção
- * filtrada. Sem coleção, volta para /categorias, que mostra as categorias de cada coleção.
+ * Desde a migração 0015 o slug de categoria é único na tabela (a categoria não pertence a
+ * coleção). /categorias/:categoria?colecao=… continua vindo da listagem da coleção filtrada;
+ * sem coleção, vira a listagem de todas as peças da categoria.
  */
 function CategoriaRedireciona() {
   const { categoria } = useParams();
   const [params] = useSearchParams();
   const colecao = params.get('colecao');
-  if (!colecao) return <Navigate to="/categorias" replace />;
+  if (!colecao) return <Navigate to={`/produtos?categoria=${encodeURIComponent(categoria)}`} replace />;
   return (
     <Navigate to={`/colecoes/${encodeURIComponent(colecao)}?categoria=${encodeURIComponent(categoria)}`} replace />
   );

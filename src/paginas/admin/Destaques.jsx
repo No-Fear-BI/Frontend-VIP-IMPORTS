@@ -255,7 +255,6 @@ function GradeDestaqueCategorias({ inicial }) {
     nome: c.nome,
     slug: c.slug,
     imagemUrl: c.imagemUrl,
-    colecaoSlug: c.colecao.slug,
   }));
   const [salva, setSalva] = useState(linhaInicial);
   const [linhas, setLinhas] = useState(linhaInicial);
@@ -263,7 +262,7 @@ function GradeDestaqueCategorias({ inicial }) {
   const [erro, setErro] = useState(null);
   const [aviso, setAviso] = useState('');
 
-  const disponiveis = useRequisicao((sinal) => categoriasService.listar(undefined, sinal), []);
+  const disponiveis = useRequisicao((sinal) => categoriasService.listar(sinal), []);
 
   const mudou = assinatura(linhas) !== assinatura(salva);
   const cheia = linhas.length >= TETO_CATEGORIAS;
@@ -289,7 +288,7 @@ function GradeDestaqueCategorias({ inicial }) {
     if (cheia || linhas.some((c) => c.id === categoria.id)) return;
     alterar([
       ...linhas,
-      { id: categoria.id, nome: categoria.nome, slug: categoria.slug, imagemUrl: categoria.imagemUrl, colecaoSlug: categoria.colecaoSlug },
+      { id: categoria.id, nome: categoria.nome, slug: categoria.slug, imagemUrl: categoria.imagemUrl },
     ]);
   }
 
@@ -330,7 +329,6 @@ function GradeDestaqueCategorias({ inicial }) {
               <MiniaturaDestaque url={categoria.imagemUrl} alt={categoria.nome} />
               <div className="admin-destaques__item-info">
                 <p className="t-body-sm">{categoria.nome}</p>
-                <p className="t-body-sm t-muted">{categoria.colecaoSlug}</p>
                 {problemas.has(categoria.id) && (
                   <p className="t-body-sm admin-destaques__erro-item" role="alert">
                     Categoria inativa — não pode ser destaque. Remova ou reative a categoria.
@@ -410,7 +408,7 @@ function AdicionarCategoria({ disponiveis, carregando, cheia, onAdicionar }) {
           <option value="">{cheia ? `Limite de ${TETO_CATEGORIAS} atingido.` : 'Selecione'}</option>
           {disponiveis.map((c) => (
             <option key={c.id} value={String(c.id)}>
-              {c.nome} · {c.colecaoSlug}
+              {c.nome}
               {!c.ativa ? ' (inativa)' : ''}
             </option>
           ))}
