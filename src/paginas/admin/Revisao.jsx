@@ -5,6 +5,7 @@ import { EstadoErro, EstadoVazio, EsqueletoGrade } from '../../components/Estado
 import Button from '../../components/ui/Button.jsx';
 import Field, { ErroGeral } from '../../components/ui/Field.jsx';
 import Card from '../../components/ui/Card.jsx';
+import ImagemAmpliavel from '../../components/ImagemAmpliavel.jsx';
 import './Revisao.css';
 import CampoNovidades from './CampoNovidades.jsx';
 import { categoriasService } from '../../services/categoriasService.js';
@@ -108,7 +109,10 @@ export default function Revisao() {
         </nav>
         <div className="revisao__grade">{itens.map((item) => (
           <Card como="article" borda className="revisao__card" key={item.id}>
-            <img loading="lazy" src={`/api/v1/admin/revisao/imagem?url=${encodeURIComponent(item.image)}&source=${encodeURIComponent(item.sourceUrl)}`} alt={item.translatedName} />
+            <ImagemAmpliavel
+              url={`/api/v1/admin/revisao/imagem?url=${encodeURIComponent(item.image)}&source=${encodeURIComponent(item.sourceUrl)}`}
+              alt={item.translatedName}
+            />
             <div className="revisao__conteudo">
               <small>{item.category} • {item.supplier}</small>
               <Field id={`nome-${item.id}`} rotulo="Nome em português" value={nomes[item.id] ?? item.translatedName} disabled={Boolean(salvando)} onChange={(e) => setNomes((atual) => ({ ...atual, [item.id]: e.target.value }))} />

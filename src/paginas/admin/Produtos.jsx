@@ -8,11 +8,11 @@
  * - Os filtros são por id. Eles vivem na URL (?busca=&marcaId=&colecaoId=&categoriaId=&status=
  *   &pagina=), para recarregar, voltar do produto ou mandar o link sem perder a busca.
  */
-
 import { useMemo, useState } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { Esqueleto, EstadoErro, EstadoVazio } from '../../components/Estados.jsx';
 import { FotoProduto } from '../../components/Produto.jsx';
+import ImagemAmpliavel from '../../components/ImagemAmpliavel.jsx';
 import Button from '../../components/ui/Button.jsx';
 import { useRequisicao } from '../../hooks/useRequisicao.js';
 import { catalogoService } from '../../services/catalogoService.js';
@@ -22,7 +22,6 @@ import { produtosAdminService } from '../../services/produtosAdminService.js';
 import { BotaoDuplicar, BotaoExcluir } from './Produto.jsx';
 import { ROTULO_STATUS } from './rotulosProduto.js';
 import './Produtos.css';
-
 const POR_PAGINA = 50;
 /** Mesma janela do backend (DIAS_NOVIDADE): só quem ainda está nos 14 dias tem o que remover. */
 const DIAS_NOVIDADE = 14;
@@ -30,25 +29,21 @@ const nasNovidades = (produto) =>
   produto.emNovidades && Date.now() - new Date(produto.criadoEm).getTime() < DIAS_NOVIDADE * 86400000;
 
 const FILTROS = ['busca', 'marcaId', 'colecaoId', 'categoriaId', 'status'];
-
 export default function AdminProdutos() {
   const [params, setParams] = useSearchParams();
   const location = useLocation();
   // Aviso de exclusão: vem da tela do produto (estado da rota) ou de um "Excluir" da própria lista.
   const [aviso, setAviso] = useState(location.state?.aviso || '');
-
   const filtros = useMemo(() => {
     const lidos = Object.fromEntries(FILTROS.map((nome) => [nome, params.get(nome) || '']));
     return { ...lidos, pagina: Math.max(1, Number(params.get('pagina')) || 1) };
   }, [params]);
   const temFiltro = FILTROS.some((nome) => filtros[nome]);
-
   const chave = JSON.stringify(filtros);
   const lista = useRequisicao(
     (sinal) => produtosAdminService.listar({ ...filtros, porPagina: POR_PAGINA }, sinal),
     [chave],
   );
-
   const marcas = useRequisicao((sinal) => marcasService.listar(sinal), []);
   const colecoes = useRequisicao((sinal) => catalogoService.colecoes(sinal), []);
   const categorias = useRequisicao((sinal) => categoriasService.listar(sinal), []);
@@ -87,10 +82,8 @@ export default function AdminProdutos() {
   }
 
   const limpar = () => setParams(new URLSearchParams(), { replace: true });
-
   const total = lista.dados?.paginacao.total ?? 0;
   const paginas = Math.max(1, Math.ceil(total / POR_PAGINA));
-
   return (
     <section className="admin__pagina">
       <header className="admin-produtos__topo admin-produtos__topo-linha">
@@ -104,13 +97,11 @@ export default function AdminProdutos() {
           Novo produto
         </Button>
       </header>
-
       {aviso && (
         <p className="t-body-sm admin-produto__aviso" role="status">
           {aviso}
         </p>
       )}
-
       <div className="admin-produtos__filtros" role="search">
         <FormBusca
           key={filtros.busca}
@@ -149,7 +140,6 @@ export default function AdminProdutos() {
           opcoes={Object.entries(ROTULO_STATUS).map(([valor, rotulo]) => ({ valor, rotulo }))}
         />
       </div>
-
       <p className="t-body-sm t-muted admin-produtos__contagem" aria-live="polite">
         {lista.carregando || lista.erro
           ? ' '
@@ -160,7 +150,6 @@ export default function AdminProdutos() {
           </button>
         )}
       </p>
-
       {lista.carregando ? (
         <div className="estado-carregando" aria-busy="true" aria-label="Carregando produtos">
           {Array.from({ length: 6 }, (_, i) => (
@@ -205,7 +194,9 @@ export default function AdminProdutos() {
               {lista.dados.dados.map((produto) => (
                 <tr key={produto.id}>
                   <td className="admin-produtos__foto">
-                    <FotoProduto url={produto.capa?.url} alt="" />
+                    <ImagemAmpliavel url={produto.capa?.url} alt={produto.nome}>
+                      <FotoProduto url={produto.capa?.url} alt="" />
+                    </ImagemAmpliavel>
                   </td>
                   <td className="t-codigo">
                     <Link
@@ -275,7 +266,6 @@ export default function AdminProdutos() {
               ))}
             </tbody>
           </table>
-
           {paginas > 1 && (
             <nav className="admin-produtos__paginacao" aria-label="Páginas">
               <Button
@@ -302,7 +292,6 @@ export default function AdminProdutos() {
     </section>
   );
 }
-
 /** A busca vai para a URL ao enviar, não a cada tecla: cada letra seria uma consulta. */
 function FormBusca({ inicial, onBuscar }) {
   const [texto, setTexto] = useState(inicial);
@@ -333,7 +322,6 @@ function FormBusca({ inicial, onBuscar }) {
     </form>
   );
 }
-
 /**
  * Seletor de filtro. Enquanto as opções carregam, fica desabilitado com "Carregando…"; se a
  * lista falhar, diz isso no próprio campo — a listagem continua funcionando sem esse filtro.
