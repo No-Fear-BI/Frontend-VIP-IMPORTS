@@ -1,6 +1,7 @@
-/* O gatilho é um botão real (funciona por Tab + Enter, não é div com onClick)
-   vestido de foto: sem borda, sem fundo, cursor de lupa. */
+/* Gatilho é um botão real vestido de foto. position: relative para o zoom
+   cobrir exatamente a área da foto, dentro ou fora da tabela do painel. */
 .imagem-ampliavel__gatilho {
+  position: relative;
   display: block;
   padding: 0;
   border: 0;
@@ -8,15 +9,25 @@
   cursor: zoom-in;
 }
 
-/* Foco visível na régua de foco do sistema, igual ao resto do site. */
 .imagem-ampliavel__gatilho:focus-visible {
   outline: var(--foco-espessura) solid var(--cor-primaria);
   outline-offset: var(--foco-afastamento);
 }
 
-/* Foto grande: ocupa a largura do corpo do modal e cresce na altura. O próprio
-   modal já limita a altura da janela (100dvh) e rola se a foto for alta. Fundo
-   branco atrás da foto, como manda o DESIGN.md para superfície de imagem. */
+/* Zoom que acompanha o mouse: cobre a foto inteira com a MESMA url ampliada.
+   Os valores de tamanho e posição vêm do JSX (FATOR_ZOOM e % do cursor), então
+   aqui só fica a borda de filete e o recorte. Só existe enquanto o mouse está
+   em cima — o JSX não monta o elemento fora disso. */
+.imagem-ampliavel__zoom {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  border: var(--borda-fina) solid var(--cor-borda-forte);
+}
+
+/* Foto grande dentro do modal: ocupa a largura e cresce na altura; o próprio
+   modal limita a janela (100dvh) e rola se a foto for alta. */
 .imagem-ampliavel__grande {
   display: block;
   width: 100%;
