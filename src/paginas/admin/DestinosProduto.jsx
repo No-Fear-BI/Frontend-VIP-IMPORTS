@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { MarcaObrigatorio } from '../../components/ui/Field.jsx';
 import './DestinosProduto.css';
 
 export const destinosCompletos = (valor) =>
@@ -11,7 +12,7 @@ export function destinosDosIds(ids, categorias) {
   }));
 }
 
-export default function DestinosProduto({ id, colecoes, categorias, valor, onMudar, disabled, erro }) {
+export default function DestinosProduto({ id, colecoes, categorias, valor, onMudar, disabled, erro, obrigatorio }) {
   function marcar(colecaoId, marcada) {
     const novo = { ...valor };
     if (marcada) novo[colecaoId] = '';
@@ -20,7 +21,7 @@ export default function DestinosProduto({ id, colecoes, categorias, valor, onMud
   }
   return (
     <fieldset className="destinos-produto" disabled={disabled} aria-describedby={`${id}-ajuda`}>
-      <legend className="t-label-caps">Coleções e categorias</legend>
+      <legend className="t-label-caps">Coleções e categorias{obrigatorio && <MarcaObrigatorio />}</legend>
       <p id={`${id}-ajuda`} className="t-body-sm t-muted">Marque Feminino, Masculino ou ambos e escolha uma categoria para cada coleção.</p>
       {colecoes.length === 0 && <p className="t-body-sm">Nenhuma coleção disponível.</p>}
       {colecoes.map((colecao) => {
@@ -34,7 +35,7 @@ export default function DestinosProduto({ id, colecoes, categorias, valor, onMud
               <span>{rotulo}</span>
             </label>
             {marcada && <label className="campo" htmlFor={`${id}-${colecao.id}`}>
-              <span className="t-label-caps">Categoria — {rotulo}</span>
+              <span className="t-label-caps">Categoria — {rotulo}{obrigatorio && <MarcaObrigatorio />}</span>
               <select id={`${id}-${colecao.id}`} className="campo__input" value={valor[colecao.id]} required
                 onChange={(e) => onMudar({ ...valor, [colecao.id]: e.target.value })}>
                 <option value="">Escolha a categoria</option>

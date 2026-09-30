@@ -4,6 +4,12 @@
   gap: var(--espaco-2);
 }
 
+/* Asterisco de obrigatório: mesma cor do rótulo, sem cor nova (a paleta não tem
+   vermelho). Quem explica o sinal é o aviso "* Campo obrigatório" da tela. */
+.campo__obrigatorio {
+  font-weight: var(--peso-forte);
+}
+
 /* --texto-md: abaixo disso o iOS dá zoom ao focar o campo. */
 .campo__input {
   height: var(--altura-controle);
