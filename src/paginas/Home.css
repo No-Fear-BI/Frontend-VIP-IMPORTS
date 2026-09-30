@@ -7,21 +7,32 @@
   display: grid;
 }
 
+/* Trilho: ocupa o hero e recebe o arrasto. --arrasto é o deslocamento do dedo em px (JSX). */
+.hero__trilho {
+  position: absolute;
+  inset: 0;
+  touch-action: pan-y;
+  user-select: none;
+  cursor: grab;
+}
+
+.hero__trilho--arrastando {
+  cursor: grabbing;
+}
+
+/* Slides lado a lado: --posicao (-1, 0, 1) é relativo ao atual; o que está fora de 0 fica fora da
+   tela e o overflow do .hero corta. Solta o dedo e assenta com a mesma curva; arrastando, sem transição. */
 .hero__slide {
   position: absolute;
   inset: 0;
   display: grid;
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity var(--duracao-lenta) ease-in-out,
-    visibility 0s linear var(--duracao-lenta);
+  transform: translateX(calc(var(--posicao, 0) * 100% + var(--arrasto, 0px)));
+  transition: transform var(--duracao-lenta) var(--curva-suave);
 }
 
-.hero__slide--ativo {
-  opacity: 1;
-  visibility: visible;
-  transition: opacity var(--duracao-lenta) ease-in-out;
+.hero__trilho--arrastando .hero__slide,
+.hero__slide--sem-transicao {
+  transition: none;
 }
 
 .hero__imagem {
@@ -30,6 +41,8 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  -webkit-user-drag: none;
+  pointer-events: none;
 }
 
 /* Zoom lento enquanto o slide está ativo. */
@@ -190,6 +203,21 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--calha);
+}
+
+@media (max-width: 767px) {
+  /* No celular a navegação é deslizar o dedo: sem setas; contador e progresso ficam. */
+  .hero__seta {
+    display: none;
+  }
+
+  .hero__controles {
+    bottom: var(--espaco-4);
+  }
+
+  .hero__progresso {
+    margin-right: 0;
+  }
 }
 
 @media (max-width: 767px) {
