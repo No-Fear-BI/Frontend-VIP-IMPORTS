@@ -17,8 +17,12 @@ on:
   pull_request:
   workflow_call:
 
+# `github.workflow` no grupo: chamado por publicar.yml (workflow_call), ele vale
+# "Publicar", não "Build". Sem isso, o push na main disparava as duas cópias do
+# build no MESMO grupo, uma cancelava a outra e o commit ficava vermelho com o
+# build passando.
 concurrency:
-  group: build-${{ github.ref }}
+  group: build-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
