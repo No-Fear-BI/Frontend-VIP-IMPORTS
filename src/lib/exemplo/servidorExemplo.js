@@ -146,6 +146,24 @@ function validarPar(p, { variacaoTamanhoId = null, variacaoCorId = null }) {
   return { variacaoTamanhoId, variacaoCorId };
 }
 
+const REVISAO_EXEMPLO = [
+  ['bolsa', 'Bolsas', 'Leather shoulder bag', 'Bolsa de ombro em couro'],
+  ['camisa', 'Camisas', 'Cotton oxford shirt', 'Camisa oxford de algodão'],
+  ['carteira', 'Acessórios', 'Bifold wallet', 'Carteira dobrável'],
+  ['cinto', 'Acessórios', 'Leather belt', 'Cinto de couro'],
+  ['lenco', 'Acessórios', 'Silk scarf', 'Lenço de seda'],
+  ['bolsa-corrente', 'Bolsas', 'Chain strap bag', 'Bolsa com alça de corrente'],
+].map(([arquivo, category, name, translatedName], i) => ({
+  id: 9001 + i,
+  image: `/exemplo/produtos/${arquivo}.svg`,
+  sourceUrl: 'https://exemplo.com/fornecedor',
+  name,
+  translatedName,
+  translatedDetails: 'Peça de teste para a fila de revisão.',
+  category,
+  supplier: 'Fornecedor Exemplo',
+}));
+
 export async function responderExemplo(metodo, url, corpo, sinal) {
   const modo = cenario();
   await esperar(modo === 'lento' ? 4000 : 250 + Math.random() * 250, sinal);
@@ -180,6 +198,28 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
     }
     if (!estado.admin) throw erro(401, 'NAO_IDENTIFICADO', 'Faça login para acessar o painel.');
     if (rota === 'GET /admin/eu') return estado.admin;
+
+    // Fila de revisão fictícia. As fotos são ilustrações de public/exemplo; o vite.config.js
+    // (modo exemplo) faz /admin/revisao/imagem redirecionar para elas.
+    if (rota === 'GET /admin/revisao/pendentes') {
+      const busca = normalizar(q.get('busca') || '');
+      const categoria = q.get('categoria') || 'Todos';
+      let lista = vazio ? [] : REVISAO_EXEMPLO.filter((i) => !estado.revisados?.includes(i.id));
+      if (categoria !== 'Todos') lista = lista.filter((i) => i.category === categoria);
+      if (busca) lista = lista.filter((i) => normalizar(i.name).includes(busca));
+      return {
+        items: lista,
+        categories: [...new Set(REVISAO_EXEMPLO.map((i) => i.category))],
+        total: lista.length,
+        pagina: 1,
+        paginas: 1,
+      };
+    }
+
+    if (rota === 'POST /admin/revisao') {
+      gravar({ ...estado, revisados: [...(estado.revisados || []), corpo.productId] });
+      return { ok: true };
+    }
 
     if (rota === 'GET /admin/acesso/fila') {
       const fila = acessoExemplo(estado).fila;

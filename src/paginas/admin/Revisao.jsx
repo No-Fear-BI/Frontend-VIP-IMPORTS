@@ -10,7 +10,7 @@ import './Revisao.css';
 import CampoNovidades from './CampoNovidades.jsx';
 import { categoriasService } from '../../services/categoriasService.js';
 import DestinosProduto, { destinosCompletos, destinosVazios } from './DestinosProduto.jsx';
-import SeletorMarca, { NOVA, nomeDaMarca } from './SeletorMarca.jsx';
+import SeletorMarca, { GENERICO, NOVA, nomeDaMarca } from './SeletorMarca.jsx';
 import { marcasService } from '../../services/marcasService.js';
 
 export default function Revisao() {
@@ -65,7 +65,7 @@ export default function Revisao() {
       setMarcas((atual) => { const novo = { ...atual }; delete novo[item.id]; return novo; });
       setDestinos((atual) => { const novo = { ...atual }; delete novo[item.id]; return novo; });
       setSemNovidades((atual) => { const novo = { ...atual }; delete novo[item.id]; return novo; });
-      if (marcas[item.id]?.escolha === NOVA) listaMarcas.recarregar();
+      if ([NOVA, GENERICO].includes(marcas[item.id]?.escolha)) listaMarcas.recarregar();
       recarregar();
     } catch (falha) {
       setErroDecisao({ itemId: item.id, mensagem: falha.mensagem, campos: falha.campos || {} });
@@ -110,6 +110,7 @@ export default function Revisao() {
         <div className="revisao__grade">{itens.map((item) => (
           <Card como="article" borda className="revisao__card" key={item.id}>
             <ImagemAmpliavel
+              lupa
               url={`/api/v1/admin/revisao/imagem?url=${encodeURIComponent(item.image)}&source=${encodeURIComponent(item.sourceUrl)}`}
               alt={item.translatedName}
             />

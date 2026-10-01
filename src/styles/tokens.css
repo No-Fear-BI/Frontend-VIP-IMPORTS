@@ -229,6 +229,7 @@
   --deslocamento-seta: 4px;
   --escala-hover: 1.04;
   --escala-destaque: 1.06;
+  --escala-zoom-foto: 2.2;                 /* lupa da foto principal na página do produto */
   --escala-pulo: 1.25;
   --escala-pressionado: 0.985;
 }
@@ -248,6 +249,7 @@
     --deslocamento-seta: 0px;
     --escala-hover: 1;
     --escala-destaque: 1;
+    --escala-zoom-foto: 1;
     --escala-pulo: 1;
   }
 }
