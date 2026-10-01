@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react';
-import { decidirProduto, listarPendentes } from '../../services/revisaoService.js';
+import { useEffect, useRef, useState } from 'react';
+import { decidirProduto, listarPendentes, listarAprovados, tentarImagens, desfazerDecisao } from '../../services/revisaoService.js';
 import { useRequisicao } from '../../hooks/useRequisicao.js';
 import { EstadoErro, EstadoVazio, EsqueletoGrade } from '../../components/Estados.jsx';
 import Button from '../../components/ui/Button.jsx';
@@ -14,6 +14,40 @@ import SeletorMarca, { GENERICO, NOVA, nomeDaMarca } from './SeletorMarca.jsx';
 import { marcasService } from '../../services/marcasService.js';
 
 export default function Revisao() {
+  const aprovados = useRequisicao((sinal) => listarAprovados(sinal), []);
+  const [repetindo, setRepetindo] = useState(null);
+  const [reabrindo, setReabrindo] = useState(null);
+  const [erroImagens, setErroImagens] = useState(null);
+  useEffect(() => {
+    if (!aprovados.dados?.some((item) => item.imagensEstado === 'pendente')) return;
+    const temporizador = setInterval(aprovados.recarregar, 5000);
+    return () => clearInterval(temporizador);
+  }, [aprovados.dados, aprovados.recarregar]);
+  const repetirImagens = async (id) => {
+    setRepetindo(id);
+    setErroImagens(null);
+    try {
+      await tentarImagens(id);
+      aprovados.recarregar();
+    } catch (erro) {
+      setErroImagens(erro.mensagem || 'Não foi possível tentar novamente.');
+    } finally {
+      setRepetindo(null);
+    }
+  };
+  const reabrirParaRevisao = async (id) => {
+    setReabrindo(id);
+    setErroImagens(null);
+    try {
+      await desfazerDecisao(id);
+      aprovados.recarregar();
+      recarregar();
+    } catch (erro) {
+      setErroImagens(erro.mensagem || 'Não foi possível devolver o produto para revisão.');
+    } finally {
+      setReabrindo(null);
+    }
+  };
   const [busca, setBusca] = useState('');
   const [categoria, setCategoria] = useState('Todos');
   const [pagina, setPagina] = useState(1);
@@ -67,6 +101,7 @@ export default function Revisao() {
       setSemNovidades((atual) => { const novo = { ...atual }; delete novo[item.id]; return novo; });
       if ([NOVA, GENERICO].includes(marcas[item.id]?.escolha)) listaMarcas.recarregar();
       recarregar();
+      aprovados.recarregar();
     } catch (falha) {
       setErroDecisao({ itemId: item.id, mensagem: falha.mensagem, campos: falha.campos || {} });
     } finally {
@@ -85,6 +120,26 @@ export default function Revisao() {
         <p>Confira a imagem e o nome, informe a marca e escolha o público e as categorias do produto.</p>
         <p className="t-body-sm t-muted"><span aria-hidden="true">*</span> Campo obrigatório para aprovar.</p>
       </div>
+      <section className="revisao__resumo" aria-labelledby="imagens-aprovadas">
+        <h2 id="imagens-aprovadas" className="t-headline-md">Imagens dos produtos aprovados</h2>
+        <p>Após aprovar, salvamos as imagens automaticamente. Novos produtos aparecem na loja quando todas as fotos estiverem prontas.</p>
+        <Button variante="texto" onClick={aprovados.recarregar} disabled={aprovados.carregando}>Atualizar status</Button>
+        {erroImagens && <ErroGeral>{erroImagens}</ErroGeral>}
+        {aprovados.erro ? <EstadoErro erro={aprovados.erro} onTentar={aprovados.recarregar} /> : !aprovados.dados && aprovados.carregando ? <EsqueletoGrade /> : aprovados.dados?.length === 0 ? (
+          <EstadoVazio titulo="Nenhuma aprovação ainda" texto="Aprove um produto na fila abaixo para salvar suas imagens." />
+        ) : <ul className="revisao__downloads" aria-live="polite">{aprovados.dados?.map((item) => (
+          <li key={item.id}>
+            <strong>{item.name}</strong>
+            <span>{({ pendente: item.imagensTentativas ? 'Nova tentativa automática agendada' : 'Aguardando download das imagens', concluido: 'Imagens salvas', falha: item.image ? 'Imagem local disponível' : 'Falha ao salvar imagens', legado: 'Aprovação antiga — produto ainda não publicado' })[item.imagensEstado]}</span>
+            {item.produtoId && <a href={`/admin/produtos/${item.produtoId}`}>Ver produto no painel →</a>}
+            {item.imagensEstado === 'legado' && <Button variante="secundaria" disabled={Boolean(reabrindo)} onClick={() => reabrirParaRevisao(item.id)}>{reabrindo === item.id ? 'Devolvendo…' : 'Devolver para revisão'}</Button>}
+            {item.imagensEstado === 'falha' && <>
+              <p>{item.imagensErro}</p>
+              <Button variante="secundaria" disabled={Boolean(repetindo)} onClick={() => repetirImagens(item.id)}>{repetindo === item.id ? 'Agendando…' : 'Tentar novamente'}</Button>
+            </>}
+          </li>
+        ))}</ul>}
+      </section>
       <div className="revisao__filtros">
         <label className="campo">Categoria
           <select className="campo__input" value={categoria} disabled={Boolean(salvando)} onChange={(e) => { setCategoria(e.target.value); setPagina(1); }}>
@@ -143,7 +198,7 @@ export default function Revisao() {
                 onMudar={(marcado) => setSemNovidades((atual) => ({ ...atual, [item.id]: !marcado }))}
               />
               <nav className="revisao__acoes">
-                <a href={item.sourceUrl} target="_blank" rel="noreferrer">Ver origem ↗</a>
+                {item.sourceUrl ? <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer">Ver origem ↗</a> : <span>Origem indisponível</span>}
                 <Button disabled={Boolean(salvando) || opcoes.carregando || Boolean(opcoes.erro) || !destinosCompletos(destinos[item.id] || destinosVazios()) || !marcaDe(item.id)} onClick={() => aprovar(item)}>{salvando === item.id ? 'Salvando…' : 'Aprovar'}</Button>
               </nav>
             </div>
