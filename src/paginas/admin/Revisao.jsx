@@ -13,6 +13,17 @@ import DestinosProduto, { destinosCompletos, destinosVazios } from './DestinosPr
 import SeletorMarca, { GENERICO, NOVA, nomeDaMarca } from './SeletorMarca.jsx';
 import { marcasService } from '../../services/marcasService.js';
 
+// O Yupoo responde 404 a um álbum aberto sem `uid=1` na URL, e os links salvos na fila vêm sem ele.
+function linkDaOrigem(url) {
+  try {
+    const link = new URL(url);
+    if (!link.searchParams.has('uid')) link.searchParams.set('uid', '1');
+    return link.toString();
+  } catch {
+    return url;
+  }
+}
+
 export default function Revisao() {
   const aprovados = useRequisicao((sinal) => listarAprovados(sinal), []);
   const [repetindo, setRepetindo] = useState(null);
@@ -198,7 +209,7 @@ export default function Revisao() {
                 onMudar={(marcado) => setSemNovidades((atual) => ({ ...atual, [item.id]: !marcado }))}
               />
               <nav className="revisao__acoes">
-                {item.sourceUrl ? <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer">Ver origem ↗</a> : <span>Origem indisponível</span>}
+                {item.sourceUrl ? <a href={linkDaOrigem(item.sourceUrl)}target="_blank" rel="noopener noreferrer">Ver origem ↗</a> : <span>Origem indisponível</span>}
                 <Button disabled={Boolean(salvando) || opcoes.carregando || Boolean(opcoes.erro) || !destinosCompletos(destinos[item.id] || destinosVazios()) || !marcaDe(item.id)} onClick={() => aprovar(item)}>{salvando === item.id ? 'Salvando…' : 'Aprovar'}</Button>
               </nav>
             </div>
