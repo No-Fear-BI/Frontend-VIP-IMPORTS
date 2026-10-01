@@ -216,6 +216,12 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
       };
     }
 
+    if (rota === 'GET /admin/revisao/fotos') {
+      // Todas as ilustrações de exemplo fazem as vezes das fotos do álbum.
+      const todas = ['bolsa', 'camisa', 'carteira', 'cinto', 'lenco', 'bolsa-corrente'].map((a) => `/exemplo/produtos/${a}.svg`);
+      return { fotos: todas.map((url) => ({ url, miniatura: url })) };
+    }
+
     if (rota === 'POST /admin/revisao') {
       gravar({ ...estado, revisados: [...(estado.revisados || []), corpo.productId] });
       return { ok: true };

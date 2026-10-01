@@ -8,6 +8,7 @@ import Card from '../../components/ui/Card.jsx';
 import ImagemAmpliavel from '../../components/ImagemAmpliavel.jsx';
 import './Revisao.css';
 import CampoNovidades from './CampoNovidades.jsx';
+import FotosDoAlbum from './FotosDoAlbum.jsx';
 import { categoriasService } from '../../services/categoriasService.js';
 import DestinosProduto, { destinosCompletos, destinosVazios } from './DestinosProduto.jsx';
 import SeletorMarca, { GENERICO, NOVA, nomeDaMarca } from './SeletorMarca.jsx';
@@ -67,6 +68,8 @@ export default function Revisao() {
   const [destinos, setDestinos] = useState({});
   // Só guarda quem desmarcou; ausente = marcado (padrão: aprovar já coloca em novidades).
   const [semNovidades, setSemNovidades] = useState({});
+  // Fotos escolhidas por produto, na ordem final (a primeira é a capa). Ausente = só a foto do cartão.
+  const [fotos, setFotos] = useState({});
   const emNovidadesDe = (id) => !semNovidades[id];
   const opcoes = useRequisicao(async (sinal) => ({ categorias: await categoriasService.listar(sinal) }), []);
   // Pedido à parte das categorias: recarregar a lista depois de criar marca não
@@ -105,11 +108,13 @@ export default function Revisao() {
         categoriasIds: destinos[item.id].categoriasIds.map(Number),
         publicos: destinos[item.id].publicos,
         emNovidades: emNovidadesDe(item.id),
+        ...(fotos[item.id] ? { fotos: fotos[item.id] } : {}),
       });
       setNomes((atual) => { const novo = { ...atual }; delete novo[item.id]; return novo; });
       setMarcas((atual) => { const novo = { ...atual }; delete novo[item.id]; return novo; });
       setDestinos((atual) => { const novo = { ...atual }; delete novo[item.id]; return novo; });
       setSemNovidades((atual) => { const novo = { ...atual }; delete novo[item.id]; return novo; });
+      setFotos((atual) => { const novo = { ...atual }; delete novo[item.id]; return novo; });
       if ([NOVA, GENERICO].includes(marcas[item.id]?.escolha)) listaMarcas.recarregar();
       recarregar();
       aprovados.recarregar();
@@ -201,6 +206,13 @@ export default function Revisao() {
                 erro={erroDecisao?.itemId === item.id ? erroDecisao.campos?.categoriasIds : undefined}
                 erroPublicos={erroDecisao?.itemId === item.id ? erroDecisao.campos?.publicos : undefined}
               />}
+              <FotosDoAlbum
+                produtoId={item.id}
+                origem={item.sourceUrl}
+                valor={fotos[item.id]}
+                disabled={Boolean(salvando)}
+                onMudar={(valor) => setFotos((atual) => ({ ...atual, [item.id]: valor }))}
+              />
               <CampoNovidades
                 id={`novidades-${item.id}`}
                 rotulo="Colocar em novidades ao permitir?"
@@ -209,7 +221,7 @@ export default function Revisao() {
                 onMudar={(marcado) => setSemNovidades((atual) => ({ ...atual, [item.id]: !marcado }))}
               />
               <nav className="revisao__acoes">
-                {item.sourceUrl ? <a href={linkDaOrigem(item.sourceUrl)}target="_blank" rel="noopener noreferrer">Ver origem ↗</a> : <span>Origem indisponível</span>}
+                {item.sourceUrl ? <a href={linkDaOrigem(item.sourceUrl)} target="_blank" rel="noopener noreferrer">Ver origem ↗</a> : <span>Origem indisponível</span>}
                 <Button disabled={Boolean(salvando) || opcoes.carregando || Boolean(opcoes.erro) || !destinosCompletos(destinos[item.id] || destinosVazios()) || !marcaDe(item.id)} onClick={() => aprovar(item)}>{salvando === item.id ? 'Salvando…' : 'Aprovar'}</Button>
               </nav>
             </div>

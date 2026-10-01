@@ -1,0 +1,9 @@
+.fotos-album { display: grid; gap: var(--espaco-3); }
+.fotos-album__grade { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--espaco-2); padding: 0; margin: var(--espaco-2) 0 0; list-style: none; }
+.fotos-album__item { display: grid; align-content: start; gap: var(--espaco-1); justify-items: start; min-width: 0; }
+.fotos-album__foto { position: relative; display: block; width: 100%; padding: 0; border: var(--borda-fina) solid var(--cor-borda); background: var(--cor-fundo-foto); cursor: pointer; }
+.fotos-album__foto img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; opacity: 0.55; }
+.fotos-album__foto:disabled { cursor: not-allowed; }
+.fotos-album__item--marcada .fotos-album__foto { border: var(--borda-grossa) solid var(--cor-primaria); }
+.fotos-album__item--marcada .fotos-album__foto img { opacity: 1; }
+.fotos-album__ordem { position: absolute; top: var(--espaco-1); left: var(--espaco-1); padding: var(--espaco-1) var(--espaco-2); background: var(--cor-primaria); color: var(--cor-sobre-primaria); font-size: var(--texto-xs); }
