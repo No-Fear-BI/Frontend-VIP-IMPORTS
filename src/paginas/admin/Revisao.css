@@ -13,7 +13,3 @@
 .revisao__acoes { margin-top: var(--espaco-4); padding-top: var(--espaco-4); border-top: var(--borda-fina) solid var(--cor-borda); }
 @media (max-width: 1240px) { .revisao__grade { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 480px) { .revisao { padding: var(--espaco-4); } .revisao__cabecalho, .revisao__filtros { align-items: stretch; flex-direction: column; } .revisao__grade { grid-template-columns: 1fr; } }
-
-.revisao__downloads { display: grid; gap: var(--espaco-4); padding: 0; margin-block: var(--espaco-4); list-style: none; }
-.revisao__downloads li { display: grid; gap: var(--espaco-2); border-bottom: var(--borda-fina) solid var(--cor-borda); padding-block: var(--espaco-3); overflow-wrap: anywhere; }
-.revisao__downloads .botao { justify-self: start; }
