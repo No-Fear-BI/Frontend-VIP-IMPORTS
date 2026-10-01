@@ -14,6 +14,16 @@ import DestinosProduto, { destinosCompletos, destinosVazios } from './DestinosPr
 import SeletorMarca, { GENERICO, NOVA, nomeDaMarca } from './SeletorMarca.jsx';
 import { marcasService } from '../../services/marcasService.js';
 
+const chaveDaMarca = (nome) => nome.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+// Marca que o título do álbum sugere: a cadastrada de mesmo nome ("Hermes" = "Hermès") ou, se ainda não
+// existe, "+ Nova marca" já com o nome. Sem a lista de marcas carregada não há sugestão (evita piscar).
+function marcaSugerida(nome, cadastradas) {
+  if (!nome || !cadastradas) return undefined;
+  const achada = cadastradas.find((m) => m.ativa && chaveDaMarca(m.nome) === chaveDaMarca(nome));
+  return achada ? { escolha: String(achada.id), nova: '' } : { escolha: NOVA, nova: nome };
+}
+
 // O Yupoo responde 404 a um álbum aberto sem `uid=1` na URL, e os links salvos na fila vêm sem ele.
 function linkDaOrigem(url) {
   try {
@@ -41,7 +51,9 @@ export default function Revisao() {
   // Pedido à parte das categorias: recarregar a lista depois de criar marca não
   // pode esconder o bloco de categorias de todos os cartões enquanto carrega.
   const listaMarcas = useRequisicao((sinal) => marcasService.listar(sinal), []);
-  const marcaDe = (id) => nomeDaMarca(marcas[id], listaMarcas.dados || []);
+  // Escolha do cartão; enquanto ninguém mexeu, vale a marca sugerida pelo título do álbum (`item.brand`).
+  const valorMarca = (item) => marcas[item.id] ?? marcaSugerida(item.brand, listaMarcas.dados);
+  const marcaDe = (item) => nomeDaMarca(valorMarca(item), listaMarcas.dados || []);
   const [salvando, setSalvando] = useState(null);
   const [erroDecisao, setErroDecisao] = useState(null);
   const trava = useRef(false);
@@ -58,7 +70,7 @@ export default function Revisao() {
   const limpar = () => { setBusca(''); setCategoria('Todos'); setPagina(1); };
   const aprovar = async (item) => {
     if (trava.current) return;
-    if (!destinosCompletos(destinos[item.id] || destinosVazios()) || !marcaDe(item.id)) {
+    if (!destinosCompletos(destinos[item.id] || destinosVazios()) || !marcaDe(item)) {
       setErroDecisao({ itemId: item.id, mensagem: 'Informe a marca, o público (Feminino e/ou Masculino) e a categoria.', campos: {} });
       return;
     }
@@ -70,7 +82,7 @@ export default function Revisao() {
         productId: item.id,
         status: 'approved',
         translatedName: nomes[item.id] ?? item.translatedName,
-        marca: marcaDe(item.id),
+        marca: marcaDe(item),
         categoriasIds: destinos[item.id].categoriasIds.map(Number),
         publicos: destinos[item.id].publicos,
         emNovidades: emNovidadesDe(item.id),
@@ -81,7 +93,7 @@ export default function Revisao() {
       setDestinos((atual) => { const novo = { ...atual }; delete novo[item.id]; return novo; });
       setSemNovidades((atual) => { const novo = { ...atual }; delete novo[item.id]; return novo; });
       setFotos((atual) => { const novo = { ...atual }; delete novo[item.id]; return novo; });
-      if ([NOVA, GENERICO].includes(marcas[item.id]?.escolha)) listaMarcas.recarregar();
+      if ([NOVA, GENERICO].includes(valorMarca(item).escolha)) listaMarcas.recarregar();
       recarregar();
     } catch (falha) {
       setErroDecisao({ itemId: item.id, mensagem: falha.mensagem, campos: falha.campos || {} });
@@ -139,11 +151,12 @@ export default function Revisao() {
                 id={`marca-${item.id}`}
                 marcas={listaMarcas.dados}
                 carregando={listaMarcas.carregando}
-                valor={marcas[item.id]}
+                valor={valorMarca(item)}
                 disabled={Boolean(salvando)}
                 erro={erroDecisao?.itemId === item.id ? erroDecisao.campos?.marca : undefined}
                 onMudar={(valor) => setMarcas((atual) => ({ ...atual, [item.id]: valor }))}
               />
+              {!marcas[item.id] && item.brand && valorMarca(item) && <p className="t-body-sm t-muted">Marca sugerida pelo título do álbum: confira antes de aprovar.</p>}
               {opcoes.dados && <DestinosProduto
                 id={`destinos-${item.id}`} categorias={opcoes.dados.categorias}
                 valor={destinos[item.id] || destinosVazios()} disabled={Boolean(salvando) || opcoes.carregando} obrigatorio
@@ -167,7 +180,7 @@ export default function Revisao() {
               />
               <nav className="revisao__acoes">
                 {item.sourceUrl ? <a href={linkDaOrigem(item.sourceUrl)} target="_blank" rel="noopener noreferrer">Ver origem ↗</a> : <span>Origem indisponível</span>}
-                <Button disabled={Boolean(salvando) || opcoes.carregando || Boolean(opcoes.erro) || !destinosCompletos(destinos[item.id] || destinosVazios()) || !marcaDe(item.id)} onClick={() => aprovar(item)}>{salvando === item.id ? 'Salvando…' : 'Aprovar'}</Button>
+                <Button disabled={Boolean(salvando) || opcoes.carregando || Boolean(opcoes.erro) || !destinosCompletos(destinos[item.id] || destinosVazios()) || !marcaDe(item)} onClick={() => aprovar(item)}>{salvando === item.id ? 'Salvando…' : 'Aprovar'}</Button>
               </nav>
             </div>
           </Card>
