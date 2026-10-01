@@ -12,6 +12,7 @@ import SeletorVariacoes from '../components/SeletorVariacoes.jsx';
 import { useCompra } from '../contexto/CompraWhatsApp.jsx';
 import { useSessaoCliente } from '../contexto/SessaoCliente.jsx';
 import { useRequisicao } from '../hooks/useRequisicao.js';
+import { acompanharMouse } from '../lib/lupa.js';
 import Button from '../components/ui/Button.jsx';
 import './Produto.css';
 
@@ -88,7 +89,7 @@ function DetalheProduto({ produto }) {
 
       <div className="produto__grade">
         <div className="produto__galeria entra" style={{ '--ordem': 1 }}>
-          <div className="produto__foto-principal">
+          <div className="produto__foto-principal" onMouseMove={acompanharMouse}>
             <FotoProduto url={foto?.url} alt={foto?.alt || produto.nome} carregamento="eager" />
             {produto.status === 'esgotado' && <span className="selo-esgotado t-label-caps-sm">Esgotado</span>}
           </div>

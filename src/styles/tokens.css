@@ -209,7 +209,7 @@
 
   --duracao-rapida: 120ms;                 /* hover, troca de cor */
   --duracao-media: 220ms;                  /* modal e gaveta entrando, seta do link */
-  --duracao-lenta: 700ms;                  /* crossfade do hero, brilho do botão, entrada do cabeçalho */
+  --duracao-lenta: 700ms;                  /* deslizar do hero, brilho do botão, entrada do cabeçalho */
   /* DESIGN.md separa isso em dois: 900ms para o filete do cabeçalho de seção se desenhando e
      1000ms para o zoom da foto no hover. Fiquei com o valor do zoom, que aparece bem mais vezes
      na tela; o filete se desenha 100ms mais devagar do que o especificado. */
@@ -229,6 +229,7 @@
   --deslocamento-seta: 4px;
   --escala-hover: 1.04;
   --escala-destaque: 1.06;
+  --escala-zoom-foto: 2.2;                 /* lupa da foto principal na página do produto */
   --escala-pulo: 1.25;
   --escala-pressionado: 0.985;
 }
@@ -248,6 +249,7 @@
     --deslocamento-seta: 0px;
     --escala-hover: 1;
     --escala-destaque: 1;
+    --escala-zoom-foto: 1;
     --escala-pulo: 1;
   }
 }

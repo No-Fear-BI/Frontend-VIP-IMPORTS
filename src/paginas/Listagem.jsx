@@ -4,7 +4,7 @@
  * Novidades (modo 'novidades') manda `novidades: true`: só peças dos últimos 14 dias (regra do
  * cliente, 29/09/2026), na primeira página e em "Carregar mais". Não vem da URL.
  * Paginação por CURSOR: "Carregar mais" manda o proximoCursor da página anterior.
- * `categoria` só vai junto com `colecao` — o slug de categoria é único por coleção.
+ * `categoria` vai sozinha ou com `colecao`: desde a 0015 o slug de categoria é único na tabela.
  */
 
 import { useEffect, useMemo, useState } from 'react';
@@ -51,7 +51,7 @@ export default function Listagem({ modo, colecaoFixa }) {
   const primeiraPagina = useRequisicao(
     (sinal) =>
       catalogoService.produtos(
-        { ...filtros, categoria: filtros.colecao ? filtros.categoria : '', porPagina: POR_PAGINA },
+        { ...filtros, categoria: filtros.categoria, porPagina: POR_PAGINA },
         sinal,
       ),
     [chave],
@@ -96,7 +96,7 @@ export default function Listagem({ modo, colecaoFixa }) {
     try {
       const pagina = await catalogoService.produtos({
         ...filtros,
-        categoria: filtros.colecao ? filtros.categoria : '',
+        categoria: filtros.categoria,
         porPagina: POR_PAGINA,
         cursor: cursorAtual,
       });

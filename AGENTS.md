@@ -28,10 +28,24 @@ Instruções para agentes de código (Codex e outros). O Claude Code lê `CLAUDE
 ```
 npm install
 npm run dev            # contra a API real (backend: docker compose up -d em ../Backend-VIP-IMPORTS)
-npm run dev:exemplo    # API simulada; ?exemplo=lento|vazio|erro na URL força os estados
+npm run dev:exemplo    # API simulada; ?exemplo=lento|vazio|erro na URL força os estados; ?exemplo=vibrante = 3 banners vibrantes p/ testar o carrossel
 npm run build
 npm run lint:design    # só depois que DESIGN.md existir
 ```
 
 Ao terminar uma tela: suba o dev server, tire screenshot em desktop e em ~390px de largura, confirme os três estados e confirme que nenhum valor solto (fora de `var(--token)`) entrou no CSS ou no JSX.
 - Portão de acesso (modo aprovação): mora em `<Estrutura>` (`components/Estrutura.jsx`) e cobre SÓ a loja — `/admin/*` nunca pode passar por ele, senão a equipe não consegue desligá-lo. Estado em `src/contexto/AcessoLoja.jsx`; detalhes em `CLAUDE.md` e `docs/decisoes-frontend.md` (seção 20).
+
+## Painel: menu, novidades e ajustes recentes (30/09/2026)
+
+Resumo do que entrou nesta rodada; o registro completo está em `CLAUDE.md` e `docs/decisoes-frontend.md` (seção 21).
+
+- **Menu do painel em dois níveis** (`src/paginas/admin/EstruturaAdmin.jsx`, constante `MENU_ADMIN`): Operação (Resumo, Revisão, Seleções, Clientes), Cadastros (Produtos, Marcas, Cores, Categorias, Banners, Destaques) e Permissões de Acesso como link direto. O grupo da rota atual abre sozinho; só um grupo fica aberto. No desktop é acordeão na lateral; até 1023px os grupos viram uma linha de abas e o submenu do grupo aberto aparece numa segunda linha (grade + `display: contents`, com `--admin-menu-colunas` inline). O agrupamento ainda precisa ser confirmado com a equipe.
+- **Novidades por produto.** Além da janela de 14 dias, cada produto tem `emNovidades` (padrão `true`; coluna `em_novidades`, migração `0017_produto_em_novidades` no backend). `GET /produtos?novidades=true` = flag ligada E dentro dos 14 dias. A migração precisa rodar no banco local: `docker exec vip-imports-api alembic upgrade head` (sem ela, `GET /admin/produtos` dá 500 com "column produtos.em_novidades does not exist").
+- **`CampoNovidades.jsx`** (`src/paginas/admin/`): caixa + botão "?" que explica a regra. Usado na Revisão ("Colocar em novidades ao permitir?", manda `emNovidades` em `POST /admin/revisao`), na criação e na edição do produto (PATCH parcial, só se mudou). Sempre vem marcado por padrão.
+- **Produtos (lista):** "Remover das novidades" (`PATCH {emNovidades:false}`) nos que ainda estão na janela; "Realocar nas novidades" (`PATCH {emNovidades:true}`) nos removidos. A coluna de status mostra "em novidades" / "fora das novidades". Realocar só devolve à página se o produto tem menos de 14 dias.
+- **Modo exemplo:** `servidorExemplo.js` entende `emNovidades` (criar, editar, listar e o filtro `novidades=true`).
+- **Revisão, cards:** grade de 3 colunas (2 até 1240px, 1 até 480px), mais espaço interno e entre cards, e filete acima dos botões. Continua sem raio de canto (`--raio: 0px` é regra da marca).
+- **"Adicionar outra categoria"** (`DestinosProduto.jsx`): sem sublinhado, só negrito na cor do texto.
+- **Arquivos com CRLF:** no Windows, edite com ferramentas que preservam o fim de linha; não reescreva arquivo inteiro com LF.
+

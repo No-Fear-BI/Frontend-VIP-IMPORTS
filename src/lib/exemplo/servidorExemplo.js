@@ -7,6 +7,7 @@
 //   ?exemplo=lento  → toda resposta demora 4s (estado carregando)
 //   ?exemplo=vazio  → listagens voltam vazias (estado vazio)
 //   ?exemplo=erro   → toda leitura (GET) falha com 500 (estado de erro)
+//   ?exemplo=vibrante → home com 3 banners de cores vibrantes (teste do carrossel)
 //
 // Painel: entra com qualquer e-mail e a senha "exemplo" (outra senha → CREDENCIAIS_INVALIDAS).
 // Como no backend, a sessão do admin vale mais que a do cliente; só cliente → 403 SEM_PERMISSAO.
@@ -14,13 +15,16 @@
 import { ErroApi } from '../apiClient.js';
 import {
   banners,
+  bannersVibrantes,
   categorias,
   colecoes,
   cores,
   coresDoProduto,
   marcas,
+  nomeDoPublico,
   produtos,
   slugDeCor,
+  slugDoPublico,
   WHATSAPP_EXEMPLO,
 } from './catalogoExemplo.js';
 
@@ -142,6 +146,24 @@ function validarPar(p, { variacaoTamanhoId = null, variacaoCorId = null }) {
   return { variacaoTamanhoId, variacaoCorId };
 }
 
+const REVISAO_EXEMPLO = [
+  ['bolsa', 'Bolsas', 'Leather shoulder bag', 'Bolsa de ombro em couro'],
+  ['camisa', 'Camisas', 'Cotton oxford shirt', 'Camisa oxford de algodão'],
+  ['carteira', 'Acessórios', 'Bifold wallet', 'Carteira dobrável'],
+  ['cinto', 'Acessórios', 'Leather belt', 'Cinto de couro'],
+  ['lenco', 'Acessórios', 'Silk scarf', 'Lenço de seda'],
+  ['bolsa-corrente', 'Bolsas', 'Chain strap bag', 'Bolsa com alça de corrente'],
+].map(([arquivo, category, name, translatedName], i) => ({
+  id: 9001 + i,
+  image: `/exemplo/produtos/${arquivo}.svg`,
+  sourceUrl: 'https://exemplo.com/fornecedor',
+  name,
+  translatedName,
+  translatedDetails: 'Peça de teste para a fila de revisão.',
+  category,
+  supplier: 'Fornecedor Exemplo',
+}));
+
 export async function responderExemplo(metodo, url, corpo, sinal) {
   const modo = cenario();
   await esperar(modo === 'lento' ? 4000 : 250 + Math.random() * 250, sinal);
@@ -176,6 +198,28 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
     }
     if (!estado.admin) throw erro(401, 'NAO_IDENTIFICADO', 'Faça login para acessar o painel.');
     if (rota === 'GET /admin/eu') return estado.admin;
+
+    // Fila de revisão fictícia. As fotos são ilustrações de public/exemplo; o vite.config.js
+    // (modo exemplo) faz /admin/revisao/imagem redirecionar para elas.
+    if (rota === 'GET /admin/revisao/pendentes') {
+      const busca = normalizar(q.get('busca') || '');
+      const categoria = q.get('categoria') || 'Todos';
+      let lista = vazio ? [] : REVISAO_EXEMPLO.filter((i) => !estado.revisados?.includes(i.id));
+      if (categoria !== 'Todos') lista = lista.filter((i) => i.category === categoria);
+      if (busca) lista = lista.filter((i) => normalizar(i.name).includes(busca));
+      return {
+        items: lista,
+        categories: [...new Set(REVISAO_EXEMPLO.map((i) => i.category))],
+        total: lista.length,
+        pagina: 1,
+        paginas: 1,
+      };
+    }
+
+    if (rota === 'POST /admin/revisao') {
+      gravar({ ...estado, revisados: [...(estado.revisados || []), corpo.productId] });
+      return { ok: true };
+    }
 
     if (rota === 'GET /admin/acesso/fila') {
       const fila = acessoExemplo(estado).fila;
@@ -325,10 +369,7 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
     }
 
     if (rota === 'GET /admin/categorias') {
-      const colecaoId = Number(q.get('colecaoId')) || null;
-      let lista = vazio ? [] : categoriasDoPainel(estado);
-      if (colecaoId) lista = lista.filter((c) => c.colecaoId === colecaoId);
-      return lista;
+      return vazio ? [] : categoriasDoPainel(estado);
     }
 
     if (rota === 'POST /admin/categorias') {
@@ -336,19 +377,13 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
       if (!nome) {
         throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', { campos: { nome: 'Obrigatório.' } });
       }
-      const colecaoId = Number(corpo?.colecaoId);
-      const colecao = colecoes.find((c) => c.id === colecaoId);
-      if (!colecao) {
-        throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', { campos: { colecaoId: 'Coleção não encontrada.' } });
-      }
-      const daColecao = categoriasDoPainel(estado).filter((c) => c.colecaoId === colecaoId);
-      const slugs = daColecao.map((c) => c.slug);
+      const slugs = categoriasDoPainel(estado).map((c) => c.slug);
       let slug;
       if (corpo?.slug) {
         slug = slugDeCor(corpo.slug);
         if (slugs.includes(slug)) {
-          throw erro(409, 'SLUG_EM_USO', `Já existe uma categoria '${slug}' na coleção ${colecao.slug}.`, {
-            campos: { slug: 'Este slug já existe nesta coleção.' },
+          throw erro(409, 'SLUG_EM_USO', `Já existe uma categoria '${slug}'.`, {
+            campos: { slug: 'Este slug já existe.' },
           });
         }
       } else {
@@ -357,8 +392,6 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
       const agora = new Date().toISOString();
       const nova = {
         id: proximoId(estado, 'proximoIdCategoria', 800000),
-        colecaoId,
-        colecaoSlug: colecao.slug,
         nome,
         slug,
         imagemUrl: null,
@@ -366,10 +399,18 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
         destaqueOrdem: null,
         ordem: 0,
         ativa: corpo?.ativa !== false,
+        cardHome: null,
+        cardHomeImagemUrl: null,
         totalProdutos: 0,
         criadoEm: agora,
         atualizadoEm: agora,
       };
+      if (corpo?.cardHome) {
+        validarCard(corpo);
+        liberarCard(estado, corpo.cardHome, null);
+        nova.cardHome = corpo.cardHome;
+        nova.cardHomeImagemUrl = corpo.cardHomeImagemUrl ?? null;
+      }
       estado.categoriasExtras = [...(estado.categoriasExtras || []), nova];
       gravar(estado);
       return nova;
@@ -391,19 +432,31 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
         return { ok: true };
       }
 
-      // Esta tela não manda colecaoId no PATCH (ver comentário de Categorias.jsx): nome, slug e ativa.
+      // Esta tela edita nome, slug e ativa (ver comentário de Categorias.jsx).
       const mudancas = {};
       if (corpo?.nome) mudancas.nome = String(corpo.nome).trim();
       if (typeof corpo?.ativa === 'boolean') mudancas.ativa = corpo.ativa;
       if (corpo?.slug) {
         const slug = slugDeCor(corpo.slug);
-        const naMesmaColecao = categoriasDoPainel(estado).filter((c) => c.id !== id && c.colecaoId === atual.colecaoId);
-        if (naMesmaColecao.some((c) => c.slug === slug)) {
-          throw erro(409, 'SLUG_EM_USO', `Já existe uma categoria '${slug}' na coleção ${atual.colecaoSlug}.`, {
-            campos: { slug: 'Este slug já existe nesta coleção.' },
+        if (categoriasDoPainel(estado).some((c) => c.id !== id && c.slug === slug)) {
+          throw erro(409, 'SLUG_EM_USO', `Já existe uma categoria '${slug}'.`, {
+            campos: { slug: 'Este slug já existe.' },
           });
         }
         mudancas.slug = slug;
+      }
+      if ('cardHome' in corpo || 'cardHomeImagemUrl' in corpo) validarCard(corpo);
+      if ('cardHome' in corpo) {
+        if (corpo.cardHome) {
+          liberarCard(estado, corpo.cardHome, id);
+          mudancas.cardHome = corpo.cardHome;
+        } else {
+          mudancas.cardHome = null;
+          mudancas.cardHomeImagemUrl = null;
+        }
+      }
+      if ('cardHomeImagemUrl' in corpo && (mudancas.cardHome ?? atual.cardHome)) {
+        mudancas.cardHomeImagemUrl = corpo.cardHomeImagemUrl ?? null;
       }
       mudancas.atualizadoEm = new Date().toISOString();
       const ajustadas = (estado.categoriasExtras || []).map((c) => (c.id === id ? { ...c, ...mudancas } : c));
@@ -423,8 +476,11 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
       const busca = (q.get('busca') || '').trim();
 
       if (marcaId) lista = lista.filter((p) => p.marcaId === marcaId);
-      if (categoriaId) lista = lista.filter((p) => p.categoriaId === categoriaId);
-      else if (colecaoId) lista = lista.filter((p) => p.colecaoId === colecaoId);
+      if (categoriaId) lista = lista.filter((p) => (p.categoriasIds || [p.categoriaId]).includes(categoriaId));
+      if (colecaoId) {
+        const slug = colecoes.find((c) => c.id === colecaoId)?.slug;
+        lista = lista.filter((p) => p.publicos.includes(slug));
+      }
       if (status) lista = lista.filter((p) => p.status === status);
       if (corId) {
         const cor = coresDoPainel(estado).find((c) => c.id === corId);
@@ -458,7 +514,7 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
       if (!categoria) {
         throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', { campos: { categoriaId: 'Categoria não encontrada.' } });
       }
-      const colecaoId = colecoes.find((c) => c.slug === categoria.colecao).id;
+      const publicos = publicosValidos(corpo?.publicos);
       const existentes = produtosDoPainel(estado);
       let codigo = corpo?.codigo ? String(corpo.codigo).trim().toUpperCase() : '';
       if (codigo && existentes.some((p) => p.codigo === codigo)) {
@@ -475,11 +531,13 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
         nome,
         descricao: corpo?.descricao ?? null,
         status: corpo?.status || 'normal',
+        emNovidades: corpo?.emNovidades !== false,
         destaque: false,
         destaqueOrdem: null,
         marcaId,
         categoriaId,
-        colecaoId,
+        categoriasIds: [categoriaId],
+        publicos,
         imagens: [],
         variacoes: [],
         criadoEm: agora,
@@ -526,9 +584,21 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
           throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', { campos: { categoriaId: 'Categoria não encontrada.' } });
         }
         campos.categoriaId = corpo.categoriaId;
-        campos.colecaoId = colecoes.find((c) => c.slug === categoria.colecao).id;
+        campos.categoriasIds = [corpo.categoriaId];
       }
+      if ('categoriasIds' in corpo && Array.isArray(corpo.categoriasIds)) {
+        const ids = corpo.categoriasIds;
+        if (ids.length < 1 || ids.length > 5 || new Set(ids).size !== ids.length || ids.some((i) => !categoriasDoPainel(estado).some((c) => c.id === i))) {
+          throw erro(400, 'DADOS_INVALIDOS', 'Confira as categorias selecionadas.', {
+            campos: { categoriasIds: 'Escolha de 1 a 5 categorias ativas.' },
+          });
+        }
+        campos.categoriasIds = ids;
+        campos.categoriaId = ids[0];
+      }
+      if ('publicos' in corpo) campos.publicos = publicosValidos(corpo.publicos);
       if ('destaque' in corpo && corpo.destaque != null) campos.destaque = corpo.destaque;
+      if ('emNovidades' in corpo && corpo.emNovidades != null) campos.emNovidades = corpo.emNovidades;
       campos.atualizadoEm = new Date().toISOString();
 
       aplicarEdicao(estado, id, campos);
@@ -551,7 +621,8 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
         destaqueOrdem: null,
         marcaId: original.marcaId,
         categoriaId: original.categoriaId,
-        colecaoId: original.colecaoId,
+        categoriasIds: [...(original.categoriasIds || [original.categoriaId])],
+        publicos: [...original.publicos],
         imagens: original.imagens.map((im) => ({ ...im, id: proximoId(estado, 'proximoIdImagem', 500000) })),
         variacoes: original.variacoes.map((v) => ({ ...v, id: proximoId(estado, 'proximoIdVariacao', 700000) })),
         criadoEm: agora,
@@ -887,19 +958,30 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
             nome: c.nome,
             slug: c.slug,
             imagemUrl: c.imagemUrl,
-            colecao: { nome: colecoes.find((x) => x.id === c.colecaoId).nome, slug: c.colecaoSlug },
+          }));
+    const cardsColecao = vazio
+      ? []
+      : categoriasDoPainel(estado)
+          .filter((c) => c.cardHome && c.ativa !== false)
+          .map((c) => ({
+            lado: c.cardHome,
+            id: c.id,
+            nome: c.nome,
+            slug: c.slug,
+            imagemUrl: c.cardHomeImagemUrl || c.imagemUrl || null,
           }));
     return {
       banners: bannersAtivos,
       destaques: destaquesProdutos,
       categoriasDestaque: destaquesCategorias,
+      cardsColecao,
       marcas: vazio ? [] : marcasComTotal(),
     };
   }
 
   if (rota === 'GET /produtos') {
     let lista = vazio ? [] : [...produtos];
-    if (q.get('colecao')) lista = lista.filter((p) => p.colecao.slug === q.get('colecao'));
+    if (q.get('colecao')) lista = lista.filter((p) => p.publicos.includes(q.get('colecao')));
     if (q.get('categoria')) lista = lista.filter((p) => p.categoria.slug === q.get('categoria'));
     if (q.get('marca')) {
       const slugs = q.get('marca').split(',');
@@ -917,7 +999,7 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
     if (q.get('novidades') === 'true') {
       // Mesma janela do backend: criado nos últimos 14 dias (DIAS_NOVIDADE em servicos/catalogo.py).
       const inicio = Date.now() - DIAS_NOVIDADE * 86400000;
-      lista = lista.filter((p) => new Date(p.criadoEm).getTime() >= inicio);
+      lista = lista.filter((p) => p.emNovidades !== false && new Date(p.criadoEm).getTime() >= inicio);
     }
     if (q.get('ordem') === 'nome') lista.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
     const porPagina = Math.min(Number(q.get('porPagina')) || 24, 60);
@@ -958,13 +1040,16 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
       throw erro(404, 'COLECAO_NAO_ENCONTRADA', 'Coleção não encontrada.');
     }
     // Categoria escondida (`ativa: false`) sai da navegação, como no backend.
-    return (vazio ? [] : categoriasDoPainel(estado).filter((c) => c.colecaoSlug === m[1] && c.ativa !== false)).map((c) => ({
-      id: c.id,
-      nome: c.nome,
-      slug: c.slug,
-      imagemUrl: c.imagemUrl,
-      totalProdutos: produtos.filter((p) => p.categoria.slug === c.slug && p.colecao.slug === m[1]).length,
-    }));
+    // Só categorias ativas com ao menos uma peça do público, como no backend (0015).
+    return (vazio ? [] : categoriasDoPainel(estado).filter((c) => c.ativa !== false))
+      .map((c) => ({
+        id: c.id,
+        nome: c.nome,
+        slug: c.slug,
+        imagemUrl: c.imagemUrl,
+        totalProdutos: produtos.filter((p) => p.categoria.slug === c.slug && p.publicos.includes(m[1])).length,
+      }))
+      .filter((c) => c.totalProdutos > 0);
   }
 
   if (rota === 'POST /clientes/identificar') {
@@ -1154,9 +1239,20 @@ function proximoCodigo(existentes, nomeMarca) {
   return `${prefixo}-${String(sequencial).padStart(4, '0')}`;
 }
 
-/** A categoria de um produto estático, por slug DA CATEGORIA *e* DA COLEÇÃO — "bolsas" existe nas duas. */
+/** A categoria de um produto estático, por slug (único na tabela desde a 0015). */
 function categoriaDoProdutoEstatico(p) {
-  return categorias.find((c) => c.slug === p.categoria.slug && c.colecao === p.colecao.slug);
+  return categorias.find((c) => c.slug === p.categoria.slug);
+}
+
+/** `publicos` válido (feminino e/ou masculino, sem repetir); senão 400, como o backend. */
+function publicosValidos(publicos) {
+  const lista = Array.isArray(publicos) ? publicos : [];
+  if (lista.length < 1 || lista.length > 2 || new Set(lista).size !== lista.length || lista.some((s) => !['feminino', 'masculino'].includes(s))) {
+    throw erro(400, 'DADOS_INVALIDOS', 'Confira o público do produto.', {
+      campos: { publicos: 'Escolha Feminino, Masculino ou os dois.' },
+    });
+  }
+  return ['feminino', 'masculino'].filter((s) => lista.includes(s));
 }
 
 /** Um produto estático como o painel o vê: com os ids que o formulário e os filtros precisam. */
@@ -1174,7 +1270,8 @@ function produtoEstaticoParaPainel(p) {
     destaqueOrdem: p.destaque ? p.id - 99 : null,
     marcaId: marcas.find((m) => m.slug === p.marca.slug).id,
     categoriaId: categoria.id,
-    colecaoId: colecoes.find((c) => c.slug === p.colecao.slug).id,
+    categoriasIds: [categoria.id],
+    publicos: p.publicos,
     imagens: p.imagens,
     variacoes: p.variacoes,
     criadoEm: p.criadoEm,
@@ -1232,8 +1329,6 @@ function categoriasBase(estado) {
   const todos = produtosDoPainel(estado);
   return categorias.map((c, i) => ({
     id: c.id,
-    colecaoId: colecoes.find((x) => x.slug === c.colecao).id,
-    colecaoSlug: c.colecao,
     nome: c.nome,
     slug: c.slug,
     imagemUrl: c.imagemUrl,
@@ -1243,10 +1338,37 @@ function categoriasBase(estado) {
     destaqueOrdem: i < LIMITE_DESTAQUES_CATEGORIAS ? i + 1 : null,
     ordem: c.id,
     ativa: true,
+    cardHome: null,
+    cardHomeImagemUrl: null,
     totalProdutos: todos.filter((p) => p.categoriaId === c.id).length,
     criadoEm: '2026-01-01T00:00:00.000Z',
     atualizadoEm: '2026-01-01T00:00:00.000Z',
   }));
+}
+
+/** Valida o lado e a imagem do card da home, como o backend (400 com o campo). */
+function validarCard(corpo) {
+  if (corpo.cardHome && !['esquerda', 'direita'].includes(corpo.cardHome)) {
+    throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', { campos: { cardHome: 'Escolha esquerda ou direita.' } });
+  }
+  const url = corpo.cardHomeImagemUrl;
+  if (url && !String(url).toLowerCase().startsWith('https://')) {
+    throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', {
+      campos: { cardHomeImagemUrl: 'A URL da imagem precisa começar com https://.' },
+    });
+  }
+}
+
+/** Cada lado do card tem UMA categoria: quem já o ocupava sai dele (e perde a imagem do card). */
+function liberarCard(estado, lado, ignorarId) {
+  for (const c of categoriasDoPainel(estado)) {
+    if (c.cardHome !== lado || c.id === ignorarId) continue;
+    const extras = estado.categoriasExtras || [];
+    const campos = { cardHome: null, cardHomeImagemUrl: null };
+    estado.categoriasExtras = extras.some((e) => e.id === c.id)
+      ? extras.map((e) => (e.id === c.id ? { ...e, ...campos } : e))
+      : [...extras, { ...c, ...campos }];
+  }
 }
 
 /** As categorias fixas (com as edições da sessão por cima) + as criadas nela. */
@@ -1258,8 +1380,12 @@ function categoriasDoPainel(estado) {
   return [...combinadas, ...novas];
 }
 
+// ?exemplo=vibrante vale até recarregar a página: sem isso o parâmetro some ao clicar em "Início".
+let vibranteLigado = false;
+
 function bannersBase() {
-  return banners.map((b, i) => ({
+  if (cenario() === 'vibrante') vibranteLigado = true;
+  return (vibranteLigado ? bannersVibrantes : banners).map((b, i) => ({
     id: b.id,
     titulo: b.titulo,
     subtitulo: b.subtitulo,
@@ -1307,18 +1433,19 @@ function refDaCategoria(categoriaId) {
   return { nome: c?.nome || '?', slug: c?.slug || '' };
 }
 
-function refDaColecao(colecaoId) {
-  const c = colecoes.find((x) => x.id === colecaoId);
-  return { nome: c?.nome || '?', slug: c?.slug || '' };
+function refDoPublico(publicos) {
+  return { nome: nomeDoPublico(publicos), slug: slugDoPublico(publicos) };
 }
 
 /** ProdutoAdminDetalhe: o produto do painel com marca/categoria/coleção por extenso. */
 function detalheDoPainel(p) {
   return {
     ...p,
+    emNovidades: p.emNovidades !== false,
     marca: refDaMarca(p.marcaId),
     categoria: refDaCategoria(p.categoriaId),
-    colecao: refDaColecao(p.colecaoId),
+    colecao: refDoPublico(p.publicos),
+    categoriasIds: p.categoriasIds || [p.categoriaId],
   };
 }
 
@@ -1330,9 +1457,10 @@ function itemDoPainel(p) {
     nome: p.nome,
     status: p.status,
     destaque: p.destaque,
+    emNovidades: p.emNovidades !== false,
     marca: refDaMarca(p.marcaId),
     categoria: refDaCategoria(p.categoriaId),
-    colecao: refDaColecao(p.colecaoId),
+    colecao: refDoPublico(p.publicos),
     capa: p.imagens[0] ? { url: p.imagens[0].url, alt: p.imagens[0].alt } : null,
     criadoEm: p.criadoEm,
     atualizadoEm: p.atualizadoEm,

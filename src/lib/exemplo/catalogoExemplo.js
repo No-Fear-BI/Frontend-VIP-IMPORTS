@@ -20,7 +20,8 @@ export const marcas = [
   { id: 8, nome: 'Ray-Ban', slug: 'ray-ban', logoUrl: null },
 ];
 
-// [id, colecaoSlug, nome, slug, desenho]
+// [id, publicoSlug, nome, slug, desenho] — o público aqui só diz a quem cada produto de exemplo se
+// destina; desde a migração 0015 a categoria em si não tem coleção e "Bolsas" existe uma vez só.
 const categoriasBrutas = [
   [1, 'feminino', 'Bolsas', 'bolsas', 'bolsas'],
   [2, 'feminino', 'Calçados', 'calcados', 'calcados'],
@@ -34,13 +35,24 @@ const categoriasBrutas = [
   [10, 'masculino', 'Bolsas', 'bolsas', 'bolsas'],
 ];
 
-export const categorias = categoriasBrutas.map(([id, colecao, nome, slug, desenho]) => ({
-  id,
-  colecao,
-  nome,
-  slug,
-  imagemUrl: `/exemplo/categorias/${desenho}.svg`,
-}));
+// Categorias únicas por slug (a primeira ocorrência vence): "Calçados" e "Bolsas" estavam nas duas coleções.
+export const categorias = categoriasBrutas
+  .filter(([, , , slug], i, todas) => todas.findIndex((c) => c[3] === slug) === i)
+  .map(([id, , nome, slug, desenho]) => ({
+    id,
+    nome,
+    slug,
+    imagemUrl: `/exemplo/categorias/${desenho}.svg`,
+  }));
+
+const idDaCategoriaPorSlug = (slug) => categorias.find((c) => c.slug === slug).id;
+
+export const nomeDoPublico = (publicos) =>
+  publicos.length > 1 ? 'Unissex' : publicos[0] === 'feminino' ? 'Feminina' : 'Masculina';
+export const slugDoPublico = (publicos) => (publicos.includes('feminino') ? 'feminino' : 'masculino');
+
+// Produtos de exemplo que são unissex (aparecem em Feminino e em Masculino).
+const UNISSEX = new Set(['R902']);
 
 const TAMANHOS_ROUPA = ['P', 'M', 'G', 'GG'];
 const TAMANHOS_CALCADO = ['35', '36', '37', '38', '39', '40', '41', '42'];
@@ -85,8 +97,9 @@ let proximaVariacao = 1;
 
 export const produtos = produtosBrutos.map(([codigo, nome, marcaSlug, categoriaId, desenho, status, variacoes], i) => {
   const marca = marcas.find((m) => m.slug === marcaSlug);
-  const categoria = categorias.find((c) => c.id === categoriaId);
-  const colecao = colecoes.find((c) => c.slug === categoria.colecao);
+  const bruta = categoriasBrutas.find((c) => c[0] === categoriaId);
+  const categoria = categorias.find((c) => c.slug === bruta[3]);
+  const publicos = UNISSEX.has(codigo) ? ['feminino', 'masculino'] : [bruta[1]];
   const imagens = desenho
     ? [
         { id: i * 10 + 1, url: img(desenho), alt: `${nome} — foto 1`, ordem: 1 },
@@ -111,7 +124,8 @@ export const produtos = produtosBrutos.map(([codigo, nome, marcaSlug, categoriaI
     destaque: i < 12,
     marca: { nome: marca.nome, slug: marca.slug },
     categoria: { nome: categoria.nome, slug: categoria.slug },
-    colecao: { nome: colecao.nome, slug: colecao.slug },
+    publicos,
+    colecao: { nome: nomeDoPublico(publicos), slug: slugDoPublico(publicos) },
     imagens,
     variacoes: lista,
     // Relativo a hoje, de 3 em 3 dias: os primeiros caem na janela de Novidades (14 dias) e o resto
@@ -176,6 +190,39 @@ export const banners = [
     imagemUrl: '/exemplo/banners/banner-3.svg',
     imagemUrlMobile: '/exemplo/banners/banner-3-mobile.svg',
     alt: 'Ilustração de mocassim e camisa',
+    linkUrl: '/masculino',
+  },
+];
+
+// Banners de cores vibrantes, só para avaliar o carrossel (?exemplo=vibrante): contraste alto entre
+// um slide e o seguinte deixa o deslizar e o arrastar evidentes. Fora da paleta da marca de
+// propósito — é foto de teste, não UI. Imagens em public/exemplo/banners-teste/.
+export const bannersVibrantes = [
+  {
+    id: 101,
+    titulo: 'Teste um: pink e laranja',
+    subtitulo: 'Carrossel de teste',
+    imagemUrl: '/exemplo/banners-teste/vibrante-1.png',
+    imagemUrlMobile: '/exemplo/banners-teste/vibrante-1-mobile.png',
+    alt: 'Fundo de teste em pink e laranja com formas geométricas',
+    linkUrl: '/novidades',
+  },
+  {
+    id: 102,
+    titulo: 'Teste dois: azul e turquesa',
+    subtitulo: 'Carrossel de teste',
+    imagemUrl: '/exemplo/banners-teste/vibrante-2.png',
+    imagemUrlMobile: '/exemplo/banners-teste/vibrante-2-mobile.png',
+    alt: 'Fundo de teste em azul e turquesa com formas geométricas',
+    linkUrl: '/feminino',
+  },
+  {
+    id: 103,
+    titulo: 'Teste três: roxo e limão',
+    subtitulo: 'Carrossel de teste',
+    imagemUrl: '/exemplo/banners-teste/vibrante-3.png',
+    imagemUrlMobile: '/exemplo/banners-teste/vibrante-3-mobile.png',
+    alt: 'Fundo de teste em roxo e verde-limão com formas geométricas',
     linkUrl: '/masculino',
   },
 ];

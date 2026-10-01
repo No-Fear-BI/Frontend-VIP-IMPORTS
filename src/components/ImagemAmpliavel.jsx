@@ -10,10 +10,12 @@
 // Sem url, devolve os children como estão: "Foto em breve" continua sendo
 // trabalho do FotoProduto, não deste componente.
 import { useState } from 'react';
+import { acompanharMouse } from '../lib/lupa.js';
 import Modal from './ui/Modal.jsx';
 import './ImagemAmpliavel.css';
 
-export default function ImagemAmpliavel({ url, alt = '', children, className = '' }) {
+// `lupa`: na foto grande do modal (e só nela), o hover amplia e segue o mouse.
+export default function ImagemAmpliavel({ url, alt = '', children, className = '', lupa = false }) {
   const [ampliada, setAmpliada] = useState(false);
 
   if (!url) return children || null;
@@ -30,7 +32,13 @@ export default function ImagemAmpliavel({ url, alt = '', children, className = '
       </button>
 
       <Modal aberto={ampliada} onFechar={() => setAmpliada(false)} titulo={alt || 'Foto ampliada'}>
-        <img src={url} alt={alt} className="imagem-ampliavel__grande" />
+        {lupa ? (
+          <div className="imagem-ampliavel__moldura" onMouseMove={acompanharMouse}>
+            <img src={url} alt={alt} className="imagem-ampliavel__grande" />
+          </div>
+        ) : (
+          <img src={url} alt={alt} className="imagem-ampliavel__grande" />
+        )}
       </Modal>
     </>
   );

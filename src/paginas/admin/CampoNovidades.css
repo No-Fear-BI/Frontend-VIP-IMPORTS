@@ -1,0 +1,44 @@
+.campo-novidades {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.campo-novidades__linha {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+}
+
+.campo-novidades__caixa {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+}
+
+.campo-novidades__ajuda-botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--espaco-6);
+  height: var(--espaco-6);
+  padding: 0;
+  background: none;
+  border: var(--borda-fina) solid var(--cor-borda-forte);
+  border-radius: var(--raio-circulo);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.campo-novidades__ajuda-botao[aria-expanded='true'] {
+  border-color: var(--cor-texto);
+}
+
+.campo-novidades__ajuda {
+  max-width: var(--largura-formulario);
+}
+
+.campo-novidades__ajuda[hidden] {
+  display: none;
+}

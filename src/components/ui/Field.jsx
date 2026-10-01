@@ -50,6 +50,15 @@ export function MarcaObrigatorio() {
   );
 }
 
+/** Legenda do formulário: explica o asterisco dos campos obrigatórios. */
+export function LegendaObrigatorio() {
+  return (
+    <p className="t-body-sm t-muted">
+      <span aria-hidden="true">*</span> Campo obrigatório.
+    </p>
+  );
+}
+
 /** Erro geral, não ligado a um campo (ex.: `erroApi.mensagem`): ícone + frase + traço. */
 export function ErroGeral({ children }) {
   return (

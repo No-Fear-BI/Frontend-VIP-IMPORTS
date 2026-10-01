@@ -14,7 +14,7 @@
 import { useState } from 'react';
 import { EstadoErro, EstadoVazio, Esqueleto } from '../../components/Estados.jsx';
 import Button from '../../components/ui/Button.jsx';
-import Field, { ErroGeral } from '../../components/ui/Field.jsx';
+import Field, { ErroGeral, LegendaObrigatorio } from '../../components/ui/Field.jsx';
 import Modal from '../../components/ui/Modal.jsx';
 import { useRequisicao } from '../../hooks/useRequisicao.js';
 import { bannersService } from '../../services/bannersService.js';
@@ -174,7 +174,7 @@ export default function AdminBanners() {
 
 /** A mesma ideia de `FotoProduto`, mas para uma URL solta de formulário: sem imagem ainda, ou
  * imagem quebrada, mostra um aviso em vez de um ícone de erro do navegador. */
-function PreviaImagem({ url, alt, className = '' }) {
+export function PreviaImagem({ url, alt, className = '' }) {
   const [falhou, setFalhou] = useState(false);
   const semImagem = !url || falhou;
   return (
@@ -195,7 +195,7 @@ function PreviaImagem({ url, alt, className = '' }) {
  * devolve a URL pronta em `onEnviado`, que preenche o campo — o resto do formulário não muda.
  * Sem `capture`: no celular deixa escolher entre câmera e galeria.
  */
-function EnvioArquivo({ id, alt, onEnviado }) {
+export function EnvioArquivo({ id, alt, onEnviado }) {
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState(null);
 
@@ -275,9 +275,11 @@ function FormBanner({ banner, onPronto }) {
 
   return (
     <form className="admin-banners__form" onSubmit={salvar}>
+      <LegendaObrigatorio />
       <Field
         id="banner-imagem-url"
         rotulo="Imagem (desktop)"
+        obrigatorio
         ajuda="Só https. Ocupa a largura toda do topo da home e é cortada nas bordas para preencher: use foto em paisagem e deixe o assunto no centro."
         value={imagemUrl}
         onChange={(e) => setImagemUrl(e.target.value)}

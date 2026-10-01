@@ -1,17 +1,35 @@
 /* O gatilho é um botão real (funciona por Tab + Enter, não é div com onClick)
-   vestido de foto: sem borda, sem fundo, cursor de lupa. */
+   vestido de foto: sem borda, sem fundo, cursor de mãozinha (como um link). */
 .imagem-ampliavel__gatilho {
   display: block;
   padding: 0;
   border: 0;
   background: none;
-  cursor: zoom-in;
+  cursor: pointer;
 }
 
 /* Foco visível na régua de foco do sistema, igual ao resto do site. */
 .imagem-ampliavel__gatilho:focus-visible {
   outline: var(--foco-espessura) solid var(--cor-primaria);
   outline-offset: var(--foco-afastamento);
+}
+
+/* Lupa no hover (opt-in com `lupa`), só na foto grande do modal: amplia dentro da
+   moldura e segue o mouse. Só em ponteiro com hover. */
+@media (hover: hover) and (pointer: fine) {
+  .imagem-ampliavel__moldura {
+    overflow: hidden;
+    cursor: zoom-in;
+  }
+
+  .imagem-ampliavel__moldura img {
+    transform-origin: var(--zoom-x, 50%) var(--zoom-y, 50%);
+    transition: transform var(--duracao-media) var(--curva-padrao);
+  }
+
+  .imagem-ampliavel__moldura:hover img {
+    transform: scale(var(--escala-zoom-foto));
+  }
 }
 
 /* Foto grande: ocupa a largura do corpo do modal e cresce na altura. O próprio

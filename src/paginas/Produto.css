@@ -23,6 +23,23 @@
   position: relative;
 }
 
+/* Lupa: a foto amplia dentro da moldura e segue o mouse (--zoom-x/--zoom-y vêm do onMouseMove).
+   Só em ponteiro com hover; no toque a foto fica como está. */
+@media (hover: hover) and (pointer: fine) {
+  .produto__foto-principal .vitrine-foto {
+    cursor: zoom-in;
+  }
+
+  .produto__foto-principal .vitrine-foto img {
+    transform-origin: var(--zoom-x, 50%) var(--zoom-y, 50%);
+    transition: transform var(--duracao-media) var(--curva-padrao);
+  }
+
+  .produto__foto-principal:hover .vitrine-foto img {
+    transform: scale(var(--escala-zoom-foto));
+  }
+}
+
 .produto__miniaturas {
   display: grid;
   grid-template-columns: repeat(auto-fill, var(--largura-miniatura));

@@ -12,8 +12,16 @@ import { MarcaObrigatorio } from '../../components/ui/Field.jsx';
  */
 export const NOVA = '__nova__';
 
+/**
+ * "Genérico": marca para peça sem marca definida. Sempre aparece na lista; se ainda não
+ * existir no cadastro, o backend a cria ao aprovar (mesmo caminho da marca nova, pelo nome).
+ */
+export const GENERICO = '__generico__';
+const NOME_GENERICO = 'Genérico';
+
 export function nomeDaMarca(valor = {}, marcas = []) {
   if (valor.escolha === NOVA) return (valor.nova || '').trim();
+  if (valor.escolha === GENERICO) return NOME_GENERICO;
   return marcas.find((m) => String(m.id) === valor.escolha)?.nome || '';
 }
 
@@ -23,6 +31,7 @@ export default function SeletorMarca({ id, marcas, valor = {}, onMudar, erro, di
   const ativas = (marcas || [])
     .filter((m) => m.ativa)
     .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+  const genericoCadastrado = ativas.some((m) => m.nome.trim().toLowerCase() === NOME_GENERICO.toLowerCase());
   const escolha = valor.escolha || '';
   return (
     <div className={`campo${erro ? ' campo--erro' : ''}`}>
@@ -41,7 +50,7 @@ export default function SeletorMarca({ id, marcas, valor = {}, onMudar, erro, di
       >
         <option value="">{carregando ? 'Carregando marcas…' : 'Escolha a marca'}</option>
         {ativas.map((m) => <option key={m.id} value={String(m.id)}>{m.nome}</option>)}
-        <option disabled>──────────</option>
+        {!genericoCadastrado && <option value={GENERICO}>{NOME_GENERICO}</option>}
         <option value={NOVA}>+ Nova marca…</option>
       </select>
       {escolha === NOVA && (
