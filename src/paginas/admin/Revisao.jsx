@@ -5,14 +5,17 @@ import { EstadoErro, EstadoVazio, EsqueletoGrade } from '../../components/Estado
 import Button from '../../components/ui/Button.jsx';
 import Field, { ErroGeral } from '../../components/ui/Field.jsx';
 import Card from '../../components/ui/Card.jsx';
+import Modal from '../../components/ui/Modal.jsx';
 import ImagemAmpliavel from '../../components/ImagemAmpliavel.jsx';
 import './Revisao.css';
 import CampoNovidades from './CampoNovidades.jsx';
 import FotosDoAlbum from './FotosDoAlbum.jsx';
+import AtualizarProdutos from './AtualizarProdutos.jsx';
 import { categoriasService } from '../../services/categoriasService.js';
 import DestinosProduto, { destinosCompletos, destinosVazios } from './DestinosProduto.jsx';
 import SeletorMarca, { GENERICO, NOVA, nomeDaMarca } from './SeletorMarca.jsx';
 import { marcasService } from '../../services/marcasService.js';
+import { linkDaOrigem } from '../../lib/linkOrigem.js';
 
 const chaveDaMarca = (nome) => nome.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
@@ -22,17 +25,6 @@ function marcaSugerida(nome, cadastradas) {
   if (!nome || !cadastradas) return undefined;
   const achada = cadastradas.find((m) => m.ativa && chaveDaMarca(m.nome) === chaveDaMarca(nome));
   return achada ? { escolha: String(achada.id), nova: '' } : { escolha: NOVA, nova: nome };
-}
-
-// O Yupoo responde 404 a um álbum aberto sem `uid=1` na URL, e os links salvos na fila vêm sem ele.
-function linkDaOrigem(url) {
-  try {
-    const link = new URL(url);
-    if (!link.searchParams.has('uid')) link.searchParams.set('uid', '1');
-    return link.toString();
-  } catch {
-    return url;
-  }
 }
 
 export default function Revisao() {
@@ -56,6 +48,8 @@ export default function Revisao() {
   const marcaDe = (item) => nomeDaMarca(valorMarca(item), listaMarcas.dados || []);
   const [salvando, setSalvando] = useState(null);
   const [erroDecisao, setErroDecisao] = useState(null);
+  // Produto à espera da confirmação de "Reprovar"; reprovar nunca acontece num clique só.
+  const [reprovando, setReprovando] = useState(null);
   const trava = useRef(false);
   const { dados, erro, carregando, recarregar } = useRequisicao(
     (sinal) => listarPendentes({ busca, categoria, pagina, porPagina: 60 }, sinal),
@@ -68,6 +62,11 @@ export default function Revisao() {
   const paginaAtual = fila?.pagina || 1;
   const paginas = fila?.paginas || 1;
   const limpar = () => { setBusca(''); setCategoria('Todos'); setPagina(1); };
+  // Larga o que foi preenchido no cartão: o item saiu da fila, e o `id` não volta a ser usado.
+  const esquecer = (id) => {
+    const sem = (atual) => { const novo = { ...atual }; delete novo[id]; return novo; };
+    setNomes(sem); setMarcas(sem); setDestinos(sem); setSemNovidades(sem); setFotos(sem);
+  };
   const aprovar = async (item) => {
     if (trava.current) return;
     if (!destinosCompletos(destinos[item.id] || destinosVazios()) || !marcaDe(item)) {
@@ -88,14 +87,28 @@ export default function Revisao() {
         emNovidades: emNovidadesDe(item.id),
         ...(fotos[item.id] ? { fotos: fotos[item.id] } : {}),
       });
-      setNomes((atual) => { const novo = { ...atual }; delete novo[item.id]; return novo; });
-      setMarcas((atual) => { const novo = { ...atual }; delete novo[item.id]; return novo; });
-      setDestinos((atual) => { const novo = { ...atual }; delete novo[item.id]; return novo; });
-      setSemNovidades((atual) => { const novo = { ...atual }; delete novo[item.id]; return novo; });
-      setFotos((atual) => { const novo = { ...atual }; delete novo[item.id]; return novo; });
+      esquecer(item.id);
       if ([NOVA, GENERICO].includes(valorMarca(item).escolha)) listaMarcas.recarregar();
       recarregar();
     } catch (falha) {
+      setErroDecisao({ itemId: item.id, mensagem: falha.mensagem, campos: falha.campos || {} });
+    } finally {
+      trava.current = false;
+      setSalvando(null);
+    }
+  };
+  const reprovar = async (item) => {
+    if (trava.current) return;
+    trava.current = true;
+    setSalvando(item.id);
+    setErroDecisao(null);
+    try {
+      await decidirProduto({ productId: item.id, status: 'rejected' });
+      esquecer(item.id);
+      setReprovando(null);
+      recarregar();
+    } catch (falha) {
+      setReprovando(null);
       setErroDecisao({ itemId: item.id, mensagem: falha.mensagem, campos: falha.campos || {} });
     } finally {
       trava.current = false;
@@ -112,6 +125,7 @@ export default function Revisao() {
         <strong className="t-headline-lg">{carregando ? '…' : total.toLocaleString('pt-BR')}</strong> itens aguardando revisão
         <p>Confira a imagem e o nome, informe a marca e escolha o público e as categorias do produto.</p>
         <p className="t-body-sm t-muted"><span aria-hidden="true">*</span> Campo obrigatório para aprovar.</p>
+        <AtualizarProdutos aoConcluir={recarregar} />
       </div>
       <div className="revisao__filtros">
         <label className="campo">Categoria
@@ -180,7 +194,10 @@ export default function Revisao() {
               />
               <nav className="revisao__acoes">
                 {item.sourceUrl ? <a href={linkDaOrigem(item.sourceUrl)} target="_blank" rel="noopener noreferrer">Ver origem ↗</a> : <span>Origem indisponível</span>}
-                <Button disabled={Boolean(salvando) || opcoes.carregando || Boolean(opcoes.erro) || !destinosCompletos(destinos[item.id] || destinosVazios()) || !marcaDe(item)} onClick={() => aprovar(item)}>{salvando === item.id ? 'Salvando…' : 'Aprovar'}</Button>
+                <div className="revisao__decisao">
+                  <button type="button" className="link-caps" disabled={Boolean(salvando)} onClick={() => setReprovando(item)}>Reprovar</button>
+                  <Button disabled={Boolean(salvando) || opcoes.carregando || Boolean(opcoes.erro) || !destinosCompletos(destinos[item.id] || destinosVazios()) || !marcaDe(item)} onClick={() => aprovar(item)}>{salvando === item.id ? 'Salvando…' : 'Aprovar'}</Button>
+                </div>
               </nav>
             </div>
           </Card>
@@ -191,6 +208,18 @@ export default function Revisao() {
           <Button variante="secundaria" disabled={paginaAtual >= paginas || Boolean(salvando)} onClick={() => setPagina(paginaAtual + 1)}>Próxima</Button>
         </nav>
       </>}
+      <Modal aberto={Boolean(reprovando)} onFechar={() => !salvando && setReprovando(null)} titulo="Reprovar este produto?">
+        {reprovando && (
+          <div className="revisao__confirmar">
+            <p className="t-body-lg">{nomes[reprovando.id] ?? reprovando.translatedName}</p>
+            <p className="t-body-sm t-muted">Ele sai da fila de revisão e não vai para a loja. Só confirme se tem certeza de que não quer essa peça.</p>
+            <div className="revisao__confirmar-acoes">
+              <Button variante="secundaria" disabled={Boolean(salvando)} onClick={() => setReprovando(null)}>Cancelar</Button>
+              <Button variante="primaria" disabled={Boolean(salvando)} onClick={() => reprovar(reprovando)}>{salvando === reprovando.id ? 'Reprovando…' : 'Sim, reprovar'}</Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </section>
   );
 }

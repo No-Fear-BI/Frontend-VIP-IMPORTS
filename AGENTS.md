@@ -49,3 +49,10 @@ Resumo do que entrou nesta rodada; o registro completo está em `CLAUDE.md` e `d
 - **"Adicionar outra categoria"** (`DestinosProduto.jsx`): sem sublinhado, só negrito na cor do texto.
 - **Arquivos com CRLF:** no Windows, edite com ferramentas que preservam o fim de linha; não reescreva arquivo inteiro com LF.
 
+## Painel: Revisão, link de origem (02/10/2026)
+
+- **Reprovar** (cartão da Revisão) sempre abre a janela "Reprovar este produto?" com "Cancelar" e "Sim, reprovar"; manda `POST /admin/revisao` com `status: 'rejected'`.
+- **Atualizar produtos** (`paginas/admin/AtualizarProdutos.jsx`): `POST /admin/revisao/atualizar` e andamento em `GET /admin/revisao/atualizacao` (a cada 5 s). Não repete álbum (o backend junta pelo id); uma coleta por vez; ao concluir, recarrega a fila.
+- **`origemUrl`** do produto: campo opcional "Link de origem" na criação e na edição; "Ver origem ↗" só na listagem do painel (ao lado de "Remover das novidades"), nunca na loja. `linkDaOrigem` está em `src/lib/linkOrigem.js` (acrescenta `uid=1`).
+- **Modo exemplo:** simula a coleta (8 s, traz 2 álbuns na primeira vez e nada na seguinte) e entende `origemUrl`.
+- Registro completo em `docs/decisoes-frontend.md`, seção 26.

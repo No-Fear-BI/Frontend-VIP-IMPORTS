@@ -316,6 +316,7 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
   const [nome, setNome] = useState(inicial?.nome || '');
   const [descricao, setDescricao] = useState(inicial?.descricao || '');
   const [codigo, setCodigo] = useState(inicial?.codigo || '');
+  const [origemUrl, setOrigemUrl] = useState(inicial?.origemUrl || '');
   const [status, setStatus] = useState(inicial?.status || 'normal');
   const [emNovidades, setEmNovidades] = useState(inicial?.emNovidades ?? true);
   const [marcaId, setMarcaId] = useState(inicial?.marcaId ? String(inicial.marcaId) : '');
@@ -350,6 +351,7 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
           nome: nome.trim(),
           ...(descricao.trim() ? { descricao: descricao.trim() } : {}),
           ...(codigo.trim() ? { codigo: codigo.trim() } : {}),
+          ...(origemUrl.trim() ? { origemUrl: origemUrl.trim() } : {}),
           status,
           emNovidades,
           marcaId: Number(marcaId),
@@ -369,6 +371,8 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
     const descricaoAtual = descricao.trim() || null;
     if (descricaoAtual !== (inicial.descricao || null)) patch.descricao = descricaoAtual;
     if (codigo.trim() && codigo.trim().toUpperCase() !== inicial.codigo) patch.codigo = codigo.trim();
+    // Vazio apaga o link (`null`).
+    if ((origemUrl.trim() || null) !== (inicial.origemUrl || null)) patch.origemUrl = origemUrl.trim() || null;
     if (status !== inicial.status) patch.status = status;
     if (emNovidades !== inicial.emNovidades) patch.emNovidades = emNovidades;
     if (marcaId && Number(marcaId) !== inicial.marcaId) patch.marcaId = Number(marcaId);
@@ -436,6 +440,19 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
           />
         </div>
 
+        <Field
+          id="produto-origem"
+          rotulo="Link de origem"
+          type="url"
+          inputMode="url"
+          ajuda="Opcional. Álbum ou página de onde a peça veio, para a equipe voltar à fonte."
+          placeholder="https://"
+          value={origemUrl}
+          onChange={(e) => setOrigemUrl(e.target.value)}
+          erro={erro?.campos?.origemUrl}
+          disabled={salvando}
+        />
+
         <div className="admin-produto__form-grade">
           <CampoSelecao
             id="produto-marca"
@@ -475,7 +492,7 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
         />}
 
         {erro && !erro.campos && <ErroGeral>{erro.mensagem}</ErroGeral>}
-        {erro?.campos && Object.keys(erro.campos).some((c) => !['nome', 'descricao', 'codigo', 'status', 'marcaId', 'categoriaId', 'categoriasIds', 'publicos', 'emNovidades'].includes(c)) && (
+        {erro?.campos && Object.keys(erro.campos).some((c) => !['nome', 'descricao', 'codigo', 'status', 'marcaId', 'categoriaId', 'categoriasIds', 'publicos', 'emNovidades', 'origemUrl'].includes(c)) && (
           <ErroGeral>{erroGeralDe(erro)}</ErroGeral>
         )}
 

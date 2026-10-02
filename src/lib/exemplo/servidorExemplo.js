@@ -153,6 +153,8 @@ const REVISAO_EXEMPLO = [
   ['cinto', 'Acessórios', 'Leather belt', 'Cinto de couro'],
   ['lenco', 'Acessórios', 'Silk scarf', 'Lenço de seda'],
   ['bolsa-corrente', 'Bolsas', 'Chain strap bag', 'Bolsa com alça de corrente'],
+  ['lenco', 'Acessórios', 'Printed scarf', 'Lenço estampado'],
+  ['carteira', 'Acessórios', 'Card holder', 'Porta-cartões'],
 ].map(([arquivo, category, name, translatedName], i) => ({
   id: 9001 + i,
   image: `/exemplo/produtos/${arquivo}.svg`,
@@ -162,6 +164,8 @@ const REVISAO_EXEMPLO = [
   translatedDetails: 'Peça de teste para a fila de revisão.',
   category,
   supplier: 'Fornecedor Exemplo',
+  // Os dois últimos só entram na fila depois do botão "Atualizar produtos" (ver `coletaConcluida`).
+  soAposAtualizar: i >= 6,
   // Só os dois primeiros trazem marca: um casa com a cadastrada (Gucci), outro cai em "+ Nova marca".
   brand: ["GUCCI", 'Louis Vuitton'][i],
 }));
@@ -206,7 +210,9 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
     if (rota === 'GET /admin/revisao/pendentes') {
       const busca = normalizar(q.get('busca') || '');
       const categoria = q.get('categoria') || 'Todos';
-      let lista = vazio ? [] : REVISAO_EXEMPLO.filter((i) => !estado.revisados?.includes(i.id));
+      let lista = vazio
+        ? []
+        : REVISAO_EXEMPLO.filter((i) => !estado.revisados?.includes(i.id) && (!i.soAposAtualizar || estado.coletaConcluida));
       if (categoria !== 'Todos') lista = lista.filter((i) => i.category === categoria);
       if (busca) lista = lista.filter((i) => normalizar(i.name).includes(busca));
       return {
@@ -222,6 +228,27 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
       // Todas as ilustrações de exemplo fazem as vezes das fotos do álbum.
       const todas = ['bolsa', 'camisa', 'carteira', 'cinto', 'lenco', 'bolsa-corrente'].map((a) => `/exemplo/produtos/${a}.svg`);
       return { fotos: todas.map((url) => ({ url, miniatura: url })) };
+    }
+
+    // Simula a coleta do Yupoo: roda ~8 s e então "traz" 2 álbuns (só na primeira vez; depois, nada novo).
+    if (rota === 'POST /admin/revisao/atualizar') {
+      const andando = estado.coleta && Date.now() - estado.coleta.iniciadoEm < 8000;
+      if (!andando) gravar({ ...estado, coleta: { iniciadoEm: Date.now(), jaTinha: Boolean(estado.coletaConcluida) } });
+      return { estado: 'rodando', iniciadoEm: new Date().toISOString() };
+    }
+    if (rota === 'GET /admin/revisao/atualizacao') {
+      const coleta = estado.coleta;
+      if (!coleta) return { estado: 'ocioso', concluidoEm: null };
+      if (Date.now() - coleta.iniciadoEm < 8000) return { estado: 'rodando', iniciadoEm: new Date(coleta.iniciadoEm).toISOString() };
+      if (!estado.coletaConcluida) gravar({ ...estado, coletaConcluida: true });
+      return {
+        estado: 'concluido',
+        iniciadoEm: new Date(coleta.iniciadoEm).toISOString(),
+        concluidoEm: new Date(coleta.iniciadoEm + 8000).toISOString(),
+        adicionados: coleta.jaTinha ? 0 : 2,
+        coletados: 120,
+        total: 500,
+      };
     }
 
     if (rota === 'POST /admin/revisao') {
@@ -538,6 +565,7 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
         codigo,
         nome,
         descricao: corpo?.descricao ?? null,
+        origemUrl: origemValida(corpo?.origemUrl),
         status: corpo?.status || 'normal',
         emNovidades: corpo?.emNovidades !== false,
         destaque: false,
@@ -579,6 +607,7 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
       }
       if ('nome' in corpo && corpo.nome) campos.nome = String(corpo.nome).trim();
       if ('descricao' in corpo) campos.descricao = corpo.descricao ?? null;
+      if ('origemUrl' in corpo) campos.origemUrl = origemValida(corpo.origemUrl);
       if ('status' in corpo && corpo.status) campos.status = corpo.status;
       if ('marcaId' in corpo && corpo.marcaId != null) {
         if (!marcas.some((mm) => mm.id === corpo.marcaId)) {
@@ -1446,6 +1475,18 @@ function refDoPublico(publicos) {
 }
 
 /** ProdutoAdminDetalhe: o produto do painel com marca/categoria/coleção por extenso. */
+/** Espelha o backend: vazio vira null; o resto precisa ser http(s) sem espaço. */
+function origemValida(valor) {
+  const texto = String(valor ?? '').trim();
+  if (!texto) return null;
+  if (!/^https?:\/\/\S+$/i.test(texto)) {
+    throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', {
+      campos: { origemUrl: 'Informe um link completo, começando com http:// ou https://.' },
+    });
+  }
+  return texto;
+}
+
 function detalheDoPainel(p) {
   return {
     ...p,
@@ -1466,6 +1507,7 @@ function itemDoPainel(p) {
     status: p.status,
     destaque: p.destaque,
     emNovidades: p.emNovidades !== false,
+    origemUrl: p.origemUrl ?? null,
     marca: refDaMarca(p.marcaId),
     categoria: refDaCategoria(p.categoriaId),
     colecao: refDoPublico(p.publicos),

@@ -19,6 +19,7 @@ import { catalogoService } from '../../services/catalogoService.js';
 import { categoriasService } from '../../services/categoriasService.js';
 import { marcasService } from '../../services/marcasService.js';
 import { produtosAdminService } from '../../services/produtosAdminService.js';
+import { linkDaOrigem } from '../../lib/linkOrigem.js';
 import { BotaoDuplicar, BotaoExcluir } from './Produto.jsx';
 import { ROTULO_STATUS } from './rotulosProduto.js';
 import './Produtos.css';
@@ -240,6 +241,11 @@ export default function AdminProdutos() {
                       <button type="button" className="link-caps" onClick={() => realocarNasNovidades(produto)}>
                         Realocar nas novidades
                       </button>
+                    )}
+                    {produto.origemUrl && (
+                      <a className="link-caps" href={linkDaOrigem(produto.origemUrl)} target="_blank" rel="noopener noreferrer">
+                        Ver origem ↗
+                      </a>
                     )}
                     <BotaoDuplicar
                       produtoId={produto.id}

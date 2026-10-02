@@ -1,0 +1,4 @@
+.atualizar-produtos { display: flex; flex-wrap: wrap; align-items: center; gap: var(--espaco-4); margin-top: var(--espaco-4); }
+.atualizar-produtos__texto { flex: 1; min-width: 0; }
+.atualizar-produtos__texto p { margin: 0; }
+.atualizar-produtos > .erro-geral { flex-basis: 100%; }
