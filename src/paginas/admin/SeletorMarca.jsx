@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { useId, useRef } from 'react';
 import { MarcaObrigatorio } from '../../components/ui/Field.jsx';
 
 /**
@@ -28,6 +28,7 @@ export function nomeDaMarca(valor = {}, marcas = []) {
 export default function SeletorMarca({ id, marcas, valor = {}, onMudar, erro, disabled, carregando }) {
   const idNova = `${id}-nova`;
   const idErro = useId();
+  const campoNova = useRef(null);
   const ativas = (marcas || [])
     .filter((m) => m.ativa)
     .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
@@ -46,7 +47,11 @@ export default function SeletorMarca({ id, marcas, valor = {}, onMudar, erro, di
         aria-required="true"
         aria-invalid={Boolean(erro)}
         aria-describedby={erro ? idErro : undefined}
-        onChange={(e) => onMudar({ escolha: e.target.value, nova: valor.nova || '' })}
+        onChange={(e) => {
+          onMudar({ escolha: e.target.value, nova: valor.nova || '' });
+          // Foco só quando a pessoa escolhe "+ Nova marca…": a sugestão do título abre vários cartões já em NOVA.
+          if (e.target.value === NOVA) requestAnimationFrame(() => campoNova.current?.focus());
+        }}
       >
         <option value="">{carregando ? 'Carregando marcas…' : 'Escolha a marca'}</option>
         {ativas.map((m) => <option key={m.id} value={String(m.id)}>{m.nome}</option>)}
@@ -60,12 +65,12 @@ export default function SeletorMarca({ id, marcas, valor = {}, onMudar, erro, di
           </label>
           <input
             id={idNova}
+            ref={campoNova}
             className="campo__input"
             value={valor.nova || ''}
             maxLength={80}
             disabled={disabled}
             aria-required="true"
-            autoFocus
             onChange={(e) => onMudar({ escolha: NOVA, nova: e.target.value })}
           />
           <p className="t-body-sm t-muted">A marca é cadastrada ao aprovar. Confira a grafia: ela aparece assim na loja.</p>

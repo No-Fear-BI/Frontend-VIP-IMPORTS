@@ -162,6 +162,8 @@ const REVISAO_EXEMPLO = [
   translatedDetails: 'Peça de teste para a fila de revisão.',
   category,
   supplier: 'Fornecedor Exemplo',
+  // Só os dois primeiros trazem marca: um casa com a cadastrada (Gucci), outro cai em "+ Nova marca".
+  brand: ["GUCCI", 'Louis Vuitton'][i],
 }));
 
 export async function responderExemplo(metodo, url, corpo, sinal) {
