@@ -7,7 +7,7 @@ import Modal from '../components/ui/Modal.jsx';
 import { Esqueleto, EsqueletoGrade, EstadoErro } from '../components/Estados.jsx';
 import FormIdentificacao from '../components/FormIdentificacao.jsx';
 import { IconeCoracao, IconeWhatsApp } from '../components/Icones.jsx';
-import { CartaoProduto, Etiqueta, FotoProduto, rotuloCompra } from '../components/Produto.jsx';
+import { CartaoProduto, Etiqueta, FotoProduto, QuantidadeProduto, rotuloCompra } from '../components/Produto.jsx';
 import SeletorVariacoes from '../components/SeletorVariacoes.jsx';
 import { useCompra } from '../contexto/CompraWhatsApp.jsx';
 import { useSessaoCliente } from '../contexto/SessaoCliente.jsx';
@@ -91,7 +91,7 @@ function DetalheProduto({ produto }) {
         <div className="produto__galeria entra" style={{ '--ordem': 1 }}>
           <div className="produto__foto-principal" onMouseMove={acompanharMouse}>
             <FotoProduto url={foto?.url} alt={foto?.alt || produto.nome} carregamento="eager" />
-            {produto.status === 'esgotado' && <span className="selo-esgotado t-label-caps-sm">Esgotado</span>}
+            {produto.status === 'esgotado' && <span className="selo-esgotado t-label-caps-sm">Fazer pedido</span>}
           </div>
           {imagens.length > 1 && (
             <ul className="produto__miniaturas" aria-label="Fotos da peça">
@@ -123,9 +123,10 @@ function DetalheProduto({ produto }) {
           <hr className="filete" />
 
           <p className="t-body-lg">Valor confirmado pelo atendimento.</p>
+          <QuantidadeProduto produto={produto} />
           {produto.status === 'esgotado' && (
             <p className="t-body-sm produto__esgotado">
-              Esta peça está esgotada no momento. Chame o atendimento para saber se ela volta ou se há outra parecida.
+              Faça seu pedido pelo WhatsApp. O atendimento confirma a disponibilidade e o prazo de entrega.
             </p>
           )}
 
@@ -160,7 +161,7 @@ function DetalheProduto({ produto }) {
             <h2 className="t-label-caps">Como funciona a compra</h2>
             <ol className="t-body-sm">
               <li>
-                <span className="t-codigo">01</span> Toque em Consultar valores no WhatsApp. Tamanho e cor são
+                <span className="t-codigo">01</span> Toque em “{rotuloCompra(produto.status)}”. Tamanho e cor são
                 opcionais.
               </li>
               <li>

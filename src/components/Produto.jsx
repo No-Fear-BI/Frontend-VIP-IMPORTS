@@ -34,7 +34,12 @@ export function Etiqueta({ children }) {
 }
 
 export function rotuloCompra(status) {
-  return status === 'esgotado' ? 'Consultar disponibilidade' : 'Consultar valores no WhatsApp';
+  return status === 'esgotado' ? 'Fazer pedido' : 'Consultar valores no WhatsApp';
+}
+
+export function QuantidadeProduto({ produto }) {
+  if (produto.quantidadeDisponivel == null) return null;
+  return <p className="t-body-sm t-muted">{produto.quantidadeDisponivel} {produto.quantidadeDisponivel === 1 ? 'unidade disponível' : 'unidades disponíveis'}</p>;
 }
 
 export function CartaoProduto({ produto, carregamento }) {
@@ -44,11 +49,12 @@ export function CartaoProduto({ produto, carregamento }) {
       <Link to={destino} className="cartao-produto__link">
         <div className="cartao-produto__foto">
           <FotoProduto url={produto.capa?.url} alt={produto.capa?.alt || produto.nome} carregamento={carregamento} />
-          {produto.status === 'esgotado' && <span className="selo-esgotado t-label-caps-sm">Esgotado</span>}
+          {produto.status === 'esgotado' && <span className="selo-esgotado t-label-caps-sm">Fazer pedido</span>}
         </div>
         <p className="t-label-caps-sm t-muted cartao-produto__marca">{produto.marca.nome}</p>
         <h3 className="t-headline-sm">Código {produto.codigo}</h3>
         <p className="t-body-sm t-muted">{produto.categoria.nome}</p>
+        <QuantidadeProduto produto={produto} />
       </Link>
       <div className="cartao-produto__acoes">
         <Link to={destino} className="link-caps">

@@ -77,6 +77,7 @@ const item = (p) => ({
   codigo: p.codigo,
   nome: p.nome,
   status: p.status,
+  quantidadeDisponivel: p.quantidadeDisponivel ?? null,
   destaque: p.destaque,
   marca: p.marca,
   categoria: p.categoria,
@@ -214,7 +215,7 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
         ? []
         : REVISAO_EXEMPLO.filter((i) => !estado.revisados?.includes(i.id) && (!i.soAposAtualizar || estado.coletaConcluida));
       if (categoria !== 'Todos') lista = lista.filter((i) => i.category === categoria);
-      if (busca) lista = lista.filter((i) => normalizar(i.name).includes(busca));
+      if (busca) lista = lista.filter((i) => busca.trim().split(/\s+/).every((termo) => normalizar([i.name, i.category, i.translatedName].join(' ')).includes(termo)));
       return {
         items: lista,
         categories: [...new Set(REVISAO_EXEMPLO.map((i) => i.category))],
@@ -567,6 +568,7 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
         descricao: corpo?.descricao ?? null,
         origemUrl: origemValida(corpo?.origemUrl),
         status: corpo?.status || 'normal',
+        quantidadeDisponivel: corpo?.quantidadeDisponivel ?? null,
         emNovidades: corpo?.emNovidades !== false,
         destaque: false,
         destaqueOrdem: null,
@@ -635,6 +637,7 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
       }
       if ('publicos' in corpo) campos.publicos = publicosValidos(corpo.publicos);
       if ('destaque' in corpo && corpo.destaque != null) campos.destaque = corpo.destaque;
+      if ('quantidadeDisponivel' in corpo) campos.quantidadeDisponivel = corpo.quantidadeDisponivel;
       if ('emNovidades' in corpo && corpo.emNovidades != null) campos.emNovidades = corpo.emNovidades;
       campos.atualizadoEm = new Date().toISOString();
 
@@ -654,6 +657,7 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
         nome: `${original.nome} (cópia)`.slice(0, 180),
         descricao: original.descricao,
         status: 'oculto',
+        quantidadeDisponivel: null,
         destaque: false,
         destaqueOrdem: null,
         marcaId: original.marcaId,
@@ -1301,6 +1305,7 @@ function produtoEstaticoParaPainel(p) {
     nome: p.nome,
     descricao: p.descricao,
     status: p.status,
+  quantidadeDisponivel: p.quantidadeDisponivel ?? null,
     destaque: p.destaque,
     // Os ids fixos são 100+i e o destaque, `i < 12` (catalogoExemplo.js) — id-99 reaproveita o
     // índice original como ordem, sem precisar guardar um segundo campo lá.
@@ -1505,6 +1510,7 @@ function itemDoPainel(p) {
     codigo: p.codigo,
     nome: p.nome,
     status: p.status,
+  quantidadeDisponivel: p.quantidadeDisponivel ?? null,
     destaque: p.destaque,
     emNovidades: p.emNovidades !== false,
     origemUrl: p.origemUrl ?? null,

@@ -239,7 +239,7 @@ function ItemSelecao({ item, onMudou }) {
         </Link>
         <p className="t-body-sm t-muted">
           {variacao ? variacao : 'Tamanho e cor a combinar com o atendimento'}
-          {item.status === 'esgotado' && ' · Esgotado'}
+          {item.status === 'esgotado' && ' · Fazer pedido'}
         </p>
 
         {editando ? (

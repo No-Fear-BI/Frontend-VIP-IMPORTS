@@ -56,7 +56,7 @@ export default function AdminResumo() {
               valor={resumo.dados.totalProdutos - resumo.dados.produtosOcultos}
             />
             <Numero rotulo="Em revisão" valor={totalFila} carregando={fila.carregando} />
-            <Numero rotulo="Esgotados" valor={resumo.dados.produtosEsgotados} />
+            <Numero rotulo="Fazer pedido" valor={resumo.dados.produtosEsgotados} />
             <Numero rotulo="Seleções · mês" valor={resumo.dados.selecoesNoMes} />
           </ul>
 

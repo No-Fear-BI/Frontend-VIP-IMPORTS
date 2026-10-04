@@ -9,7 +9,10 @@
 .revisao__card img { width: 100%; aspect-ratio: 1; object-fit: contain; background: var(--cor-fundo-foto); }
 .revisao__conteudo { padding: var(--espaco-6); display: grid; gap: var(--espaco-4); overflow-wrap: anywhere; }
 .revisao__conteudo small { color: var(--cor-texto-suave); }
-.revisao__paginacao { margin-block: var(--espaco-6); }
+.revisao__paginacao { margin-block: var(--espaco-6); justify-content: flex-end; }
+.revisao__controles-pagina { display: flex; align-items: end; gap: var(--espaco-3); }
+.revisao__ir-pagina { display: flex; gap: var(--espaco-3); align-items: end; }
+.revisao__ir-pagina .campo { min-width: 0; }
 .revisao__acoes { margin-top: var(--espaco-4); padding-top: var(--espaco-4); border-top: var(--borda-fina) solid var(--cor-borda); }
 .revisao__decisao { display: flex; align-items: center; gap: var(--espaco-6); }
 .revisao__confirmar { display: grid; gap: var(--espaco-4); }
