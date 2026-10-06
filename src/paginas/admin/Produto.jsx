@@ -20,6 +20,7 @@
 
 import { useState } from 'react';
 import CampoNovidades from './CampoNovidades.jsx';
+import CampoQuantidade, { quantidadeValida, quantidadeParaApi } from './CampoQuantidade.jsx';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Esqueleto, EstadoErro } from '../../components/Estados.jsx';
 import { FotoProduto } from '../../components/Produto.jsx';
@@ -289,9 +290,7 @@ export function BotaoExcluir({ produto, render, onExcluido }) {
         <div className="admin-produto__duplicar">
           <p className="t-body-lg">
             Excluir <strong>{produto.codigo} — {produto.nome}</strong>? <strong>Não dá para desfazer.</strong>{' '}
-            As imagens, as variações, os favoritos e os itens de seleção em aberto dele somem. As
-            seleções que já foram enviadas ao WhatsApp continuam no histórico, sem o link para
-            o produto.
+            As imagens, as variações, os favoritos e os itens de seleção em aberto dele somem.
           </p>
           {erro && <ErroGeral>{erro.mensagem}</ErroGeral>}
           <Button variante="primaria" largo onClick={excluir} disabled={excluindo}>
@@ -321,6 +320,7 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
   const [origemUrl, setOrigemUrl] = useState(inicial?.origemUrl || '');
   const [preco, setPreco] = useState(inicial?.precoCentavos != null ? formatarCentavos(inicial.precoCentavos) : '');
   const [status, setStatus] = useState(inicial?.status || 'normal');
+  const [quantidade, setQuantidade] = useState(inicial?.quantidadeDisponivel == null ? '' : String(inicial.quantidadeDisponivel));
   const [emNovidades, setEmNovidades] = useState(inicial?.emNovidades ?? true);
   const [marcaId, setMarcaId] = useState(inicial?.marcaId ? String(inicial.marcaId) : '');
   const [destinosEditados, setDestinosEditados] = useState(modo === 'criar' ? destinosVazios() : null);
@@ -337,7 +337,7 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
   const opcoesCarregando = categorias.carregando;
   const erroOpcoes = categorias.erro;
   const faltaAlgoObrigatorio =
-    !nome.trim() || !marcaId || !destinosCompletos(destinos) || opcoesCarregando || Boolean(erroOpcoes);
+    !quantidadeValida(quantidade) || !nome.trim() || !marcaId || !destinosCompletos(destinos) || opcoesCarregando || Boolean(erroOpcoes);
   const recarregarOpcoes = () => categorias.recarregar();
 
   async function enviar(evento) {
@@ -363,6 +363,7 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
           ...(precoCentavos !== null ? { precoCentavos } : {}),
           status,
           emNovidades,
+          quantidadeDisponivel: quantidadeParaApi(quantidade),
           marcaId: Number(marcaId),
           categoriaId: Number(destinos.categoriasIds[0]),
           publicos: destinos.publicos,
@@ -385,6 +386,7 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
     // Vazio apaga o preço (`null`).
     if (precoCentavos !== (inicial.precoCentavos ?? null)) patch.precoCentavos = precoCentavos;
     if (status !== inicial.status) patch.status = status;
+    if (quantidadeParaApi(quantidade) !== (inicial.quantidadeDisponivel ?? null)) patch.quantidadeDisponivel = quantidadeParaApi(quantidade);
     if (emNovidades !== inicial.emNovidades) patch.emNovidades = emNovidades;
     if (marcaId && Number(marcaId) !== inicial.marcaId) patch.marcaId = Number(marcaId);
     // A ordem importa: a primeira categoria é a principal.
@@ -492,6 +494,8 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
           />
         </div>
 
+        <CampoQuantidade id="produto-quantidade" valor={quantidade} onMudar={setQuantidade}
+          disabled={salvando} erro={erro?.campos?.quantidadeDisponivel} />
         <CampoNovidades
           id="produto-em-novidades"
           rotulo="Colocar em novidades?"
@@ -511,7 +515,7 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
         />}
 
         {erro && !erro.campos && <ErroGeral>{erro.mensagem}</ErroGeral>}
-        {erro?.campos && Object.keys(erro.campos).some((c) => !['nome', 'descricao', 'codigo', 'status', 'marcaId', 'categoriaId', 'categoriasIds', 'publicos', 'emNovidades', 'origemUrl', 'precoCentavos'].includes(c)) && (
+        {erro?.campos && Object.keys(erro.campos).some((c) => !['nome', 'descricao', 'codigo', 'status', 'marcaId', 'categoriaId', 'categoriasIds', 'publicos', 'emNovidades', 'origemUrl', 'precoCentavos', 'quantidadeDisponivel'].includes(c)) && (
           <ErroGeral>{erroGeralDe(erro)}</ErroGeral>
         )}
 

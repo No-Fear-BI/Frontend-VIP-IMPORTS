@@ -287,3 +287,15 @@ Além disso, a base de acesso dele não tem rota protegida, não separa 401 de 4
 - **Opcional:** vazio aprova e salva normalmente. No PATCH, vazio manda `null` e apaga; sem mudança, o campo nem viaja.
 - **Nunca na loja:** nenhum componente da loja lê o campo; o modo exemplo só o guarda nas rotas de admin.
 - **Alternativa descartada:** guardar em reais com vírgula flutuante (arredondamento) ou como texto.
+
+
+## Pedidos sem histórico — 05/10/2026
+
+Decisão do cliente: o rótulo "Fazer pedido" passa a "Encomendar" em toda a loja
+e no painel. O histórico de pedidos sai da conta, do painel, das rotas e do
+banco. `POST /selecoes` apenas gera `itens`, `mensagemWhatsapp` e `linkWhatsapp`
+em memória (HTTP 200), sem id ou data e sem salvar o envio. A seleção em
+andamento continua disponível. No resumo, o quarto contador passa a Clientes.
+Não existem mais selecoesService.historico, selecoesAdminService, as páginas
+admin/selecoes nem os campos selecoesNoMes e totalSelecoes. Esta decisão
+substitui as referências anteriores ao histórico de seleções.

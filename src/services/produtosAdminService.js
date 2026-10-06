@@ -37,7 +37,7 @@ export const produtosAdminService = {
 
   /**
    * DELETE /admin/produtos/:id — responde `{ok: true}`. Leva junto imagens, variações, favoritos
-   * e itens de carrinho; as seleções já enviadas ficam (histórico congelado, sem o link). Sem
+   * e itens de carrinho. Sem
    * recusa por status: o único erro esperado é 404, produto que já não existe.
    */
   excluir: (id) => requisitarAdmin('DELETE', `/admin/produtos/${id}`),

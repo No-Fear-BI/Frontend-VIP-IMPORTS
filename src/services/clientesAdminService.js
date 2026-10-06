@@ -9,7 +9,7 @@ export const clientesAdminService = {
   /**
    * GET /admin/clientes — listarClientesAdmin. Envelope `{dados, paginacao: {total, porPagina,
    * pagina}}`. `busca` casa parte do nome ou do e-mail, ignorando caixa. Cada cliente traz
-   * `totalSelecoes` (quem vale a pena atender), `ultimoAcessoEm` e o telefone — aqui ele aparece
+   * `ultimoAcessoEm` e o telefone — aqui ele aparece
    * porque é o painel, e é com ele que o atendimento responde.
    * @param {{ busca?: string, pagina?: number, porPagina?: number }} filtros
    */

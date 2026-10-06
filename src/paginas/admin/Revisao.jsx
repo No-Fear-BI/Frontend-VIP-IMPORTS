@@ -10,6 +10,7 @@ import ImagemAmpliavel from '../../components/ImagemAmpliavel.jsx';
 import './Revisao.css';
 import CampoNovidades from './CampoNovidades.jsx';
 import CampoPreco from './CampoPreco.jsx';
+import CampoQuantidade, { quantidadeValida, quantidadeParaApi } from './CampoQuantidade.jsx';
 import FotosDoAlbum from './FotosDoAlbum.jsx';
 import AtualizarProdutos from './AtualizarProdutos.jsx';
 import { categoriasService } from '../../services/categoriasService.js';
@@ -29,11 +30,28 @@ function marcaSugerida(nome, cadastradas) {
   return achada ? { escolha: String(achada.id), nova: '' } : { escolha: NOVA, nova: nome };
 }
 
+function EscolherPagina({ id, pagina, paginas, disabled, onMudar }) {
+  const [destino, setDestino] = useState(String(pagina));
+  return (
+    <form className="revisao__ir-pagina" onSubmit={(evento) => {
+      evento.preventDefault();
+      const numero = Number(destino);
+      if (Number.isInteger(numero) && numero >= 1 && numero <= paginas) onMudar(numero);
+    }}>
+      <Field id={id} rotulo={`Página (de ${paginas})`} type="number" inputMode="numeric"
+        min={1} max={paginas} step={1} required value={destino} disabled={disabled}
+        onChange={(evento) => setDestino(evento.target.value)} />
+    </form>
+  );
+}
+
 export default function Revisao() {
   const [busca, setBusca] = useState('');
   const [categoria, setCategoria] = useState('Todos');
   const [pagina, setPagina] = useState(1);
   const [nomes, setNomes] = useState({});
+  const [quantidades, setQuantidades] = useState({});
+  const [statusProdutos, setStatusProdutos] = useState({});
   const [marcas, setMarcas] = useState({});
   const [destinos, setDestinos] = useState({});
   // Só guarda quem desmarcou; ausente = marcado (padrão: aprovar já coloca em novidades).
@@ -70,9 +88,10 @@ export default function Revisao() {
   const esquecer = (id) => {
     const sem = (atual) => { const novo = { ...atual }; delete novo[id]; return novo; };
     setNomes(sem); setMarcas(sem); setDestinos(sem); setSemNovidades(sem); setFotos(sem); setPrecos(sem);
+    setQuantidades(sem); setStatusProdutos(sem);
   };
   const aprovar = async (item) => {
-    if (trava.current) return;
+    if (trava.current || !quantidadeValida(quantidades[item.id] ?? '')) return;
     if (!destinosCompletos(destinos[item.id] || destinosVazios()) || !marcaDe(item)) {
       setErroDecisao({ itemId: item.id, mensagem: 'Informe a marca, o público (Feminino e/ou Masculino) e a categoria.', campos: {} });
       return;
@@ -95,6 +114,8 @@ export default function Revisao() {
         publicos: destinos[item.id].publicos,
         emNovidades: emNovidadesDe(item.id),
         ...(precoCentavos !== null ? { precoCentavos } : {}),
+        quantidadeDisponivel: quantidadeParaApi(quantidades[item.id] ?? ''),
+        statusProduto: statusProdutos[item.id] || 'normal',
         ...(fotos[item.id] ? { fotos: fotos[item.id] } : {}),
       });
       esquecer(item.id);
@@ -143,7 +164,7 @@ export default function Revisao() {
             <option>Todos</option>{categorias.map((nome) => <option key={nome}>{nome}</option>)}
           </select>
         </label>
-        <Field id="busca-revisao" rotulo="Buscar pelo título original" value={busca} disabled={Boolean(salvando)} onChange={(e) => { setBusca(e.target.value); setPagina(1); }} />
+        <Field id="busca-revisao" rotulo="Buscar por nome ou categoria" value={busca} disabled={Boolean(salvando)} onChange={(e) => { setBusca(e.target.value); setPagina(1); }} />
       </div>
       {opcoes.carregando && <p role="status">Carregando categorias…</p>}
       {opcoes.erro && <EstadoErro erro={opcoes.erro} onTentar={opcoes.recarregar} />}
@@ -155,9 +176,11 @@ export default function Revisao() {
         <EstadoVazio titulo="Nenhum produto pendente" texto="Limpe os filtros ou atualize a fila para conferir novos produtos." acao={{ rotulo: busca || categoria !== 'Todos' ? 'Limpar filtros' : 'Atualizar fila', onClick: busca || categoria !== 'Todos' ? limpar : recarregar }} />
       ) : <>
         <nav className="revisao__paginacao" aria-label="Páginas da revisão">
-          <Button variante="secundaria" disabled={paginaAtual <= 1 || Boolean(salvando)} onClick={() => setPagina(paginaAtual - 1)}>Anterior</Button>
-          <span>Página {paginaAtual} de {paginas} · {itens.length} produtos</span>
-          <Button variante="secundaria" disabled={paginaAtual >= paginas || Boolean(salvando)} onClick={() => setPagina(paginaAtual + 1)}>Próxima</Button>
+          <div className="revisao__controles-pagina">
+            <Button variante="secundaria" disabled={paginaAtual <= 1 || Boolean(salvando)} onClick={() => setPagina(paginaAtual - 1)}>Anterior</Button>
+            <EscolherPagina key={`topo-${paginaAtual}-${paginas}`} id="pagina-revisao-topo" pagina={paginaAtual} paginas={paginas} disabled={Boolean(salvando)} onMudar={setPagina} />
+            <Button variante="secundaria" disabled={paginaAtual >= paginas || Boolean(salvando)} onClick={() => setPagina(paginaAtual + 1)}>Próxima</Button>
+          </div>
         </nav>
         <div className="revisao__grade">{itens.map((item) => (
           <Card como="article" borda className="revisao__card" key={item.id}>
@@ -202,6 +225,18 @@ export default function Revisao() {
                 erro={erroDecisao?.itemId === item.id ? erroDecisao.campos?.precoCentavos : undefined}
                 disabled={Boolean(salvando)}
               />
+              <CampoQuantidade id={`quantidade-${item.id}`} valor={quantidades[item.id] ?? ''}
+                disabled={Boolean(salvando)}
+                erro={erroDecisao?.itemId === item.id ? erroDecisao.campos?.quantidadeDisponivel : undefined}
+                onMudar={(valor) => setQuantidades((atual) => ({ ...atual, [item.id]: valor }))} />
+              <label className="campo" htmlFor={`status-${item.id}`}>
+                <span className="t-label-caps">Disponibilidade</span>
+                <select id={`status-${item.id}`} className="campo__input" value={statusProdutos[item.id] || 'normal'}
+                  disabled={Boolean(salvando)} onChange={(evento) => setStatusProdutos((atual) => ({ ...atual, [item.id]: evento.target.value }))}>
+                  <option value="normal">Na loja</option>
+                  <option value="esgotado">Encomendar</option>
+                </select>
+              </label>
               <CampoNovidades
                 id={`novidades-${item.id}`}
                 rotulo="Colocar em novidades ao permitir?"
@@ -213,16 +248,18 @@ export default function Revisao() {
                 {item.sourceUrl ? <a href={linkDaOrigem(item.sourceUrl)} target="_blank" rel="noopener noreferrer">Ver origem ↗</a> : <span>Origem indisponível</span>}
                 <div className="revisao__decisao">
                   <button type="button" className="link-caps" disabled={Boolean(salvando)} onClick={() => setReprovando(item)}>Reprovar</button>
-                  <Button disabled={Boolean(salvando) || opcoes.carregando || Boolean(opcoes.erro) || !destinosCompletos(destinos[item.id] || destinosVazios()) || !marcaDe(item)} onClick={() => aprovar(item)}>{salvando === item.id ? 'Salvando…' : 'Aprovar'}</Button>
+                  <Button disabled={!quantidadeValida(quantidades[item.id] ?? '') || Boolean(salvando) || opcoes.carregando || Boolean(opcoes.erro) || !destinosCompletos(destinos[item.id] || destinosVazios()) || !marcaDe(item)} onClick={() => aprovar(item)}>{salvando === item.id ? 'Salvando…' : 'Aprovar'}</Button>
                 </div>
               </nav>
             </div>
           </Card>
         ))}</div>
         <nav className="revisao__paginacao" aria-label="Continuar revisão">
-          <Button variante="secundaria" disabled={paginaAtual <= 1 || Boolean(salvando)} onClick={() => setPagina(paginaAtual - 1)}>Anterior</Button>
-          <span>Página {paginaAtual} de {paginas}</span>
-          <Button variante="secundaria" disabled={paginaAtual >= paginas || Boolean(salvando)} onClick={() => setPagina(paginaAtual + 1)}>Próxima</Button>
+          <div className="revisao__controles-pagina">
+            <Button variante="secundaria" disabled={paginaAtual <= 1 || Boolean(salvando)} onClick={() => setPagina(paginaAtual - 1)}>Anterior</Button>
+            <EscolherPagina key={`fim-${paginaAtual}-${paginas}`} id="pagina-revisao-fim" pagina={paginaAtual} paginas={paginas} disabled={Boolean(salvando)} onMudar={setPagina} />
+            <Button variante="secundaria" disabled={paginaAtual >= paginas || Boolean(salvando)} onClick={() => setPagina(paginaAtual + 1)}>Próxima</Button>
+          </div>
         </nav>
       </>}
       <Modal aberto={Boolean(reprovando)} onFechar={() => !salvando && setReprovando(null)} titulo="Reprovar este produto?">

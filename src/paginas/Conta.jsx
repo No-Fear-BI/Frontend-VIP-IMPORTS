@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { clienteService } from '../services/clienteService.js';
 import { favoritosService } from '../services/favoritosService.js';
-import { selecoesService } from '../services/selecoesService.js';
 import CabecalhoSecao from '../components/CabecalhoSecao.jsx';
 import Field, { ErroGeral } from '../components/ui/Field.jsx';
 import { EsqueletoGrade, Esqueleto, EstadoErro, EstadoVazio } from '../components/Estados.jsx';
@@ -12,7 +11,6 @@ import { useRequisicao } from '../hooks/useRequisicao.js';
 import Button from '../components/ui/Button.jsx';
 import './Conta.css';
 
-const formatoData = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long', timeStyle: 'short' });
 
 export default function Conta() {
   const { cliente, verificando } = useSessaoCliente();
@@ -38,7 +36,7 @@ export default function Conta() {
       <div className="container conta">
         {topo}
         <div className="conta__identificar">
-          <p className="t-body-lg">Entre com seu e-mail para ver favoritos e seleções enviadas.</p>
+          <p className="t-body-lg">Entre com seu e-mail para ver seus favoritos.</p>
           <FormIdentificacao idBase="conta" rotuloBotao="Entrar" />
         </div>
       </div>
@@ -52,7 +50,6 @@ export default function Conta() {
         <DadosCliente />
         <div className="conta__principal">
           <Favoritos />
-          <Historico />
         </div>
       </div>
     </div>
@@ -157,84 +154,6 @@ function Favoritos() {
             <CartaoProduto key={produto.id} produto={produto} />
           ))}
         </div>
-      )}
-    </section>
-  );
-}
-
-function Historico() {
-  const [paginas, setPaginas] = useState({ itens: [], cursor: null, carregando: true, erro: null, fim: false });
-
-  async function carregar(cursor) {
-    setPaginas((p) => ({ ...p, carregando: true, erro: null }));
-    try {
-      const resposta = await selecoesService.historico(cursor);
-      setPaginas((p) => ({
-        itens: cursor ? [...p.itens, ...resposta.dados] : resposta.dados,
-        cursor: resposta.paginacao.proximoCursor || null,
-        carregando: false,
-        erro: null,
-        fim: !resposta.paginacao.proximoCursor,
-      }));
-    } catch (erro) {
-      setPaginas((p) => ({ ...p, carregando: false, erro }));
-    }
-  }
-
-  useEffect(() => {
-    carregar(null);
-  }, []);
-
-  return (
-    <section className="secao" aria-labelledby="titulo-historico">
-      <CabecalhoSecao id="titulo-historico" rotulo="O que você já mandou" titulo="Seleções enviadas" />
-      {paginas.carregando && paginas.itens.length === 0 ? (
-        <Esqueleto className="esqueleto--bloco" />
-      ) : paginas.erro && paginas.itens.length === 0 ? (
-        <EstadoErro erro={paginas.erro} onTentar={() => carregar(null)} titulo="Não conseguimos carregar o histórico." />
-      ) : paginas.itens.length === 0 ? (
-        <EstadoVazio
-          titulo="Nenhuma seleção enviada."
-          texto="Quando você chamar o atendimento pelo WhatsApp, a lista de peças fica registrada aqui."
-          acao={{ rotulo: 'Ver novidades', para: '/novidades' }}
-        />
-      ) : (
-        <>
-          <ol className="historico">
-            {paginas.itens.map((selecao) => (
-              <li key={selecao.id} className="historico__item">
-                <div className="historico__cabecalho">
-                  <p className="t-label-caps">{formatoData.format(new Date(selecao.criadoEm))}</p>
-                  <p className="t-body-sm t-muted">
-                    {selecao.totalItens} {selecao.totalItens === 1 ? 'peça' : 'peças'}
-                  </p>
-                </div>
-                <ul className="historico__pecas">
-                  {selecao.itens.map((peca, i) => (
-                    <li key={`${peca.codigo}-${i}`} className="t-body-sm">
-                      <span className="t-codigo">{peca.codigo}</span> {peca.nome}{' '}
-                      <span className="t-muted">
-                        · {peca.marca}
-                        {peca.variacao && ` · ${peca.variacao}`}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </li>
-            ))}
-          </ol>
-          {paginas.erro && <ErroGeral>{paginas.erro.mensagem}</ErroGeral>}
-          {!paginas.fim && (
-            <Button
-              variante="secundaria"
-              className="historico__mais"
-              onClick={() => carregar(paginas.cursor)}
-              disabled={paginas.carregando}
-            >
-              {paginas.carregando ? 'Carregando…' : 'Ver seleções anteriores'}
-            </Button>
-          )}
-        </>
       )}
     </section>
   );

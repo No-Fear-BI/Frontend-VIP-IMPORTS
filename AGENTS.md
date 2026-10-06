@@ -61,3 +61,15 @@ Resumo do que entrou nesta rodada; o registro completo está em `CLAUDE.md` e `d
 - **`origemUrl`** do produto: campo opcional "Link de origem" na criação e na edição; "Ver origem ↗" só na listagem do painel (ao lado de "Remover das novidades"), nunca na loja. `linkDaOrigem` está em `src/lib/linkOrigem.js` (acrescenta `uid=1`).
 - **Modo exemplo:** simula a coleta (8 s, traz 2 álbuns na primeira vez e nada na seguinte) e entende `origemUrl`.
 - Registro completo em `docs/decisoes-frontend.md`, seção 26.
+
+
+## Pedidos sem histórico — 05/10/2026
+
+Decisão do cliente: o rótulo "Fazer pedido" passa a "Encomendar" em toda a loja
+e no painel. O histórico de pedidos sai da conta, do painel, das rotas e do
+banco. `POST /selecoes` apenas gera `itens`, `mensagemWhatsapp` e `linkWhatsapp`
+em memória (HTTP 200), sem id ou data e sem salvar o envio. A seleção em
+andamento continua disponível. No resumo, o quarto contador passa a Clientes.
+Não existem mais selecoesService.historico, selecoesAdminService, as páginas
+admin/selecoes nem os campos selecoesNoMes e totalSelecoes. Esta decisão
+substitui as referências anteriores ao histórico de seleções.
