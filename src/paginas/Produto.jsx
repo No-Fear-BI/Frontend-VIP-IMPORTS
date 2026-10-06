@@ -91,7 +91,7 @@ function DetalheProduto({ produto }) {
         <div className="produto__galeria entra" style={{ '--ordem': 1 }}>
           <div className="produto__foto-principal" onMouseMove={acompanharMouse}>
             <FotoProduto url={foto?.url} alt={foto?.alt || produto.nome} carregamento="eager" />
-            {produto.status === 'esgotado' && <span className="selo-esgotado t-label-caps-sm">Fazer pedido</span>}
+            {produto.status === 'esgotado' && <span className="selo-esgotado t-label-caps-sm">Encomendar</span>}
           </div>
           {imagens.length > 1 && (
             <ul className="produto__miniaturas" aria-label="Fotos da peça">

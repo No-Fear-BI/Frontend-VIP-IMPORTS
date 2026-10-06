@@ -15,8 +15,6 @@ import AdminProduto, { AdminProdutoNovo } from './paginas/admin/Produto.jsx';
 import AdminProdutos from './paginas/admin/Produtos.jsx';
 import AdminResumo from './paginas/admin/Resumo.jsx';
 import AdminRevisao from './paginas/admin/Revisao.jsx';
-import AdminSelecaoDetalhe from './paginas/admin/Selecao.jsx';
-import AdminSelecoes from './paginas/admin/Selecoes.jsx';
 import Categorias from './paginas/Categorias.jsx';
 import Conta from './paginas/Conta.jsx';
 import Home from './paginas/Home.jsx';
@@ -56,7 +54,7 @@ export default function App() {
         <Route path="selecao" element={<Selecao />} />
         {/* Na tela o carrinho se chama "seleção"; /carrinho existe para quem usar o nome técnico. */}
         <Route path="carrinho" element={<Navigate to="/selecao" replace />} />
-        {/* Os favoritos moram na página da conta, junto com as seleções enviadas. */}
+        {/* Os favoritos moram na página da conta, junto com os dados do cliente. */}
         <Route path="favoritos" element={<Navigate to="/conta" replace />} />
         <Route path="conta" element={<Conta />} />
         <Route path="sobre" element={<Sobre />} />
@@ -78,8 +76,6 @@ export default function App() {
             <Route path="categorias" element={<AdminCategorias />} />
             <Route path="banners" element={<AdminBanners />} />
             <Route path="destaques" element={<AdminDestaques />} />
-            <Route path="selecoes" element={<AdminSelecoes />} />
-            <Route path="selecoes/:id" element={<AdminSelecaoDetalhe />} />
             <Route path="clientes" element={<AdminClientes />} />
             <Route path="permissoes" element={<AdminPermissoes />} />
             <Route path="revisao" element={<AdminRevisao />} />

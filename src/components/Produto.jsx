@@ -34,7 +34,7 @@ export function Etiqueta({ children }) {
 }
 
 export function rotuloCompra(status) {
-  return status === 'esgotado' ? 'Fazer pedido' : 'Consultar valores no WhatsApp';
+  return status === 'esgotado' ? 'Encomendar' : 'Consultar valores no WhatsApp';
 }
 
 export function QuantidadeProduto({ produto }) {
@@ -49,7 +49,7 @@ export function CartaoProduto({ produto, carregamento }) {
       <Link to={destino} className="cartao-produto__link">
         <div className="cartao-produto__foto">
           <FotoProduto url={produto.capa?.url} alt={produto.capa?.alt || produto.nome} carregamento={carregamento} />
-          {produto.status === 'esgotado' && <span className="selo-esgotado t-label-caps-sm">Fazer pedido</span>}
+          {produto.status === 'esgotado' && <span className="selo-esgotado t-label-caps-sm">Encomendar</span>}
         </div>
         <p className="t-label-caps-sm t-muted cartao-produto__marca">{produto.marca.nome}</p>
         <h3 className="t-headline-sm">Código {produto.codigo}</h3>

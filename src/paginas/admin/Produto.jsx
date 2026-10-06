@@ -288,9 +288,7 @@ export function BotaoExcluir({ produto, render, onExcluido }) {
         <div className="admin-produto__duplicar">
           <p className="t-body-lg">
             Excluir <strong>{produto.codigo} — {produto.nome}</strong>? <strong>Não dá para desfazer.</strong>{' '}
-            As imagens, as variações, os favoritos e os itens de seleção em aberto dele somem. As
-            seleções que já foram enviadas ao WhatsApp continuam no histórico, sem o link para
-            o produto.
+            As imagens, as variações, os favoritos e os itens de seleção em aberto dele somem.
           </p>
           {erro && <ErroGeral>{erro.mensagem}</ErroGeral>}
           <Button variante="primaria" largo onClick={excluir} disabled={excluindo}>

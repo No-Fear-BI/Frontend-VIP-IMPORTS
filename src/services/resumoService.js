@@ -9,7 +9,7 @@ export const resumoService = {
    * GET /admin/resumo — obterResumo. A tela inicial do painel.
    * @returns {Promise<{ totalProdutos: number, produtosEsgotados: number, produtosOcultos: number,
    *   porMarca: { marcaId: number, nome: string, slug: string, total: number }[],
-   *   selecoesNoMes: number, totalClientes: number }>}
+   *   totalClientes: number }>}
    */
   obter: (sinal) => requisitarAdmin('GET', '/admin/resumo', { sinal }),
 };

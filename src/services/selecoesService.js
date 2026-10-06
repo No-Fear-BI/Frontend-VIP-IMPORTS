@@ -8,10 +8,8 @@ import { requisitar } from '../lib/apiClient.js';
 export const selecoesService = {
   /**
    * POST /selecoes — criarSelecao. Corpo vazio: a seleção é o carrinho atual.
-   * Responde 201 com `linkWhatsapp`. NÃO esvazia o carrinho. Carrinho vazio: 400 CARRINHO_VAZIO.
+   * Responde 200 com `linkWhatsapp`. Não salva histórico. NÃO esvazia o carrinho. Carrinho vazio: 400 CARRINHO_VAZIO.
    */
   enviar: () => requisitar('POST', '/selecoes'),
 
-  /** GET /selecoes — listarSelecoesDoCliente. Paginação por cursor. `variacao` já vem como rótulo pronto. */
-  historico: (cursor, sinal) => requisitar('GET', '/selecoes', { query: { cursor }, sinal }),
 };

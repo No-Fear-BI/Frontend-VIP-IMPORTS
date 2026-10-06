@@ -33,14 +33,19 @@ const SENHA_ADMIN_EXEMPLO = 'exemplo';
 
 function lerEstado() {
   try {
-    return JSON.parse(localStorage.getItem(CHAVE)) || estadoInicial();
+    const estado = JSON.parse(localStorage.getItem(CHAVE)) || estadoInicial();
+    if (Object.hasOwn(estado, "selecoes")) {
+      delete estado.selecoes;
+      gravar(estado);
+    }
+    return estado;
   } catch {
     return estadoInicial();
   }
 }
 
 function estadoInicial() {
-  return { cliente: null, admin: null, carrinho: [], favoritos: [], selecoes: [], proximoItem: 1 };
+  return { cliente: null, admin: null, carrinho: [], favoritos: [], proximoItem: 1 };
 }
 
 function gravar(estado) {
@@ -1223,20 +1228,13 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
       'Olá! Tenho interesse nestas peças:',
       ...itens.map((i) => `• ${i.codigo} — ${i.nome} (${i.marca}${i.variacao ? `, ${i.variacao}` : ''})`),
     ].join('\n');
-    const selecao = { id: estado.selecoes.length + 1, criadoEm: new Date().toISOString(), itens };
-    estado.selecoes.unshift({ ...selecao, totalItens: itens.length });
-    gravar(estado);
     return {
-      ...selecao,
+      itens,
       mensagemWhatsapp: mensagem,
       linkWhatsapp: `https://wa.me/${WHATSAPP_EXEMPLO}?text=${encodeURIComponent(mensagem)}`,
     };
   }
 
-  if (rota === 'GET /selecoes') {
-    exigirCliente(estado);
-    return { dados: estado.selecoes, paginacao: { total: estado.selecoes.length, porPagina: 20 } };
-  }
 
   throw erro(404, 'ROTA_NAO_ENCONTRADA', `Rota não simulada no modo exemplo: ${rota}`);
 }

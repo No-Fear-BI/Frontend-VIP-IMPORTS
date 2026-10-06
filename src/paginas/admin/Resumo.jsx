@@ -1,24 +1,11 @@
-/*
- * Resumo do painel (/admin/resumo — docs/para-o-frontend.md, seção 4.1).
- * Abre a cada login: quatro números no topo e as duas filas que a equipe olha primeiro.
- *
- * DUAS COISAS DO DESENHO NÃO ESTÃO AQUI, e não é esquecimento:
- * - "Seleções · 7 dias": GET /admin/resumo conta por MÊS (selecoesNoMes). O rótulo diz mês
- *   para o número não mentir; a janela de 7 dias precisa de mudança no backend.
- * - Selo "Nova"/"Em atendimento" na seleção: não existe status de seleção no esquema. Um selo
- *   fixo seria enfeite; a coluna e a rota de mudar status precisam nascer no backend antes.
- */
-
 import { Link } from 'react-router-dom';
 import { Esqueleto, EstadoErro, EstadoVazio } from '../../components/Estados.jsx';
 import { useRequisicao } from '../../hooks/useRequisicao.js';
 import { resumoService } from '../../services/resumoService.js';
-import { selecoesAdminService } from '../../services/selecoesAdminService.js';
 import { listarPendentes } from '../../services/revisaoService.js';
 import './Resumo.css';
 
 const ITENS_POR_BLOCO = 4;
-const formatoData = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' });
 const formatoHoje = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
 
 function hojePorExtenso() {
@@ -56,8 +43,8 @@ export default function AdminResumo() {
               valor={resumo.dados.totalProdutos - resumo.dados.produtosOcultos}
             />
             <Numero rotulo="Em revisão" valor={totalFila} carregando={fila.carregando} />
-            <Numero rotulo="Fazer pedido" valor={resumo.dados.produtosEsgotados} />
-            <Numero rotulo="Seleções · mês" valor={resumo.dados.selecoesNoMes} />
+            <Numero rotulo="Encomendar" valor={resumo.dados.produtosEsgotados} />
+            <Numero rotulo="Clientes" valor={resumo.dados.totalClientes} />
           </ul>
 
           {resumo.dados.totalProdutos === 0 && !totalFila ? (
@@ -69,7 +56,6 @@ export default function AdminResumo() {
           ) : (
             <div className="admin-resumo__colunas">
               <BlocoFilaRevisao estado={fila} />
-              <BlocoUltimasSelecoes />
             </div>
           )}
         </>
@@ -106,44 +92,6 @@ function BlocoFilaRevisao({ estado }) {
                   <span className="t-label-caps-sm t-muted">
                     {[item.supplier, item.category].filter(Boolean).join(' · ')}
                   </span>
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-    </Bloco>
-  );
-}
-
-function BlocoUltimasSelecoes() {
-  const selecoes = useRequisicao(
-    (sinal) => selecoesAdminService.listar({ pagina: 1, porPagina: ITENS_POR_BLOCO }, sinal),
-    [],
-  );
-
-  return (
-    <Bloco titulo="Últimas seleções" para="/admin/selecoes" acao="ver todas">
-      {selecoes.carregando ? (
-        <ListaEsqueleto rotulo="Carregando as seleções recentes" />
-      ) : selecoes.erro ? (
-        <p className="t-body-sm t-muted">Não conseguimos carregar as seleções recentes.</p>
-      ) : selecoes.dados.dados.length === 0 ? (
-        <p className="t-body-sm t-muted">Nenhuma seleção recebida ainda.</p>
-      ) : (
-        <ul className="admin-resumo__lista">
-          {selecoes.dados.dados.map((selecao) => (
-            <li key={selecao.id}>
-              <Link to={`/admin/selecoes/${selecao.id}`} className="admin-resumo__item">
-                <span className="admin-resumo__texto">
-                  <span className="t-body-sm">#{selecao.id}</span>
-                  <span className="t-label-caps-sm t-muted">
-                    {selecao.cliente.nome || selecao.cliente.email} · {selecao.totalItens}{' '}
-                    {selecao.totalItens === 1 ? 'item' : 'itens'}
-                  </span>
-                </span>
-                <span className="t-label-caps-sm t-muted admin-resumo__quando">
-                  {formatoData.format(new Date(selecao.criadoEm))}
                 </span>
               </Link>
             </li>
@@ -203,7 +151,6 @@ function EsqueletoResumo() {
         ))}
       </ul>
       <div className="admin-resumo__colunas">
-        <Esqueleto className="esqueleto--bloco" />
         <Esqueleto className="esqueleto--bloco" />
       </div>
     </div>

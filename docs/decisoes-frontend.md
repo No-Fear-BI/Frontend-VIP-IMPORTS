@@ -276,3 +276,15 @@ Além disso, a base de acesso dele não tem rota protegida, não separa 401 de 4
 - **Atualizar produtos.** Botão na Revisão que puxa os álbuns novos da Yupoo (`POST /admin/revisao/atualizar`, andamento em `GET /admin/revisao/atualizacao`, consultado a cada 5 s). O backend roda `scripts/sync-yupoo.mjs ... --padrao` em segundo plano, uma coleta por vez. Não repete álbum: o script junta pelo id (`fornecedor-idDoÁlbum`) e a fila já esconde o que foi aprovado ou reprovado. Ao terminar com a tela aberta, a fila recarrega. Escolhido com o dono: Node dentro da API (a imagem ganhou Node e `data/` ficou gravável no compose; em produção é preciso reconstruir a imagem) e todos os fornecedores (os do `fornecedores-adicionais.json` mais os embutidos, como o qwer888, que não está no arquivo — listá-lo por link geraria o id `1234qwer888-…` e repetiria tudo).
 - **Link de origem do produto.** `origemUrl` (coluna `produtos.origem_url`, que a aprovação já preenchia) passou a sair em `GET /admin/produtos` e no detalhe, e entra em `POST`/`PATCH /admin/produtos` (http/https; vazio apaga). Campo opcional "Link de origem" na criação e na edição; "Ver origem ↗" fica só na listagem do painel, ao lado de "Remover das novidades", nunca na loja. `linkDaOrigem` (acrescenta `uid=1`, que o Yupoo exige) mora em `src/lib/linkOrigem.js`.
 - **Backend.** Duas branches, uma sobre a outra: `feat/origem-no-produto` e `feat/atualizar-produtos-yupoo`.
+
+
+## Pedidos sem histórico — 05/10/2026
+
+Decisão do cliente: o rótulo "Fazer pedido" passa a "Encomendar" em toda a loja
+e no painel. O histórico de pedidos sai da conta, do painel, das rotas e do
+banco. `POST /selecoes` apenas gera `itens`, `mensagemWhatsapp` e `linkWhatsapp`
+em memória (HTTP 200), sem id ou data e sem salvar o envio. A seleção em
+andamento continua disponível. No resumo, o quarto contador passa a Clientes.
+Não existem mais selecoesService.historico, selecoesAdminService, as páginas
+admin/selecoes nem os campos selecoesNoMes e totalSelecoes. Esta decisão
+substitui as referências anteriores ao histórico de seleções.

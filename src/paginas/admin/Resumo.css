@@ -1,4 +1,4 @@
-/* Tela inicial do painel: quatro números numa faixa e as duas filas do dia. */
+/* Tela inicial do painel: quatro números numa faixa e a fila de revisão. */
 
 .admin-resumo__topo {
   display: flex;
@@ -42,7 +42,7 @@
 
 .admin-resumo__colunas {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--espaco-secao);
   align-items: start;
 }

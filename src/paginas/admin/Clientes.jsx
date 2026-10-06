@@ -102,7 +102,6 @@ export default function AdminClientes() {
                 <th scope="col" className="t-label-caps-sm">Nome</th>
                 <th scope="col" className="t-label-caps-sm">E-mail</th>
                 <th scope="col" className="t-label-caps-sm">Telefone</th>
-                <th scope="col" className="t-label-caps-sm">Seleções</th>
                 <th scope="col" className="t-label-caps-sm">Último acesso</th>
               </tr>
             </thead>
@@ -114,7 +113,6 @@ export default function AdminClientes() {
                   <td className="t-body-sm">
                     {cliente.telefone || <span className="t-muted">não informado</span>}
                   </td>
-                  <td className="t-body-sm">{cliente.totalSelecoes}</td>
                   <td className="t-body-sm">
                     {cliente.ultimoAcessoEm ? formatoData.format(new Date(cliente.ultimoAcessoEm)) : '—'}
                   </td>

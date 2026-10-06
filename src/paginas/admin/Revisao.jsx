@@ -217,7 +217,7 @@ export default function Revisao() {
                 <select id={`status-${item.id}`} className="campo__input" value={statusProdutos[item.id] || 'normal'}
                   disabled={Boolean(salvando)} onChange={(evento) => setStatusProdutos((atual) => ({ ...atual, [item.id]: evento.target.value }))}>
                   <option value="normal">Na loja</option>
-                  <option value="esgotado">Fazer pedido</option>
+                  <option value="esgotado">Encomendar</option>
                 </select>
               </label>
               <CampoNovidades

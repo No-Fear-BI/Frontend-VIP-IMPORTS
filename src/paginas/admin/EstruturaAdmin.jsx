@@ -23,7 +23,6 @@ const MENU_ADMIN = [
     itens: [
       { rotulo: 'Resumo', para: 'resumo' },
       { rotulo: 'Revisão', para: 'revisao' },
-      { rotulo: 'Seleções', para: 'selecoes' },
       { rotulo: 'Clientes', para: 'clientes' },
     ],
   },
