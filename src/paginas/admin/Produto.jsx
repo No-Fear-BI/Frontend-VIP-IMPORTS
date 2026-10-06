@@ -32,7 +32,9 @@ import { coresService } from '../../services/coresService.js';
 import { categoriasService } from '../../services/categoriasService.js';
 import { marcasService } from '../../services/marcasService.js';
 import { produtosAdminService } from '../../services/produtosAdminService.js';
+import { formatarCentavos, lerPreco } from '../../lib/preco.js';
 import { ROTULO_STATUS } from './rotulosProduto.js';
+import CampoPreco from './CampoPreco.jsx';
 import './Produtos.css';
 import DestinosProduto, { destinosCompletos, destinosDosIds, destinosVazios } from './DestinosProduto.jsx';
 
@@ -317,6 +319,7 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
   const [descricao, setDescricao] = useState(inicial?.descricao || '');
   const [codigo, setCodigo] = useState(inicial?.codigo || '');
   const [origemUrl, setOrigemUrl] = useState(inicial?.origemUrl || '');
+  const [preco, setPreco] = useState(inicial?.precoCentavos != null ? formatarCentavos(inicial.precoCentavos) : '');
   const [status, setStatus] = useState(inicial?.status || 'normal');
   const [emNovidades, setEmNovidades] = useState(inicial?.emNovidades ?? true);
   const [marcaId, setMarcaId] = useState(inicial?.marcaId ? String(inicial.marcaId) : '');
@@ -342,6 +345,11 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
     setErro(null);
     setAviso('');
     if (faltaAlgoObrigatorio) return;
+    const { centavos: precoCentavos, erro: erroPreco } = lerPreco(preco);
+    if (erroPreco) {
+      setErro({ campos: { precoCentavos: erroPreco } });
+      return;
+    }
 
     if (modo === 'criar') {
       if (faltaAlgoObrigatorio) return;
@@ -352,6 +360,7 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
           ...(descricao.trim() ? { descricao: descricao.trim() } : {}),
           ...(codigo.trim() ? { codigo: codigo.trim() } : {}),
           ...(origemUrl.trim() ? { origemUrl: origemUrl.trim() } : {}),
+          ...(precoCentavos !== null ? { precoCentavos } : {}),
           status,
           emNovidades,
           marcaId: Number(marcaId),
@@ -373,6 +382,8 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
     if (codigo.trim() && codigo.trim().toUpperCase() !== inicial.codigo) patch.codigo = codigo.trim();
     // Vazio apaga o link (`null`).
     if ((origemUrl.trim() || null) !== (inicial.origemUrl || null)) patch.origemUrl = origemUrl.trim() || null;
+    // Vazio apaga o preço (`null`).
+    if (precoCentavos !== (inicial.precoCentavos ?? null)) patch.precoCentavos = precoCentavos;
     if (status !== inicial.status) patch.status = status;
     if (emNovidades !== inicial.emNovidades) patch.emNovidades = emNovidades;
     if (marcaId && Number(marcaId) !== inicial.marcaId) patch.marcaId = Number(marcaId);
@@ -453,6 +464,14 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
           disabled={salvando}
         />
 
+        <CampoPreco
+          id="produto-preco"
+          valor={preco}
+          onMudar={setPreco}
+          erro={erro?.campos?.precoCentavos}
+          disabled={salvando}
+        />
+
         <div className="admin-produto__form-grade">
           <CampoSelecao
             id="produto-marca"
@@ -492,7 +511,7 @@ function DadosProduto({ modo, inicial, onSalvar, children }) {
         />}
 
         {erro && !erro.campos && <ErroGeral>{erro.mensagem}</ErroGeral>}
-        {erro?.campos && Object.keys(erro.campos).some((c) => !['nome', 'descricao', 'codigo', 'status', 'marcaId', 'categoriaId', 'categoriasIds', 'publicos', 'emNovidades', 'origemUrl'].includes(c)) && (
+        {erro?.campos && Object.keys(erro.campos).some((c) => !['nome', 'descricao', 'codigo', 'status', 'marcaId', 'categoriaId', 'categoriasIds', 'publicos', 'emNovidades', 'origemUrl', 'precoCentavos'].includes(c)) && (
           <ErroGeral>{erroGeralDe(erro)}</ErroGeral>
         )}
 

@@ -9,6 +9,7 @@ import Modal from '../../components/ui/Modal.jsx';
 import ImagemAmpliavel from '../../components/ImagemAmpliavel.jsx';
 import './Revisao.css';
 import CampoNovidades from './CampoNovidades.jsx';
+import CampoPreco from './CampoPreco.jsx';
 import FotosDoAlbum from './FotosDoAlbum.jsx';
 import AtualizarProdutos from './AtualizarProdutos.jsx';
 import { categoriasService } from '../../services/categoriasService.js';
@@ -16,6 +17,7 @@ import DestinosProduto, { destinosCompletos, destinosVazios } from './DestinosPr
 import SeletorMarca, { GENERICO, NOVA, nomeDaMarca } from './SeletorMarca.jsx';
 import { marcasService } from '../../services/marcasService.js';
 import { linkDaOrigem } from '../../lib/linkOrigem.js';
+import { lerPreco } from '../../lib/preco.js';
 
 const chaveDaMarca = (nome) => nome.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
@@ -38,6 +40,8 @@ export default function Revisao() {
   const [semNovidades, setSemNovidades] = useState({});
   // Fotos escolhidas por produto, na ordem final (a primeira é a capa). Ausente = só a foto do cartão.
   const [fotos, setFotos] = useState({});
+  // Texto digitado do preço (opcional, só consulta interna), por produto.
+  const [precos, setPrecos] = useState({});
   const emNovidadesDe = (id) => !semNovidades[id];
   const opcoes = useRequisicao(async (sinal) => ({ categorias: await categoriasService.listar(sinal) }), []);
   // Pedido à parte das categorias: recarregar a lista depois de criar marca não
@@ -65,12 +69,17 @@ export default function Revisao() {
   // Larga o que foi preenchido no cartão: o item saiu da fila, e o `id` não volta a ser usado.
   const esquecer = (id) => {
     const sem = (atual) => { const novo = { ...atual }; delete novo[id]; return novo; };
-    setNomes(sem); setMarcas(sem); setDestinos(sem); setSemNovidades(sem); setFotos(sem);
+    setNomes(sem); setMarcas(sem); setDestinos(sem); setSemNovidades(sem); setFotos(sem); setPrecos(sem);
   };
   const aprovar = async (item) => {
     if (trava.current) return;
     if (!destinosCompletos(destinos[item.id] || destinosVazios()) || !marcaDe(item)) {
       setErroDecisao({ itemId: item.id, mensagem: 'Informe a marca, o público (Feminino e/ou Masculino) e a categoria.', campos: {} });
+      return;
+    }
+    const { centavos: precoCentavos, erro: erroPreco } = lerPreco(precos[item.id]);
+    if (erroPreco) {
+      setErroDecisao({ itemId: item.id, mensagem: erroPreco, campos: { precoCentavos: erroPreco } });
       return;
     }
     trava.current = true;
@@ -85,6 +94,7 @@ export default function Revisao() {
         categoriasIds: destinos[item.id].categoriasIds.map(Number),
         publicos: destinos[item.id].publicos,
         emNovidades: emNovidadesDe(item.id),
+        ...(precoCentavos !== null ? { precoCentavos } : {}),
         ...(fotos[item.id] ? { fotos: fotos[item.id] } : {}),
       });
       esquecer(item.id);
@@ -157,7 +167,7 @@ export default function Revisao() {
               alt={item.translatedName}
             />
             <div className="revisao__conteudo">
-              <small>{item.category} • {item.supplier}</small>
+              <small>{item.category}</small>
               <Field id={`nome-${item.id}`} rotulo="Nome em português" value={nomes[item.id] ?? item.translatedName} disabled={Boolean(salvando)} onChange={(e) => setNomes((atual) => ({ ...atual, [item.id]: e.target.value }))} />
               <p>{item.translatedDetails}</p>
               <details><summary>Nome original</summary><p>{item.name}</p></details>
@@ -184,6 +194,13 @@ export default function Revisao() {
                 valor={fotos[item.id]}
                 disabled={Boolean(salvando)}
                 onMudar={(valor) => setFotos((atual) => ({ ...atual, [item.id]: valor }))}
+              />
+              <CampoPreco
+                id={`preco-${item.id}`}
+                valor={precos[item.id] ?? ''}
+                onMudar={(texto) => setPrecos((atual) => ({ ...atual, [item.id]: texto }))}
+                erro={erroDecisao?.itemId === item.id ? erroDecisao.campos?.precoCentavos : undefined}
+                disabled={Boolean(salvando)}
               />
               <CampoNovidades
                 id={`novidades-${item.id}`}
