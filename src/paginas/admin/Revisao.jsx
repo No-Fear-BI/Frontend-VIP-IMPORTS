@@ -167,7 +167,7 @@ export default function Revisao() {
               alt={item.translatedName}
             />
             <div className="revisao__conteudo">
-              <small>{item.category} • {item.supplier}</small>
+              <small>{item.category}</small>
               <Field id={`nome-${item.id}`} rotulo="Nome em português" value={nomes[item.id] ?? item.translatedName} disabled={Boolean(salvando)} onChange={(e) => setNomes((atual) => ({ ...atual, [item.id]: e.target.value }))} />
               <p>{item.translatedDetails}</p>
               <details><summary>Nome original</summary><p>{item.name}</p></details>
