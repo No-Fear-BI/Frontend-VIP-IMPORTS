@@ -276,3 +276,14 @@ Além disso, a base de acesso dele não tem rota protegida, não separa 401 de 4
 - **Atualizar produtos.** Botão na Revisão que puxa os álbuns novos da Yupoo (`POST /admin/revisao/atualizar`, andamento em `GET /admin/revisao/atualizacao`, consultado a cada 5 s). O backend roda `scripts/sync-yupoo.mjs ... --padrao` em segundo plano, uma coleta por vez. Não repete álbum: o script junta pelo id (`fornecedor-idDoÁlbum`) e a fila já esconde o que foi aprovado ou reprovado. Ao terminar com a tela aberta, a fila recarrega. Escolhido com o dono: Node dentro da API (a imagem ganhou Node e `data/` ficou gravável no compose; em produção é preciso reconstruir a imagem) e todos os fornecedores (os do `fornecedores-adicionais.json` mais os embutidos, como o qwer888, que não está no arquivo — listá-lo por link geraria o id `1234qwer888-…` e repetiria tudo).
 - **Link de origem do produto.** `origemUrl` (coluna `produtos.origem_url`, que a aprovação já preenchia) passou a sair em `GET /admin/produtos` e no detalhe, e entra em `POST`/`PATCH /admin/produtos` (http/https; vazio apaga). Campo opcional "Link de origem" na criação e na edição; "Ver origem ↗" fica só na listagem do painel, ao lado de "Remover das novidades", nunca na loja. `linkDaOrigem` (acrescenta `uid=1`, que o Yupoo exige) mora em `src/lib/linkOrigem.js`.
 - **Backend.** Duas branches, uma sobre a outra: `feat/origem-no-produto` e `feat/atualizar-produtos-yupoo`.
+
+
+## 27. Preço interno do produto, só no painel (06/10/2026)
+
+**Decisão (pedido do dono):** o dono registra o preço de cada peça só para consulta própria. A loja continua sem preço (seção "A loja não tem venda direta").
+
+- **Onde:** campo "Preço (R$)" (`CampoPreco.jsx`) no cartão da Revisão (vai em `POST /admin/revisao` ao aprovar), no formulário de produto (criar e editar, o mesmo componente) e "Preço interno: R$ …" na lista de Produtos do painel.
+- **Formato:** o backend guarda `precoCentavos` (inteiro, `null` = sem preço, 0 a 10.000.000). A tela aceita "1.234,50", "1234,5", "1.234" (milhar), "R$ 1.234,50", reescreve no formato certo ao sair do campo e recusa negativo, texto e valor acima de R$ 100.000,00 com mensagem. Conta só com inteiros (`src/lib/preco.js`).
+- **Opcional:** vazio aprova e salva normalmente. No PATCH, vazio manda `null` e apaga; sem mudança, o campo nem viaja.
+- **Nunca na loja:** nenhum componente da loja lê o campo; o modo exemplo só o guarda nas rotas de admin.
+- **Alternativa descartada:** guardar em reais com vírgula flutuante (arredondamento) ou como texto.

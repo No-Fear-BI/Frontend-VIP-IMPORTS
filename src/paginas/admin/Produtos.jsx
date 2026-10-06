@@ -20,6 +20,7 @@ import { categoriasService } from '../../services/categoriasService.js';
 import { marcasService } from '../../services/marcasService.js';
 import { produtosAdminService } from '../../services/produtosAdminService.js';
 import { linkDaOrigem } from '../../lib/linkOrigem.js';
+import { formatarReais } from '../../lib/preco.js';
 import { BotaoDuplicar, BotaoExcluir } from './Produto.jsx';
 import { ROTULO_STATUS } from './rotulosProduto.js';
 import './Produtos.css';
@@ -211,6 +212,9 @@ export default function AdminProdutos() {
                   <td>
                     <p className="t-body-sm">{produto.nome}</p>
                     <p className="t-label-caps-sm t-muted">{produto.marca.nome}</p>
+                    {produto.precoCentavos != null && (
+                      <p className="t-body-sm t-muted">Preço interno: {formatarReais(produto.precoCentavos)}</p>
+                    )}
                   </td>
                   <td className="t-body-sm">
                     {produto.categoria.nome}

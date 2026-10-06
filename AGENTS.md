@@ -49,6 +49,11 @@ Resumo do que entrou nesta rodada; o registro completo está em `CLAUDE.md` e `d
 - **"Adicionar outra categoria"** (`DestinosProduto.jsx`): sem sublinhado, só negrito na cor do texto.
 - **Arquivos com CRLF:** no Windows, edite com ferramentas que preservam o fim de linha; não reescreva arquivo inteiro com LF.
 
+## Painel: preço interno (06/10/2026)
+
+- `precoCentavos` (inteiro, opcional, 0 a 10.000.000) é dado SÓ do painel: `CampoPreco.jsx` na Revisão (manda em `POST /admin/revisao` ao aprovar) e em `paginas/admin/Produto.jsx` (criar; no PATCH vazio vira `null`), e "Preço interno" na lista de Produtos. Nenhum componente da loja lê preço; `grep -rniE 'preco|preço|price|centavo' src` só pode achar `paginas/admin/`, `lib/preco.js`, o modo exemplo e dois textos institucionais.
+- `src/lib/preco.js`: `lerPreco` (vírgula, milhar, `R$`; só inteiros), `formatarCentavos`, `formatarReais`. Teste: `npm test`.
+
 ## Painel: Revisão, link de origem (02/10/2026)
 
 - **Reprovar** (cartão da Revisão) sempre abre a janela "Reprovar este produto?" com "Cancelar" e "Sim, reprovar"; manda `POST /admin/revisao` com `status: 'rejected'`.

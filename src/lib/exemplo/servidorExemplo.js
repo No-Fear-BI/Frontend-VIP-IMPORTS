@@ -252,6 +252,7 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
     }
 
     if (rota === 'POST /admin/revisao') {
+      if (corpo.status === 'approved') precoValido(corpo.precoCentavos);
       gravar({ ...estado, revisados: [...(estado.revisados || []), corpo.productId] });
       return { ok: true };
     }
@@ -566,6 +567,7 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
         nome,
         descricao: corpo?.descricao ?? null,
         origemUrl: origemValida(corpo?.origemUrl),
+        precoCentavos: precoValido(corpo?.precoCentavos),
         status: corpo?.status || 'normal',
         emNovidades: corpo?.emNovidades !== false,
         destaque: false,
@@ -608,6 +610,7 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
       if ('nome' in corpo && corpo.nome) campos.nome = String(corpo.nome).trim();
       if ('descricao' in corpo) campos.descricao = corpo.descricao ?? null;
       if ('origemUrl' in corpo) campos.origemUrl = origemValida(corpo.origemUrl);
+      if ('precoCentavos' in corpo) campos.precoCentavos = precoValido(corpo.precoCentavos);
       if ('status' in corpo && corpo.status) campos.status = corpo.status;
       if ('marcaId' in corpo && corpo.marcaId != null) {
         if (!marcas.some((mm) => mm.id === corpo.marcaId)) {
@@ -1487,6 +1490,17 @@ function origemValida(valor) {
   return texto;
 }
 
+/** Espelha o backend: preço interno é opcional (null), inteiro de 0 a 10.000.000 centavos. Só do painel. */
+function precoValido(valor) {
+  if (valor == null) return null;
+  if (!Number.isInteger(valor) || valor < 0 || valor > 10_000_000) {
+    throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', {
+      campos: { precoCentavos: 'Informe um preço de R$ 0,00 a R$ 100.000,00.' },
+    });
+  }
+  return valor;
+}
+
 function detalheDoPainel(p) {
   return {
     ...p,
@@ -1508,6 +1522,7 @@ function itemDoPainel(p) {
     destaque: p.destaque,
     emNovidades: p.emNovidades !== false,
     origemUrl: p.origemUrl ?? null,
+    precoCentavos: p.precoCentavos ?? null,
     marca: refDaMarca(p.marcaId),
     categoria: refDaCategoria(p.categoriaId),
     colecao: refDoPublico(p.publicos),
