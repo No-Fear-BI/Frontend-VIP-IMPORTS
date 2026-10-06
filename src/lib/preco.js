@@ -13,9 +13,9 @@ export function formatarCentavos(centavos) {
   return FORMATADOR.format(centavos / 100);
 }
 
-/** 123450 → "R$ 1.234,50". */
+/** 123450 → "R$ 1.234,50". Espaço sem quebra: o "R$" nunca fica sozinho no fim da linha. */
 export function formatarReais(centavos) {
-  return `R$ ${formatarCentavos(centavos)}`;
+  return `R$\u00A0${formatarCentavos(centavos)}`;
 }
 
 /**

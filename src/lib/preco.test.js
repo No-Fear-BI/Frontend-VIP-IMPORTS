@@ -50,5 +50,5 @@ test('teto de R$ 100.000,00', () => {
 test('formata em reais', () => {
   assert.equal(formatarCentavos(123450), '1.234,50');
   assert.equal(formatarCentavos(5), '0,05');
-  assert.equal(formatarReais(10_000_000), 'R$ 100.000,00');
+  assert.equal(formatarReais(10_000_000), 'R$\u00A0100.000,00');
 });
