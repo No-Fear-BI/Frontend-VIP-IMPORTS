@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { useAcesso } from '../contexto/AcessoLoja.jsx';
 import { useSessaoCliente } from '../contexto/SessaoCliente.jsx';
 import Cabecalho from './Cabecalho.jsx';
+import ChatAtendimento from './ChatAtendimento.jsx';
 import PortaoAcesso, { PortaoCarregando } from './PortaoAcesso.jsx';
 import Rodape from './Rodape.jsx';
 import './Estrutura.css';
@@ -20,13 +21,28 @@ export default function Estrutura() {
     window.scrollTo(0, 0);
   }, [pathname]);
 
-  if (carregando) return <PortaoCarregando />;
+  // O chat aparece também no portão: quem espera aprovação também fala com o atendimento.
+  if (carregando) {
+    return (
+      <>
+        <PortaoCarregando />
+        <ChatAtendimento />
+      </>
+    );
+  }
   // Falha ABERTA, igual ao backend: sem resposta válida do /acesso/estado, a loja
   // renderiza. Bloquear por erro de rede trancaria a loja por acidente, e trancar
   // a loja é decisão do painel. Se o modo estiver em aprovação, a primeira chamada
   // de catálogo volta 403 do portão, o provedor atualiza o estado e o portão
   // aparece — esse caminho já está implementado e cobre o caso real.
-  if (estado && !estado.podeNavegar) return <PortaoAcesso />;
+  if (estado && !estado.podeNavegar) {
+    return (
+      <>
+        <PortaoAcesso />
+        <ChatAtendimento />
+      </>
+    );
+  }
 
   return (
     <>
@@ -39,6 +55,7 @@ export default function Estrutura() {
       </main>
       <Rodape />
       <Aviso />
+      <ChatAtendimento />
     </>
   );
 }

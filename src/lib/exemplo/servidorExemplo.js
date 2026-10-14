@@ -27,6 +27,7 @@ import {
   slugDoPublico,
   WHATSAPP_EXEMPLO,
 } from './catalogoExemplo.js';
+import { responderAtendimentoExemplo } from './atendimentoExemplo.js';
 
 const CHAVE = 'vip-exemplo-estado';
 const SENHA_ADMIN_EXEMPLO = 'exemplo';
@@ -210,6 +211,12 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
     }
     if (!estado.admin) throw erro(401, 'NAO_IDENTIFICADO', 'Faça login para acessar o painel.');
     if (rota === 'GET /admin/eu') return estado.admin;
+
+    // Atendimento Burnwood simulado (atendimentoExemplo.js): conversas fictícias, em memória.
+    if (caminho.startsWith('/admin/atendimento/')) {
+      if (vazio) return caminho === '/admin/atendimento/conversations' ? { items: [], next_cursor: null } : {};
+      return responderAtendimentoExemplo(metodo, caminho.slice('/admin/atendimento'.length), q, corpo, estado.admin, erro);
+    }
 
     // Fila de revisão fictícia. As fotos são ilustrações de public/exemplo; o vite.config.js
     // (modo exemplo) faz /admin/revisao/imagem redirecionar para elas.
@@ -1114,6 +1121,9 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
     gravar(estado);
     return estado.cliente;
   }
+
+  // Chat da loja: desligado no modo exemplo (não há key nem widget da Burnwood aqui).
+  if (rota === 'GET /atendimento/widget') return { widgetUrl: null, chaveCanal: null };
 
   // Portão de acesso (seção 05). Nasce ABERTO: o modo exemplo só tranca se a equipe ligar no painel.
   if (rota === 'GET /acesso/estado') return estadoDeAcessoExemplo(estado);
