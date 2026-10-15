@@ -5,7 +5,8 @@ import { atendimentoService } from '../services/atendimentoService.js';
  * Chat do atendimento Burnwood: carrega o widget.js da Burnwood uma vez por página. O próprio
  * widget desenha o botão flutuante e a janela do chat (iframe da Burnwood), fora do nosso CSS.
  *
- * Mora em <Estrutura>, ANTES do portão: quem espera aprovação também fala com o atendimento.
+ * Mora em <Estrutura>, só na loja liberada (nunca no portão): o agente consulta o catálogo, e o
+ * backend só devolve o canal a quem passou pelo portão (decisão de 15/10/2026).
  * Chat desligado (backend sem key, Burnwood fora do ar) = nada carrega e nada aparece.
  *
  * A `chaveCanal` (wk_…) é pública por desenho. A key da Burnwood nunca chega aqui.

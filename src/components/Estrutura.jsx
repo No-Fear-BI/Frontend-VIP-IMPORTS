@@ -21,28 +21,13 @@ export default function Estrutura() {
     window.scrollTo(0, 0);
   }, [pathname]);
 
-  // O chat aparece também no portão: quem espera aprovação também fala com o atendimento.
-  if (carregando) {
-    return (
-      <>
-        <PortaoCarregando />
-        <ChatAtendimento />
-      </>
-    );
-  }
+  if (carregando) return <PortaoCarregando />;
   // Falha ABERTA, igual ao backend: sem resposta válida do /acesso/estado, a loja
   // renderiza. Bloquear por erro de rede trancaria a loja por acidente, e trancar
   // a loja é decisão do painel. Se o modo estiver em aprovação, a primeira chamada
   // de catálogo volta 403 do portão, o provedor atualiza o estado e o portão
   // aparece — esse caminho já está implementado e cobre o caso real.
-  if (estado && !estado.podeNavegar) {
-    return (
-      <>
-        <PortaoAcesso />
-        <ChatAtendimento />
-      </>
-    );
-  }
+  if (estado && !estado.podeNavegar) return <PortaoAcesso />;
 
   return (
     <>
@@ -55,6 +40,7 @@ export default function Estrutura() {
       </main>
       <Rodape />
       <Aviso />
+      {/* Só na loja liberada: o agente consulta o catálogo, e o portão existe para escondê-lo. */}
       <ChatAtendimento />
     </>
   );
