@@ -112,6 +112,11 @@
   margin-top: var(--espaco-10);
 }
 
+/* O primeiro título já tem o respiro do bloco (.secao--proxima). */
+.texto-corrido > h2:first-child {
+  margin-top: 0;
+}
+
 .lista-contato {
   display: flex;
   flex-direction: column;
