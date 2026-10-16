@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Conectar WhatsApp (exemplo)</title>
+  </head>
+  <body style="font-family: sans-serif; padding: 24px">
+    <!-- Só no `npm run dev:exemplo`: faz o papel da janela do provedor do WhatsApp. -->
+    <p>Janela simulada do provedor do WhatsApp.</p>
+    <button id="conectar">Conectar</button>
+    <button id="cancelar">Cancelar</button>
+    <script>
+      const state = new URLSearchParams(location.search).get('state');
+      const responder = (type) => {
+        window.opener?.postMessage({ type, state, phone_number_id: '1234567890' }, location.origin);
+        window.close();
+      };
+      document.getElementById('conectar').onclick = () => responder('WASAPFLOW_CONNECT_SUCCESS');
+      document.getElementById('cancelar').onclick = () => responder('WASAPFLOW_CONNECT_CANCEL');
+    </script>
+  </body>
+</html>

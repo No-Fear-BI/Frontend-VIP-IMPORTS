@@ -43,4 +43,22 @@ export const atendimentoAdminService = {
   /** POST conversations/:id/reply — só quem assumiu a conversa pode responder. */
   responder: (id, texto) =>
     requisitarAdmin('POST', `${BASE}/conversations/${id}/reply`, { corpo: { body: texto } }),
+
+  /** GET configuracao — `{ podeConectarWhatsapp }`: falso = key `operator`, a tela só mostra o estado. */
+  configuracao: (sinal) => requisitarAdmin('GET', `${BASE}/configuracao`, { sinal }),
+
+  /**
+   * GET whatsapp — `{ connected, provider, phone_number, display_name, state, updated_at }`.
+   * `state`: connected, offboarded (reconectar), partner_removed (conectar de novo).
+   */
+  whatsapp: (sinal) => requisitarAdmin('GET', `${BASE}/whatsapp`, { sinal }),
+
+  /** POST whatsapp/connect — `{ connect_url, state, expires_in }`: abrir `connect_url` na janela. */
+  conectarWhatsapp: () => requisitarAdmin('POST', `${BASE}/whatsapp/connect`, { corpo: {} }),
+
+  /** POST whatsapp/connect/complete — 409 = o número ainda está registrando (tentar de novo). */
+  concluirWhatsapp: (state, phoneNumberId) =>
+    requisitarAdmin('POST', `${BASE}/whatsapp/connect/complete`, {
+      corpo: { state, ...(phoneNumberId ? { phone_number_id: phoneNumberId } : {}) },
+    }),
 };

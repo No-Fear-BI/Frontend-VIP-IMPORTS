@@ -14,7 +14,7 @@ import './EstruturaAdmin.css';
 
 /*
  * Menu em dois níveis, ordenado por uso: rotina diária em cima, cadastro embaixo. Grupo com um
- * item só (Avulso) vira link direto, sem submenu. `para` é o primeiro segmento depois de /admin/.
+ * item só vira link direto com o nome do GRUPO, sem submenu. `para` é o primeiro segmento depois de /admin/.
  */
 const MENU_ADMIN = [
   {
@@ -44,6 +44,12 @@ const MENU_ADMIN = [
     rotulo: 'Permissões de Acesso',
     itens: [{ rotulo: 'Permissões de Acesso', para: 'permissoes' }],
   },
+  {
+    // Configurações da loja ligadas a serviços de fora. Hoje só o WhatsApp do atendimento (Burnwood).
+    id: 'configuracoes',
+    rotulo: 'Configurações',
+    itens: [{ rotulo: 'WhatsApp', para: 'whatsapp' }],
+  },
 ];
 
 function grupoDaRota(pathname) {
@@ -70,7 +76,7 @@ function MenuAdmin() {
             return (
               <li key={grupo.id} className="admin__grupo">
                 <NavLink to={item.para} className="admin__grupo-botao t-label-caps">
-                  {item.rotulo}
+                  {grupo.rotulo}
                 </NavLink>
               </li>
             );

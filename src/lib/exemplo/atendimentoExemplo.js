@@ -49,6 +49,8 @@ function conversa(id, nome, estado, mensagens) {
 }
 
 let conversas = null;
+let whatsapp = { connected: false, provider: null, phone_number: null, display_name: null, state: null, updated_at: null };
+let tentativasDeConclusao = 0;
 
 function iniciar() {
   conversas = [
@@ -92,6 +94,29 @@ function paraApi(c) {
 export function responderAtendimentoExemplo(metodo, caminho, query, corpo, admin, erro) {
   if (conversas === null) iniciar();
   let m;
+
+  // Configurações → WhatsApp. A "janela do provedor" é public/exemplo/whatsapp-conectar.html.
+  if (metodo === 'GET' && caminho === '/configuracao') return { podeConectarWhatsapp: true };
+  if (metodo === 'GET' && caminho === '/whatsapp') return whatsapp;
+  if (metodo === 'POST' && caminho === '/whatsapp/connect') {
+    const state = `exemplo-${Date.now()}`;
+    tentativasDeConclusao = 0;
+    return { connect_url: `${window.location.origin}/exemplo/whatsapp-conectar.html?state=${state}`, state, expires_in: 600 };
+  }
+  if (metodo === 'POST' && caminho === '/whatsapp/connect/complete') {
+    // Como na Burnwood: o primeiro pedido ainda está "registrando" (409), o segundo conclui.
+    tentativasDeConclusao += 1;
+    if (tentativasDeConclusao === 1) throw erro(409, 'WHATSAPP_REGISTERING', 'O número ainda está sendo registrado.');
+    whatsapp = {
+      connected: true,
+      provider: 'exemplo',
+      phone_number: '+55 41 99999-0000',
+      display_name: 'VIP Imports (exemplo)',
+      state: 'connected',
+      updated_at: new Date().toISOString(),
+    };
+    return whatsapp;
+  }
 
   if (metodo === 'GET' && caminho === '/conversations') {
     return { items: conversas.map(paraApi), next_cursor: null };

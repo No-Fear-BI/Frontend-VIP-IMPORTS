@@ -3,6 +3,7 @@ import Estrutura from './components/Estrutura.jsx';
 import { ProvedorSessaoAdmin } from './contexto/SessaoAdmin.jsx';
 import RotaAdminProtegida from './paginas/admin/Acesso.jsx';
 import AdminAtendimento from './paginas/admin/Atendimento.jsx';
+import AdminWhatsApp from './paginas/admin/WhatsApp.jsx';
 import AdminBanners from './paginas/admin/Banners.jsx';
 import AdminCategorias from './paginas/admin/Categorias.jsx';
 import AdminClientes from './paginas/admin/Clientes.jsx';
@@ -81,6 +82,7 @@ export default function App() {
             <Route path="permissoes" element={<AdminPermissoes />} />
             <Route path="revisao" element={<AdminRevisao />} />
             <Route path="atendimento" element={<AdminAtendimento />} />
+            <Route path="whatsapp" element={<AdminWhatsApp />} />
             <Route path="*" element={<Navigate to="resumo" replace />} />
           </Route>
         </Route>
