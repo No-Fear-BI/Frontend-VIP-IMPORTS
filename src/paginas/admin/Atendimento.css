@@ -1,0 +1,271 @@
+/* Painel de conversas do atendimento Burnwood. Só tokens (CLAUDE.md). */
+
+.admin-atendimento__topo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  margin-bottom: var(--espaco-6);
+}
+
+.admin-atendimento__ajuda {
+  max-width: var(--medida-texto);
+}
+
+.admin-atendimento__colunas {
+  display: grid;
+  grid-template-columns: var(--largura-gaveta) minmax(0, 1fr);
+  gap: var(--calha);
+  align-items: start;
+}
+
+/* ---------------------------------------------------------------- lista */
+
+.admin-atendimento__lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  border: var(--borda-fina) solid var(--cor-borda);
+  padding: var(--espaco-3);
+}
+
+.admin-atendimento__lista ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+}
+
+.admin-atendimento__contagem {
+  padding-inline: var(--espaco-2);
+}
+
+.admin-atendimento__linha {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  width: 100%;
+  padding: var(--espaco-3);
+  border: var(--borda-fina) solid transparent;
+  background: none;
+  color: var(--cor-texto);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--duracao-rapida) var(--curva-padrao);
+}
+
+.admin-atendimento__linha:hover {
+  border-color: var(--cor-borda);
+}
+
+.admin-atendimento__linha--atual {
+  border-color: var(--cor-borda-forte);
+  background: var(--cor-fundo-campo);
+}
+
+.admin-atendimento__linha:focus-visible {
+  outline: var(--foco-espessura) solid var(--cor-primaria);
+  outline-offset: var(--foco-afastamento);
+}
+
+.admin-atendimento__linha-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--espaco-2);
+}
+
+.admin-atendimento__previa {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Estado da conversa. A paleta tem três cores: quem precisa de gente aparece cheio. */
+.admin-atendimento__estado {
+  flex-shrink: 0;
+  padding: var(--espaco-1) var(--espaco-2);
+  border: var(--borda-fina) solid var(--cor-borda-forte);
+  color: var(--cor-texto-suave);
+}
+
+.admin-atendimento__estado--waiting_human {
+  border-color: var(--cor-primaria);
+  background: var(--cor-primaria);
+  color: var(--cor-sobre-primaria);
+}
+
+.admin-atendimento__estado--human_active {
+  border-color: var(--cor-primaria);
+  color: var(--cor-primaria);
+}
+
+.admin-atendimento__estado--resolved,
+.admin-atendimento__estado--closed {
+  border-color: var(--cor-borda);
+}
+
+/* ---------------------------------------------------------------- conversa */
+
+.admin-atendimento__conversa {
+  border: var(--borda-fina) solid var(--cor-borda);
+  padding: var(--espaco-6);
+  min-height: var(--altura-minima-conteudo);
+}
+
+.admin-atendimento__escolha {
+  padding-block: var(--espaco-8);
+  text-align: center;
+}
+
+.admin-atendimento__fio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.admin-atendimento__fio-topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--espaco-4);
+  padding-bottom: var(--espaco-4);
+  border-bottom: var(--borda-fina) solid var(--cor-borda);
+}
+
+.admin-atendimento__voltar {
+  display: none;
+}
+
+.admin-atendimento__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+}
+
+.admin-atendimento__mensagens {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  max-height: var(--altura-minima-conteudo);
+  overflow-y: auto;
+  padding-right: var(--espaco-2);
+}
+
+.admin-atendimento__balao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  max-width: var(--medida-curta);
+  padding: var(--espaco-3) var(--espaco-4);
+  border: var(--borda-fina) solid var(--cor-borda);
+  background: var(--cor-fundo-campo);
+}
+
+/* Cliente à esquerda; agente e equipe à direita, a equipe em destaque. */
+.admin-atendimento__balao--bot,
+.admin-atendimento__balao--operator {
+  align-self: flex-end;
+}
+
+.admin-atendimento__balao--bot {
+  background: var(--cor-secundaria);
+  border-color: var(--cor-secundaria);
+  color: var(--cor-sobre-secundaria);
+}
+
+.admin-atendimento__balao--operator {
+  background: var(--cor-primaria);
+  border-color: var(--cor-primaria);
+  color: var(--cor-sobre-primaria);
+}
+
+.admin-atendimento__balao--operator .admin-atendimento__autor {
+  color: var(--cor-sobre-primaria-suave);
+}
+
+.admin-atendimento__autor {
+  color: var(--cor-texto-suave);
+}
+
+.admin-atendimento__texto {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.admin-atendimento__falha {
+  text-decoration: underline;
+  text-underline-offset: var(--sublinhado-afastamento);
+}
+
+.admin-atendimento__evento {
+  align-self: center;
+  text-align: center;
+}
+
+.admin-atendimento__aviso {
+  padding-left: var(--espaco-3);
+  border-left: var(--borda-grossa) solid var(--cor-erro);
+}
+
+.admin-atendimento__resposta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  padding-top: var(--espaco-4);
+  border-top: var(--borda-fina) solid var(--cor-borda);
+}
+
+.admin-atendimento__resposta .botao {
+  align-self: flex-end;
+}
+
+.admin-atendimento__campo {
+  height: auto;
+  min-height: var(--altura-controle);
+  padding-block: var(--espaco-3);
+  resize: vertical;
+}
+
+.admin-atendimento__dica {
+  padding-top: var(--espaco-4);
+  border-top: var(--borda-fina) solid var(--cor-borda);
+}
+
+/* ---------------------------------------------------------------- esqueletos */
+
+.admin-atendimento__esqueleto-linha {
+  height: var(--altura-controle);
+}
+
+.admin-atendimento__esqueleto-balao {
+  width: var(--medida-curta);
+  max-width: 100%;
+  height: var(--altura-controle);
+}
+
+.admin-atendimento__esqueleto-balao--direita {
+  align-self: flex-end;
+}
+
+/* ---------------------------------------------------------------- celular e tablet */
+
+@media (max-width: 1023px) {
+  .admin-atendimento__colunas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Uma coluna por vez: a lista, ou a conversa aberta com "← Conversas" para voltar. */
+  .admin-atendimento__colunas--aberta .admin-atendimento__lista,
+  .admin-atendimento__colunas:not(.admin-atendimento__colunas--aberta) .admin-atendimento__conversa {
+    display: none;
+  }
+
+  .admin-atendimento__voltar {
+    display: inline-flex;
+    flex-basis: 100%;
+  }
+
+  .admin-atendimento__conversa {
+    padding: var(--espaco-4);
+  }
+}

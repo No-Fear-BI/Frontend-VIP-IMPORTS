@@ -1,0 +1,78 @@
+/* Configurações → WhatsApp. Só tokens (CLAUDE.md). */
+
+.admin-whatsapp__topo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  margin-bottom: var(--espaco-6);
+}
+
+.admin-whatsapp__ajuda {
+  max-width: var(--medida-texto);
+}
+
+.admin-whatsapp__cartao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-6);
+  max-width: var(--largura-modal);
+  padding: var(--espaco-6);
+  border: var(--borda-fina) solid var(--cor-borda);
+}
+
+.admin-whatsapp__dados {
+  display: grid;
+  gap: var(--espaco-4);
+}
+
+.admin-whatsapp__dados > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+}
+
+.admin-whatsapp__situacao {
+  display: inline-block;
+  padding: var(--espaco-1) var(--espaco-2);
+  border: var(--borda-fina) solid var(--cor-borda-forte);
+  color: var(--cor-texto-suave);
+}
+
+/* A paleta tem três cores: conectado aparece cheio; o que pede ação, em contorno forte. */
+.admin-whatsapp__situacao--ok {
+  border-color: var(--cor-primaria);
+  background: var(--cor-primaria);
+  color: var(--cor-sobre-primaria);
+}
+
+.admin-whatsapp__situacao--alerta {
+  border-width: var(--borda-grossa);
+  border-color: var(--cor-primaria);
+  color: var(--cor-primaria);
+}
+
+.admin-whatsapp__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-4);
+}
+
+.admin-whatsapp__nota {
+  padding-top: var(--espaco-4);
+  border-top: var(--borda-fina) solid var(--cor-borda);
+  max-width: var(--medida-curta);
+}
+
+.admin-whatsapp__erro {
+  padding-left: var(--espaco-3);
+  border-left: var(--borda-grossa) solid var(--cor-erro);
+}
+
+.admin-whatsapp__esqueleto {
+  height: var(--altura-controle);
+}
+
+.admin-whatsapp__esqueleto--curto {
+  width: var(--largura-miniatura-grande);
+}

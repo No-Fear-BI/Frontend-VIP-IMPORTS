@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { useAcesso } from '../contexto/AcessoLoja.jsx';
 import { useSessaoCliente } from '../contexto/SessaoCliente.jsx';
 import Cabecalho from './Cabecalho.jsx';
+import ChatAtendimento from './ChatAtendimento.jsx';
 import PortaoAcesso, { PortaoCarregando } from './PortaoAcesso.jsx';
 import Rodape from './Rodape.jsx';
 import './Estrutura.css';
@@ -39,6 +40,8 @@ export default function Estrutura() {
       </main>
       <Rodape />
       <Aviso />
+      {/* Só na loja liberada: o agente consulta o catálogo, e o portão existe para escondê-lo. */}
+      <ChatAtendimento />
     </>
   );
 }
