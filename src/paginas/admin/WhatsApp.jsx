@@ -16,6 +16,7 @@ import './WhatsApp.css';
  * - janela fechada sem mensagem → concluir mesmo assim (a Burnwood sabe se deu certo);
  * - 409 ao concluir = o número ainda está registrando: até 4 tentativas, 2,5 s entre elas.
  * Conectar exige key `manager`; com `operator` a tela mostra só o estado.
+ * UMA conta de WhatsApp por empresa: conectado = sem botão; trocar o número é com a Burnwood.
  */
 
 const TENTATIVAS = 4;
@@ -27,6 +28,7 @@ function situacaoDe(conexao) {
   if (!conexao?.provider) return { rotulo: 'Não conectado', tom: 'neutro' };
   if (conexao.connected) return { rotulo: 'Conectado', tom: 'ok' };
   if (conexao.state === 'partner_removed') return { rotulo: 'Desconectado: conecte de novo', tom: 'alerta' };
+  if (conexao.state === 'removed') return { rotulo: 'Removido após uma semana desconectado: conecte de novo', tom: 'alerta' };
   return { rotulo: 'Conexão perdida: reconecte', tom: 'alerta' };
 }
 
@@ -185,10 +187,14 @@ export default function AdminWhatsApp() {
             )}
           </dl>
 
-          {podeConectar ? (
+          {conexao.connected ? (
+            <p className="t-body-sm admin-whatsapp__nota">
+              Para trocar o número, fale com a Burnwood: cada loja tem uma conta de WhatsApp só.
+            </p>
+          ) : podeConectar ? (
             <div className="admin-whatsapp__acoes">
               <Button disabled={ocupado} onClick={conectar}>
-                {conexao.provider ? 'Reconectar WhatsApp' : 'Conectar WhatsApp'}
+                {conexao.provider ? 'Conectar de novo' : 'Conectar WhatsApp'}
               </Button>
               {ocupado && <p className="t-body-sm t-muted">Termine na janela que abriu…</p>}
             </div>
