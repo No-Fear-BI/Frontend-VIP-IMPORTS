@@ -4,6 +4,7 @@ import { ProvedorSessaoAdmin } from './contexto/SessaoAdmin.jsx';
 import RotaAdminProtegida from './paginas/admin/Acesso.jsx';
 import AdminAtendimento from './paginas/admin/Atendimento.jsx';
 import AdminWhatsApp from './paginas/admin/WhatsApp.jsx';
+import AdminMercadoPago from './paginas/admin/MercadoPago.jsx';
 import AdminBanners from './paginas/admin/Banners.jsx';
 import AdminCategorias from './paginas/admin/Categorias.jsx';
 import AdminClientes from './paginas/admin/Clientes.jsx';
@@ -83,6 +84,7 @@ export default function App() {
             <Route path="revisao" element={<AdminRevisao />} />
             <Route path="atendimento" element={<AdminAtendimento />} />
             <Route path="whatsapp" element={<AdminWhatsApp />} />
+            <Route path="mercadopago" element={<AdminMercadoPago />} />
             <Route path="*" element={<Navigate to="resumo" replace />} />
           </Route>
         </Route>

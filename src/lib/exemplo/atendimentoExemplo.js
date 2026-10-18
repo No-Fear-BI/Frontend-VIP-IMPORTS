@@ -49,8 +49,15 @@ function conversa(id, nome, estado, mensagens) {
 }
 
 let conversas = null;
-let whatsapp = { connected: false, provider: null, phone_number: null, display_name: null, state: null, updated_at: null };
+const SEM_VERIFICACAO = { provider_linked: false, status: 'not_linked', challenge: null, last_inbound_at: null, validated_at: null, failure_reason: null };
+let whatsapp = { connected: false, provider: null, phone_number: null, display_name: null, state: null, updated_at: null, readiness: SEM_VERIFICACAO };
 let tentativasDeConclusao = 0;
+let consultasEsperandoFrase = 0;
+
+// Mercado Pago em modo teste: conta "conectada" e um pagamento que vira `paid` depois de 3 consultas.
+const mercadoPago = { enabled: true, connected: true, mode: 'test', payments_enabled: true };
+const pedidos = [];
+const checkouts = [];
 
 function iniciar() {
   conversas = [
@@ -96,8 +103,50 @@ export function responderAtendimentoExemplo(metodo, caminho, query, corpo, admin
   let m;
 
   // Configurações → WhatsApp. A "janela do provedor" é public/exemplo/whatsapp-conectar.html.
-  if (metodo === 'GET' && caminho === '/configuracao') return { podeConectarWhatsapp: true };
-  if (metodo === 'GET' && caminho === '/whatsapp') return whatsapp;
+  if (metodo === 'GET' && caminho === '/configuracao') {
+    return { podeConectarWhatsapp: true, portalPagamentosUrl: 'https://dev.burnwood.com.br/t/exemplo/payments' };
+  }
+  if (metodo === 'GET' && caminho === '/whatsapp') {
+    // A "frase" chega na 3ª consulta, como se alguém a tivesse mandado de outro celular.
+    if (whatsapp.readiness.status === 'awaiting_inbound' && ++consultasEsperandoFrase >= 3) {
+      const agora = new Date().toISOString();
+      whatsapp = { ...whatsapp, readiness: { ...whatsapp.readiness, status: 'operational', challenge: null, last_inbound_at: agora, validated_at: agora } };
+    }
+    return whatsapp;
+  }
+  if (metodo === 'POST' && caminho === '/whatsapp/readiness/start') {
+    consultasEsperandoFrase = 0;
+    whatsapp = { ...whatsapp, readiness: { ...whatsapp.readiness, status: 'awaiting_inbound', challenge: `BW-${Math.random().toString(36).slice(2, 8).toUpperCase()}` } };
+    return whatsapp;
+  }
+  if (metodo === 'POST' && caminho === '/whatsapp/readiness/missed') {
+    whatsapp = { ...whatsapp, readiness: { ...whatsapp.readiness, status: 'validation_failed', challenge: null, failure_reason: 'A frase não chegou à Burnwood.' } };
+    return whatsapp;
+  }
+  if (metodo === 'POST' && caminho === '/whatsapp/disconnect') {
+    whatsapp = { ...whatsapp, connected: false, state: 'offboarded', updated_at: new Date().toISOString() };
+    return whatsapp;
+  }
+  if (metodo === 'GET' && caminho === '/payments/mercadopago') return mercadoPago;
+  if (metodo === 'GET' && caminho === '/payments/mercadopago/requests') return pedidos;
+  if (metodo === 'GET' && caminho === '/payments/mercadopago/checkouts') {
+    for (const c of checkouts) {
+      if (c.status !== 'paid' && ++c.consultas >= 3) Object.assign(c, { status: 'paid', provider_status: 'approved' });
+    }
+    return checkouts.map(({ consultas, ...c }) => c);
+  }
+  if (metodo === 'POST' && caminho === '/payments/mercadopago/requests') {
+    const pedido = { id: `req-${pedidos.length + 1}`, amount: corpo.amount, currency: 'BRL', purpose: corpo.purpose, status: 'approved' };
+    pedidos.unshift(pedido);
+    return pedido;
+  }
+  if (metodo === 'POST' && caminho === '/payments/mercadopago/checkouts') {
+    const pedido = pedidos.find((p) => p.status === 'approved' && p.amount === corpo.amount);
+    if (pedido) pedido.status = 'used';
+    const checkout = { id: `chk-${checkouts.length + 1}`, description: corpo.description, amount: corpo.amount, status: 'created', provider_status: 'pending', checkout_url: 'https://www.mercadopago.com.br/checkout/exemplo', live: false, consultas: 0 };
+    checkouts.unshift(checkout);
+    return checkout;
+  }
   if (metodo === 'POST' && caminho === '/whatsapp/connect') {
     const state = `exemplo-${Date.now()}`;
     tentativasDeConclusao = 0;
@@ -114,6 +163,7 @@ export function responderAtendimentoExemplo(metodo, caminho, query, corpo, admin
       display_name: 'VIP Imports (exemplo)',
       state: 'connected',
       updated_at: new Date().toISOString(),
+      readiness: { ...SEM_VERIFICACAO, provider_linked: true, status: 'not_verified' },
     };
     return whatsapp;
   }

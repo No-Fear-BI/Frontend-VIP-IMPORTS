@@ -1,0 +1,104 @@
+/* Configurações → Mercado Pago. Só tokens (CLAUDE.md). */
+
+.admin-mercadopago__topo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  margin-bottom: var(--espaco-6);
+}
+
+.admin-mercadopago__ajuda {
+  max-width: var(--medida-texto);
+}
+
+.admin-mercadopago__colunas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--calha);
+  align-items: start;
+}
+
+.admin-mercadopago__cartao {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-4);
+  padding: var(--espaco-6);
+  border: var(--borda-fina) solid var(--cor-borda);
+}
+
+.admin-mercadopago__cartao .botao {
+  max-width: 100%;
+  white-space: normal;
+}
+
+.admin-mercadopago__cartao--largo {
+  grid-column: 1 / -1;
+}
+
+.admin-mercadopago__situacao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.admin-mercadopago__item {
+  color: var(--cor-texto-suave);
+}
+
+.admin-mercadopago__item--ok {
+  color: var(--cor-texto);
+  font-weight: var(--peso-forte);
+}
+
+.admin-mercadopago__formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+  width: 100%;
+}
+
+.admin-mercadopago__formulario .campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+}
+
+.admin-mercadopago__formulario .botao {
+  align-self: flex-start;
+}
+
+.admin-mercadopago__linhas {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.admin-mercadopago__linha {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--espaco-4);
+  padding-block: var(--espaco-3);
+  border-bottom: var(--borda-fina) solid var(--cor-borda);
+}
+
+.admin-mercadopago__erro {
+  padding-left: var(--espaco-3);
+  border-left: var(--borda-grossa) solid var(--cor-erro);
+}
+
+.admin-mercadopago__esqueleto {
+  height: var(--altura-controle);
+}
+
+@media (max-width: 1023px) {
+  .admin-mercadopago__colunas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-mercadopago__linha {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--espaco-2);
+  }
+}

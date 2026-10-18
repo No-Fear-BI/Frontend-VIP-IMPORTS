@@ -45,10 +45,13 @@ const MENU_ADMIN = [
     itens: [{ rotulo: 'Permissões de Acesso', para: 'permissoes' }],
   },
   {
-    // Configurações da loja ligadas a serviços de fora. Hoje só o WhatsApp do atendimento (Burnwood).
+    // Configurações da loja ligadas a serviços de fora: WhatsApp e Mercado Pago do atendimento (Burnwood).
     id: 'configuracoes',
     rotulo: 'Configurações',
-    itens: [{ rotulo: 'WhatsApp', para: 'whatsapp' }],
+    itens: [
+      { rotulo: 'WhatsApp', para: 'whatsapp' },
+      { rotulo: 'Mercado Pago', para: 'mercadopago' },
+    ],
   },
 ];
 

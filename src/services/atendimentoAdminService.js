@@ -44,7 +44,10 @@ export const atendimentoAdminService = {
   responder: (id, texto) =>
     requisitarAdmin('POST', `${BASE}/conversations/${id}/reply`, { corpo: { body: texto } }),
 
-  /** GET configuracao — `{ podeConectarWhatsapp }`: falso = key `operator`, a tela só mostra o estado. */
+  /**
+   * GET configuracao — `{ podeConectarWhatsapp, portalPagamentosUrl }`. `podeConectarWhatsapp` falso =
+   * key `operator`, a tela só mostra o estado. O portal é onde se conecta a conta do Mercado Pago.
+   */
   configuracao: (sinal) => requisitarAdmin('GET', `${BASE}/configuracao`, { sinal }),
 
   /**
@@ -55,6 +58,33 @@ export const atendimentoAdminService = {
 
   /** POST whatsapp/connect — `{ connect_url, state, expires_in }`: abrir `connect_url` na janela. */
   conectarWhatsapp: () => requisitarAdmin('POST', `${BASE}/whatsapp/connect`, { corpo: {} }),
+
+  /** POST whatsapp/disconnect — desliga o número da Burnwood (o agente para; as conversas ficam). */
+  desconectarWhatsapp: () => requisitarAdmin('POST', `${BASE}/whatsapp/disconnect`, { corpo: {} }),
+
+  /**
+   * POST whatsapp/readiness/start|missed — verificação de entrada. `start` gera a frase (BW-…) que
+   * alguém manda de OUTRO celular; `missed` avisa que ela não chegou. Devolve o mesmo que `whatsapp`.
+   */
+  iniciarVerificacaoWhatsapp: () => requisitarAdmin('POST', `${BASE}/whatsapp/readiness/start`, { corpo: {} }),
+  verificacaoNaoChegou: () => requisitarAdmin('POST', `${BASE}/whatsapp/readiness/missed`, { corpo: {} }),
+
+  /** GET payments/mercadopago — `{ enabled, connected, mode, payments_enabled, operational? }`. */
+  mercadoPago: (sinal) => requisitarAdmin('GET', `${BASE}/payments/mercadopago`, { sinal }),
+
+  /** GET payments/mercadopago/requests — pedidos aprovados `[{ id, amount, currency, purpose, status }]`. */
+  pedidosMercadoPago: (sinal) => requisitarAdmin('GET', `${BASE}/payments/mercadopago/requests`, { sinal }),
+
+  /** POST payments/mercadopago/requests — aprova um valor (`amount` "10.00") e a finalidade. */
+  aprovarPedidoMercadoPago: (valor, finalidade) =>
+    requisitarAdmin('POST', `${BASE}/payments/mercadopago/requests`, { corpo: { amount: valor, purpose: finalidade } }),
+
+  /** GET payments/mercadopago/checkouts — `[{ id, description, amount, status, provider_status, checkout_url, live }]`. */
+  checkoutsMercadoPago: (sinal) => requisitarAdmin('GET', `${BASE}/payments/mercadopago/checkouts`, { sinal }),
+
+  /** POST payments/mercadopago/checkouts — cria o link de pagamento de um pedido aprovado. */
+  criarCheckoutMercadoPago: (descricao, valor) =>
+    requisitarAdmin('POST', `${BASE}/payments/mercadopago/checkouts`, { corpo: { description: descricao, amount: valor } }),
 
   /** POST whatsapp/connect/complete — 409 = o número ainda está registrando (tentar de novo). */
   concluirWhatsapp: (state, phoneNumberId) =>
