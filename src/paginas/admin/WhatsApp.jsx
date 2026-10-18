@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Esqueleto, EstadoErro, EstadoVazio } from '../../components/Estados.jsx';
 import Button from '../../components/ui/Button.jsx';
+import Modal from '../../components/ui/Modal.jsx';
 import { cn } from '../../lib/cn.js';
 import { atendimentoAdminService } from '../../services/atendimentoAdminService.js';
 import './WhatsApp.css';
@@ -16,10 +17,25 @@ import './WhatsApp.css';
  * - janela fechada sem mensagem → concluir mesmo assim (a Burnwood sabe se deu certo);
  * - 409 ao concluir = o número ainda está registrando: até 4 tentativas, 2,5 s entre elas.
  * Conectar exige key `manager`; com `operator` a tela mostra só o estado.
- * UMA conta de WhatsApp por empresa: conectado = sem botão; trocar o número é com a Burnwood.
+ * UMA conta de WhatsApp por empresa: conectado = sem botão de conectar; para trocar o número,
+ * desconecte aqui primeiro (isso não libera a vaga paga no provedor).
+ *
+ * Verificação de entrada: "conectado" não prova que as mensagens chegam. A tela gera uma frase
+ * (BW-…) que alguém manda de OUTRO celular; só `operational` confirma que uma mensagem real chegou.
+ * "Remover o registro no provedor" fica FORA desta tela de propósito: apaga a conta do WhatsApp
+ * Business e não tem volta (está no portal da Burnwood).
  */
 
 const TENTATIVAS = 4;
+const VERIFICACAO_A_CADA_MS = 4000;
+
+const ROTULO_VERIFICACAO = {
+  not_linked: 'Número não ligado ao provedor',
+  not_verified: 'Ainda não verificado',
+  awaiting_inbound: 'Esperando a mensagem de teste',
+  operational: 'Funcionando: uma mensagem real chegou',
+  validation_failed: 'A verificação falhou',
+};
 const ESPERA_ENTRE_TENTATIVAS_MS = 2500;
 
 const esperar = (ms) => new Promise((resolver) => setTimeout(resolver, ms));
@@ -27,8 +43,9 @@ const esperar = (ms) => new Promise((resolver) => setTimeout(resolver, ms));
 function situacaoDe(conexao) {
   if (!conexao?.provider) return { rotulo: 'Não conectado', tom: 'neutro' };
   if (conexao.connected) return { rotulo: 'Conectado', tom: 'ok' };
-  if (conexao.state === 'partner_removed') return { rotulo: 'Desconectado: conecte de novo', tom: 'alerta' };
-  if (conexao.state === 'removed') return { rotulo: 'Removido após uma semana desconectado: conecte de novo', tom: 'alerta' };
+  if (conexao.state === 'offboarded') return { rotulo: 'Desconectado da Burnwood: conecte de novo', tom: 'alerta' };
+  if (conexao.state === 'partner_removed') return { rotulo: 'Desconectado pelo provedor: conecte de novo', tom: 'alerta' };
+  if (conexao.state === 'removed') return { rotulo: 'Registro removido no provedor: conecte de novo', tom: 'alerta' };
   return { rotulo: 'Conexão perdida: reconecte', tom: 'alerta' };
 }
 
@@ -41,6 +58,8 @@ export default function AdminWhatsApp() {
   const [ocupado, setOcupado] = useState(false);
   const [aviso, setAviso] = useState(null);
   const [erro, setErro] = useState(null);
+  const [confirmandoDesconexao, setConfirmandoDesconexao] = useState(false);
+  const [desconectando, setDesconectando] = useState(false);
   const pendente = useRef(null);
 
   const carregar = useCallback(async () => {
@@ -60,6 +79,40 @@ export default function AdminWhatsApp() {
   useEffect(() => {
     carregar();
   }, [carregar]);
+
+  // Esperando a frase de teste: consulta de 4 em 4 s até a Burnwood confirmar (ou não).
+  const esperandoFrase = conexao?.readiness?.status === 'awaiting_inbound';
+  useEffect(() => {
+    if (!esperandoFrase) return undefined;
+    const relogio = window.setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
+      atendimentoAdminService.whatsapp().then(setConexao).catch(() => {});
+    }, VERIFICACAO_A_CADA_MS);
+    return () => window.clearInterval(relogio);
+  }, [esperandoFrase]);
+
+  async function executar(acao, avisoDeSucesso) {
+    setErro(null);
+    setAviso(null);
+    try {
+      setConexao(await acao());
+      if (avisoDeSucesso) setAviso(avisoDeSucesso);
+      return true;
+    } catch (falha) {
+      setErro(falha.mensagem || 'A Burnwood recusou a ação. Tente de novo.');
+      return false;
+    }
+  }
+
+  async function desconectar() {
+    setDesconectando(true);
+    const ok = await executar(
+      atendimentoAdminService.desconectarWhatsapp,
+      'Desconectado da Burnwood: o agente parou de responder neste número. As conversas continuam no painel.',
+    );
+    setDesconectando(false);
+    if (ok) setConfirmandoDesconexao(false);
+  }
 
   const concluir = useCallback(async (state, phoneNumberId) => {
     setAviso('Confirmando a conexão com a Burnwood…');
@@ -187,10 +240,31 @@ export default function AdminWhatsApp() {
             )}
           </dl>
 
+          {conexao.readiness?.provider_linked && (
+            <Verificacao
+              verificacao={conexao.readiness}
+              podeAgir={podeConectar}
+              aoIniciar={() =>
+                executar(
+                  atendimentoAdminService.iniciarVerificacaoWhatsapp,
+                  'Frase gerada. Mande de outro celular para o número — esta tela não envia nada.',
+                )
+              }
+              aoNaoChegar={() => executar(atendimentoAdminService.verificacaoNaoChegou)}
+            />
+          )}
+
           {conexao.connected ? (
-            <p className="t-body-sm admin-whatsapp__nota">
-              Para trocar o número, fale com a Burnwood: cada loja tem uma conta de WhatsApp só.
-            </p>
+            <div className="admin-whatsapp__acoes admin-whatsapp__nota">
+              <p className="t-body-sm">
+                Cada loja tem uma conta de WhatsApp só. Para trocar o número, desconecte primeiro.
+              </p>
+              {podeConectar && (
+                <Button variante="secundaria" onClick={() => setConfirmandoDesconexao(true)}>
+                  Desconectar da Burnwood
+                </Button>
+              )}
+            </div>
           ) : podeConectar ? (
             <div className="admin-whatsapp__acoes">
               <Button disabled={ocupado} onClick={conectar}>
@@ -217,6 +291,72 @@ export default function AdminWhatsApp() {
           )}
         </div>
       )}
+
+      <Modal
+        aberto={confirmandoDesconexao}
+        onFechar={() => !desconectando && setConfirmandoDesconexao(false)}
+        titulo="Desconectar o WhatsApp da Burnwood?"
+      >
+        <div className="admin-whatsapp__confirmar">
+          <p className="t-body-sm">
+            O agente para de responder neste número. As conversas continuam no painel, e o número segue funcionando
+            no app WhatsApp Business.
+          </p>
+          <p className="t-body-sm t-muted">
+            O registro no provedor continua, e desconectar <strong>não libera a vaga paga</strong> no provedor. Para
+            conectar outro número depois, é preciso conectar de novo por esta tela.
+          </p>
+          <div className="admin-whatsapp__confirmar-acoes">
+            <Button variante="secundaria" disabled={desconectando} onClick={() => setConfirmandoDesconexao(false)}>
+              Cancelar
+            </Button>
+            <Button disabled={desconectando} onClick={desconectar}>
+              {desconectando ? 'Desconectando…' : 'Sim, desconectar'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </section>
+  );
+}
+
+/** Verificação de entrada: a frase que prova que uma mensagem real chega ao número. */
+function Verificacao({ verificacao, podeAgir, aoIniciar, aoNaoChegar }) {
+  const { status, challenge: frase, failure_reason: motivo, validated_at: validadoEm } = verificacao;
+  return (
+    <div className="admin-whatsapp__verificacao">
+      <p className="t-label-caps t-muted">Verificação de entrada</p>
+      <p>
+        <span
+          className={cn(
+            'admin-whatsapp__situacao t-label-caps-sm',
+            status === 'operational' ? 'admin-whatsapp__situacao--ok' : 'admin-whatsapp__situacao--alerta',
+          )}
+        >
+          {ROTULO_VERIFICACAO[status] || status}
+        </span>
+      </p>
+      {status === 'operational' && validadoEm && (
+        <p className="t-body-sm t-muted">Confirmado em {formatoData.format(new Date(validadoEm))}.</p>
+      )}
+      {status === 'validation_failed' && motivo && <p className="t-body-sm admin-whatsapp__erro">{motivo}</p>}
+      {frase && (
+        <div className="admin-whatsapp__frase">
+          <p className="t-body-sm">De outro celular, mande exatamente esta frase para o número:</p>
+          <p className="t-codigo admin-whatsapp__frase-texto">{frase}</p>
+          <p className="t-body-sm t-muted">A tela confere sozinha a cada poucos segundos.</p>
+        </div>
+      )}
+      {podeAgir && (status === 'not_verified' || status === 'validation_failed') && (
+        <Button variante="secundaria" onClick={aoIniciar}>
+          Iniciar verificação
+        </Button>
+      )}
+      {podeAgir && status === 'awaiting_inbound' && (
+        <Button variante="texto" onClick={aoNaoChegar}>
+          <span>A mensagem de teste não chegou</span>
+        </Button>
+      )}
+    </div>
   );
 }
