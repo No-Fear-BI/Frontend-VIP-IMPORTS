@@ -1,0 +1,95 @@
+/* Listagem de pedidos do painel. */
+
+.admin-pedidos__topo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  margin-bottom: var(--espaco-6);
+}
+
+.admin-pedidos__ajuda {
+  max-width: var(--medida-curta);
+}
+
+.admin-pedidos__filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--espaco-6);
+}
+
+.admin-pedidos__busca {
+  flex: 1;
+  min-width: 0;
+  max-width: var(--largura-formulario);
+}
+
+.admin-pedidos__busca-linha {
+  display: flex;
+  gap: var(--espaco-2);
+}
+
+.admin-pedidos__busca-linha .campo__input {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-pedidos__situacoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+}
+
+.admin-pedidos__contagem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--espaco-4);
+  margin-block: var(--espaco-6) var(--espaco-2);
+}
+
+.admin-pedidos__erro {
+  margin-bottom: var(--espaco-4);
+}
+
+.admin-pedidos__esqueleto {
+  height: var(--altura-controle);
+}
+
+/* Linhas curtas dentro da célula: nome/e-mail/telefone, número/data. */
+.admin-pedidos__detalhe {
+  display: block;
+}
+
+.admin-pedidos__itens {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A paleta não tem cor de estado: "Pago" é cheio (verde com texto creme), "Aguardando" é só contorno. */
+.admin-pedidos__selo {
+  display: inline-block;
+  padding: var(--espaco-1) var(--espaco-2);
+  border: var(--borda-fina) solid var(--cor-borda-forte);
+  border-radius: var(--raio);
+}
+
+.admin-pedidos__selo--pago {
+  background: var(--cor-primaria);
+  border-color: var(--cor-primaria);
+  color: var(--cor-sobre-primaria);
+}
+
+.admin-pedidos__acao {
+  margin-top: var(--espaco-2);
+}
+
+.admin-pedidos__paginacao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-4);
+  margin-top: var(--espaco-6);
+}

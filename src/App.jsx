@@ -8,6 +8,7 @@ import AdminMercadoPago from './paginas/admin/MercadoPago.jsx';
 import AdminBanners from './paginas/admin/Banners.jsx';
 import AdminCategorias from './paginas/admin/Categorias.jsx';
 import AdminClientes from './paginas/admin/Clientes.jsx';
+import AdminPedidos from './paginas/admin/Pedidos.jsx';
 import AdminCores from './paginas/admin/Cores.jsx';
 import AdminDestaques from './paginas/admin/Destaques.jsx';
 import EstruturaAdmin from './paginas/admin/EstruturaAdmin.jsx';
@@ -80,6 +81,7 @@ export default function App() {
             <Route path="banners" element={<AdminBanners />} />
             <Route path="destaques" element={<AdminDestaques />} />
             <Route path="clientes" element={<AdminClientes />} />
+            <Route path="pedidos" element={<AdminPedidos />} />
             <Route path="permissoes" element={<AdminPermissoes />} />
             <Route path="revisao" element={<AdminRevisao />} />
             <Route path="atendimento" element={<AdminAtendimento />} />
