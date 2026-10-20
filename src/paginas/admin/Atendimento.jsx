@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Esqueleto, EstadoErro, EstadoVazio } from '../../components/Estados.jsx';
 import Button from '../../components/ui/Button.jsx';
 import { cn } from '../../lib/cn.js';
@@ -39,6 +40,9 @@ const ROTULO_EVENTO = {
   closed: 'encerrou a conversa',
 };
 
+/** Opções do filtro de status, na ordem do seletor: quem precisa de gente vem primeiro. */
+const FILTROS_ESTADO = ['waiting_human', 'human_active', 'bot_active', 'paused', 'resolved', 'closed'];
+
 const formatoHora = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 
 function hora(iso) {
@@ -60,19 +64,27 @@ function useConsultaPeriodica(tarefa, ms) {
 }
 
 export default function AdminAtendimento() {
-  const [conversas, setConversas] = useState(null);
+  const [params, setParams] = useSearchParams();
+  const estadoNaUrl = params.get('estado');
+  const estado = FILTROS_ESTADO.includes(estadoNaUrl) ? estadoNaUrl : '';
+
+  // A resposta guarda o filtro com que foi pedida: uma consulta lenta do filtro anterior nunca
+  // sobrescreve a lista do filtro atual, que fica no esqueleto até a sua chegar.
+  const [resposta, setResposta] = useState(null);
   const [erro, setErro] = useState(null);
-  const [selecionadaId, setSelecionadaId] = useState(null);
+  // A conversa aberta, e não só o id: ela continua aberta mesmo se a ação (ex.: Assumir) a tirar do filtro.
+  const [selecionada, setSelecionada] = useState(null);
+  const conversas = resposta?.estado === estado ? resposta.itens : null;
 
   const carregarLista = useCallback(async () => {
     try {
-      const pagina = await atendimentoAdminService.conversas();
-      setConversas(pagina.items);
+      const pagina = await atendimentoAdminService.conversas({ estado });
+      setResposta({ estado, itens: pagina.items });
       setErro(null);
     } catch (falha) {
       setErro(falha);
     }
-  }, []);
+  }, [estado]);
 
   useEffect(() => {
     carregarLista();
@@ -80,12 +92,23 @@ export default function AdminAtendimento() {
   useConsultaPeriodica(carregarLista, LISTA_A_CADA_MS);
 
   const tentarDeNovo = () => {
-    setConversas(null);
+    setResposta(null);
     setErro(null);
     carregarLista();
   };
 
-  const selecionada = conversas?.find((c) => c.id === selecionadaId) ?? null;
+  function mudarEstado(novo) {
+    const proximo = new URLSearchParams(params);
+    if (novo) proximo.set('estado', novo);
+    else proximo.delete('estado');
+    setErro(null);
+    setParams(proximo);
+  }
+
+  // Sem conversa nenhuma (e sem filtro) não há o que filtrar; fora isso o filtro fica visível, inclusive
+  // enquanto a lista do novo status carrega e quando ele não tem nenhuma conversa.
+  const mostrarFiltro =
+    !ehDesligado(erro) && !(conversas?.length === 0 && estado === '') && (resposta !== null || estado !== '');
 
   return (
     <section className="admin__pagina admin-atendimento">
@@ -95,6 +118,10 @@ export default function AdminAtendimento() {
           Conversas do chat da loja. O agente de IA responde sozinho; assuma quando quiser falar com o cliente.
         </p>
       </header>
+
+      {mostrarFiltro && (
+        <FiltroEstado atual={estado} aberta={Boolean(selecionada)} onMudar={mudarEstado} />
+      )}
 
       {conversas === null && !erro ? (
         <EsqueletoAtendimento />
@@ -106,7 +133,13 @@ export default function AdminAtendimento() {
         />
       ) : conversas === null ? (
         <EstadoErro erro={erro} onTentar={tentarDeNovo} titulo="Não conseguimos carregar as conversas." />
-      ) : conversas.length === 0 ? (
+      ) : conversas.length === 0 && estado && !selecionada ? (
+        <EstadoVazio
+          titulo="Nenhuma conversa com este status."
+          texto={`Não há conversas em “${ROTULO_ESTADO[estado]}” agora. A lista se atualiza sozinha.`}
+          acao={{ rotulo: 'Ver todas as conversas', onClick: () => mudarEstado('') }}
+        />
+      ) : conversas.length === 0 && !selecionada ? (
         <EstadoVazio
           titulo="Nenhuma conversa ainda."
           texto="Quando um cliente escrever no chat da loja, a conversa aparece aqui."
@@ -118,14 +151,19 @@ export default function AdminAtendimento() {
               {conversas.length} {conversas.length === 1 ? 'conversa' : 'conversas'}
             </p>
             {erro && <p className="t-body-sm admin-atendimento__aviso">Sem atualização agora: {erro.mensagem}</p>}
+            {conversas.length === 0 && (
+              <p className="t-body-sm t-muted admin-atendimento__contagem">
+                Nenhuma conversa{estado ? ' neste status' : ''} agora.
+              </p>
+            )}
             <ul>
               {conversas.map((c) => (
                 <li key={c.id}>
                   <button
                     type="button"
-                    className={cn('admin-atendimento__linha', c.id === selecionadaId && 'admin-atendimento__linha--atual')}
-                    aria-current={c.id === selecionadaId ? 'true' : undefined}
-                    onClick={() => setSelecionadaId(c.id)}
+                    className={cn('admin-atendimento__linha', c.id === selecionada?.id && 'admin-atendimento__linha--atual')}
+                    aria-current={c.id === selecionada?.id ? 'true' : undefined}
+                    onClick={() => setSelecionada(c)}
                   >
                     <span className="admin-atendimento__linha-topo">
                       <strong>{c.contact?.display_name || 'Visitante'}</strong>
@@ -146,7 +184,7 @@ export default function AdminAtendimento() {
                 key={selecionada.id}
                 inicial={selecionada}
                 aoMudar={carregarLista}
-                aoVoltar={() => setSelecionadaId(null)}
+                aoVoltar={() => setSelecionada(null)}
               />
             ) : (
               <p className="t-body-sm t-muted admin-atendimento__escolha">Escolha uma conversa na lista.</p>
@@ -155,6 +193,30 @@ export default function AdminAtendimento() {
         </div>
       )}
     </section>
+  );
+}
+
+/** Filtro de status da lista. No celular some enquanto uma conversa está aberta (a lista também). */
+function FiltroEstado({ atual, aberta, onMudar }) {
+  return (
+    <div className={cn('campo admin-atendimento__filtro', aberta && 'admin-atendimento__filtro--aberta')}>
+      <label htmlFor="atendimento-filtro-estado" className="t-label-caps">
+        Status
+      </label>
+      <select
+        id="atendimento-filtro-estado"
+        className="campo__input"
+        value={atual}
+        onChange={(e) => onMudar(e.target.value)}
+      >
+        <option value="">Todas</option>
+        {FILTROS_ESTADO.map((estado) => (
+          <option key={estado} value={estado}>
+            {ROTULO_ESTADO[estado]}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 }
 

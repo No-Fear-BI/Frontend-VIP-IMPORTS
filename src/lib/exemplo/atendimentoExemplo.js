@@ -169,7 +169,9 @@ export function responderAtendimentoExemplo(metodo, caminho, query, corpo, admin
   }
 
   if (metodo === 'GET' && caminho === '/conversations') {
-    return { items: conversas.map(paraApi), next_cursor: null };
+    const estados = query.getAll('state');
+    const lista = estados.length ? conversas.filter((c) => estados.includes(c.estado)) : conversas;
+    return { items: lista.map(paraApi), next_cursor: null };
   }
 
   if ((m = caminho.match(/^\/conversations\/([0-9a-f-]{36})(\/.*)?$/))) {
