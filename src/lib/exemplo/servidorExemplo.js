@@ -177,6 +177,24 @@ const REVISAO_EXEMPLO = [
   brand: ["GUCCI", 'Louis Vuitton'][i],
 }));
 
+/** Pedidos fictícios da aba Pedidos; o "pago" que a equipe marca fica no estado local. */
+function pedidosExemplo(estado) {
+  if (estado.pedidos) return estado.pedidos;
+  const hora = (h) => new Date(Date.now() - h * 3600_000).toISOString();
+  const item = (codigo, nome, marca, variacao) => ({ codigo, nome, marca, variacao });
+  return [
+    { id: 3, clienteNome: 'Mariana Souza', clienteEmail: 'mariana@exemplo.com', clienteTelefone: '41999990001',
+      itens: [item('X030', 'Jaqueta Couro', 'Gucci', 'M / Preto'), item('X041', 'Bolsa Tote', 'Louis Vuitton', null)],
+      pago: false, pagoEm: null, criadoEm: hora(2) },
+    { id: 2, clienteNome: 'Carlos Lima', clienteEmail: 'carlos@exemplo.com', clienteTelefone: null,
+      itens: [item('X017', 'Camisa Linho', 'Gucci', 'G / Creme')],
+      pago: true, pagoEm: hora(20), criadoEm: hora(30) },
+    { id: 1, clienteNome: null, clienteEmail: 'visitante@exemplo.com', clienteTelefone: '11988887777',
+      itens: [item('X009', 'Tênis Run', 'Nike', '42 / Branco')],
+      pago: false, pagoEm: null, criadoEm: hora(72) },
+  ];
+}
+
 export async function responderExemplo(metodo, url, corpo, sinal) {
   const modo = cenario();
   await esperar(modo === 'lento' ? 4000 : 250 + Math.random() * 250, sinal);
@@ -189,6 +207,35 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
   const estado = lerEstado();
   const rota = `${metodo} ${caminho}`;
   let m;
+
+  if (rota === 'GET /admin/pedidos') {
+    const pedidos = pedidosExemplo(estado);
+    const busca = (q.get('busca') || '').toLowerCase();
+    const situacao = q.get('situacao');
+    const filtrados = vazio
+      ? []
+      : pedidos.filter(
+          (p) =>
+            (!busca || `${p.clienteNome} ${p.clienteEmail}`.toLowerCase().includes(busca)) &&
+            (!situacao || p.pago === (situacao === 'pago')),
+        );
+    const porPagina = Number(q.get('porPagina')) || 20;
+    const pagina = Number(q.get('pagina')) || 1;
+    return {
+      dados: filtrados.slice((pagina - 1) * porPagina, pagina * porPagina),
+      paginacao: { total: filtrados.length, porPagina, pagina },
+    };
+  }
+
+  if ((m = rota.match(/^PATCH \/admin\/pedidos\/(\d+)$/))) {
+    const pedidos = pedidosExemplo(estado);
+    const pedido = pedidos.find((p) => p.id === Number(m[1]));
+    if (!pedido) throw erro(404, 'PEDIDO_NAO_ENCONTRADO', 'Pedido não encontrado.');
+    pedido.pago = Boolean(corpo.pago);
+    pedido.pagoEm = pedido.pago ? new Date().toISOString() : null;
+    gravar({ ...estado, pedidos });
+    return pedido;
+  }
 
   if (rota === 'POST /admin/sessao') {
     if (corpo?.senha !== SENHA_ADMIN_EXEMPLO) {
