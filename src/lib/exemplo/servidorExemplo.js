@@ -445,12 +445,13 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
       } else {
         slug = slugUnico(slugs, slugDeCor(nome));
       }
+      validarImagemCategoria(corpo);
       const agora = new Date().toISOString();
       const nova = {
         id: proximoId(estado, 'proximoIdCategoria', 800000),
         nome,
         slug,
-        imagemUrl: null,
+        imagemUrl: corpo?.imagemUrl ? String(corpo.imagemUrl).trim() : null,
         destaque: false,
         destaqueOrdem: null,
         ordem: 0,
@@ -500,6 +501,10 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
           });
         }
         mudancas.slug = slug;
+      }
+      if ('imagemUrl' in corpo) {
+        validarImagemCategoria(corpo);
+        mudancas.imagemUrl = corpo.imagemUrl ? String(corpo.imagemUrl).trim() : null;
       }
       if ('cardHome' in corpo || 'cardHomeImagemUrl' in corpo) validarCard(corpo);
       if ('cardHome' in corpo) {
@@ -1245,11 +1250,6 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
       marca: i.marca.nome,
       variacao: [i.variacaoTamanho?.valor, i.variacaoCor?.valor].filter(Boolean).join(' / ') || null,
     }));
-    const mensagem = [
-      'Olá! Tenho interesse nestas peças:',
-      ...itens.map((i) => `• ${i.codigo} — ${i.nome} (${i.marca}${i.variacao ? `, ${i.variacao}` : ''})`),
-    ].join('\n');
-    return {
     // Como o backend: a seleção enviada vira pedido em andamento, com a cópia do que o cliente viu.
     registrarPedidoExemplo(
       estado.cliente,
@@ -1265,6 +1265,11 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
         cor: i.variacaoCor?.valor ?? null,
       })),
     );
+    const mensagem = [
+      'Olá! Tenho interesse nestas peças:',
+      ...itens.map((i) => `• ${i.codigo} — ${i.nome} (${i.marca}${i.variacao ? `, ${i.variacao}` : ''})`),
+    ].join('\n');
+    return {
       itens,
       mensagemWhatsapp: mensagem,
       linkWhatsapp: `https://wa.me/${WHATSAPP_EXEMPLO}?text=${encodeURIComponent(mensagem)}`,
@@ -1420,6 +1425,16 @@ function categoriasBase(estado) {
     criadoEm: '2026-01-01T00:00:00.000Z',
     atualizadoEm: '2026-01-01T00:00:00.000Z',
   }));
+}
+
+/** A imagem da categoria precisa ser https (o arquivo enviado pelo painel também passa no backend real). */
+function validarImagemCategoria(corpo) {
+  const url = corpo?.imagemUrl;
+  if (url && !String(url).toLowerCase().startsWith('https://')) {
+    throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', {
+      campos: { imagemUrl: 'A URL da imagem precisa começar com https://.' },
+    });
+  }
 }
 
 /** Valida o lado e a imagem do card da home, como o backend (400 com o campo). */

@@ -175,7 +175,10 @@ export default function AdminBanners() {
 /** A mesma ideia de `FotoProduto`, mas para uma URL solta de formulário: sem imagem ainda, ou
  * imagem quebrada, mostra um aviso em vez de um ícone de erro do navegador. */
 export function PreviaImagem({ url, alt, className = '' }) {
-  const [falhou, setFalhou] = useState(false);
+  // Guarda QUAL endereço falhou, não só "falhou": quem digita o endereço passa por pedaços que não
+  // carregam, e a prévia tem de voltar quando o endereço fica completo.
+  const [urlQueFalhou, setUrlQueFalhou] = useState(null);
+  const falhou = url === urlQueFalhou;
   const semImagem = !url || falhou;
   return (
     <div className={`previa-imagem ${className}`}>
@@ -184,7 +187,7 @@ export function PreviaImagem({ url, alt, className = '' }) {
           {url ? 'Prévia indisponível' : 'Sem imagem'}
         </span>
       ) : (
-        <img src={url} alt={alt || ''} onError={() => setFalhou(true)} />
+        <img src={url} alt={alt || ''} onError={() => setUrlQueFalhou(url)} />
       )}
     </div>
   );

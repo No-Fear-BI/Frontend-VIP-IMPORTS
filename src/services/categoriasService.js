@@ -16,11 +16,14 @@ export const categoriasService = {
   /**
    * POST /admin/categorias — categorias_criar. `slug` ausente nasce do nome; se colidir, ganha
    * sufixo. Slug informado que já existe é 409 `SLUG_EM_USO`.
-   * @param {{ nome: string, slug?: string, ativa?: boolean }} dados
+   * @param {{ nome: string, slug?: string, ativa?: boolean, imagemUrl?: string }} dados
    */
   criar: (dados) => requisitarAdmin('POST', '/admin/categorias', { corpo: dados }),
 
-  /** PATCH /admin/categorias/:id — categorias_editar. `slug` SÓ muda se vier no corpo. */
+  /**
+   * PATCH /admin/categorias/:id — categorias_editar. `slug` SÓ muda se vier no corpo. `imagemUrl` é a
+   * imagem do cartão na aba Categorias da loja (https ou arquivo do painel); `null` tira a imagem.
+   */
   editar: (id, dados) => requisitarAdmin('PATCH', `/admin/categorias/${id}`, { corpo: dados }),
 
   /** DELETE /admin/categorias/:id — categorias_excluir. 409 `CATEGORIA_COM_PRODUTOS` com `erro.detalhes.totalProdutos`. */
