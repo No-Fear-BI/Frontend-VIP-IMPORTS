@@ -1,4 +1,4 @@
-/* Permissões de Acesso do painel: fila de pedidos. */
+/* Permissões de Acesso do painel: abertura da loja e fila de pedidos. */
 
 .admin-permissoes__topo {
   display: flex;
@@ -16,6 +16,39 @@
   flex-direction: column;
   gap: var(--espaco-3);
   margin-bottom: var(--espaco-12);
+}
+
+/* Estado da loja: etiqueta, explicação e o botão que troca o modo, na mesma linha. */
+.admin-permissoes__loja {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-4);
+}
+
+.admin-permissoes__loja-texto {
+  flex: 1 1 var(--medida-curta);
+}
+
+/* Fechada é o normal e fica discreta; aberta é a exceção e aparece cheia. */
+.admin-permissoes__situacao {
+  flex-shrink: 0;
+  padding: var(--espaco-1) var(--espaco-2);
+  border: var(--borda-fina) solid var(--cor-borda-forte);
+  color: var(--cor-texto-suave);
+}
+
+.admin-permissoes__situacao--aberta {
+  border-color: var(--cor-primaria);
+  background: var(--cor-primaria);
+  color: var(--cor-sobre-primaria);
+}
+
+/* Região role="status" sempre presente (o leitor de tela só anuncia mudança numa região que já
+   existe), mas vazia não ocupa espaço. */
+.admin-permissoes__aviso:not(:empty) {
+  padding-left: var(--espaco-3);
+  border-left: var(--borda-grossa) solid var(--cor-primaria);
 }
 
 .admin-permissoes__mensagem {
