@@ -299,3 +299,14 @@ andamento continua disponível. No resumo, o quarto contador passa a Clientes.
 Não existem mais selecoesService.historico, selecoesAdminService, as páginas
 admin/selecoes nem os campos selecoesNoMes e totalSelecoes. Esta decisão
 substitui as referências anteriores ao histórico de seleções.
+
+## 28. Pedidos voltam, com status (20/10/2026)
+
+**Decisão (pedido do dono):** nova tela `/admin/pedidos` com os pedidos em andamento, finalizados e não finalizados, a quantidade de produtos, os produtos e os dados do cliente. Isto reverte, no painel e no banco, a seção "Pedidos sem histórico — 05/10/2026": a migração 0021 do backend recria `pedidos`/`pedido_itens`, e `POST /selecoes` passa a gravar o pedido. A conta do cliente continua sem histórico.
+
+- **Status:** `em_andamento` (nasce assim), `finalizado` e `nao_finalizado`. Quem muda é a equipe, na própria tela; qualquer status vale para qualquer outro, para corrigir um clique.
+- **Congelado:** peças e dados do cliente são cópia em texto do envio. Renomear um produto depois não muda o pedido.
+- **Sem duplicar:** enviar a mesma seleção de novo enquanto o pedido está em andamento devolve o mesmo pedido.
+- **Na tela:** filtro por status (com contagem de cada um, vinda do backend) e página na URL, cartão por pedido, três estados (carregando, vazio, erro). No modo exemplo, o envio da loja também gera pedido.
+- **Alternativas descartadas:** só a tela com dados de exemplo (sem dado real); usar os checkouts do Mercado Pago como "pedidos" (não têm peças nem dados do cliente).
+- **Privacidade:** o pedido guarda e-mail e telefone do cliente sem prazo e não há exclusão. Foi a escolha do dono; vale revisar quando houver política de retenção.

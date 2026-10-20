@@ -24,6 +24,7 @@ const MENU_ADMIN = [
       { rotulo: 'Resumo', para: 'resumo' },
       { rotulo: 'Revisão', para: 'revisao' },
       { rotulo: 'Atendimento', para: 'atendimento' },
+      { rotulo: 'Pedidos', para: 'pedidos' },
       { rotulo: 'Clientes', para: 'clientes' },
     ],
   },

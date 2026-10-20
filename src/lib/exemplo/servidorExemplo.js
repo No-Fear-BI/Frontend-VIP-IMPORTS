@@ -28,6 +28,7 @@ import {
   WHATSAPP_EXEMPLO,
 } from './catalogoExemplo.js';
 import { responderAtendimentoExemplo } from './atendimentoExemplo.js';
+import { pedidosVazios, registrarPedidoExemplo, responderPedidosExemplo } from './pedidosExemplo.js';
 
 const CHAVE = 'vip-exemplo-estado';
 const SENHA_ADMIN_EXEMPLO = 'exemplo';
@@ -216,6 +217,12 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
     if (caminho.startsWith('/admin/atendimento/')) {
       if (vazio) return caminho === '/admin/atendimento/conversations' ? { items: [], next_cursor: null } : {};
       return responderAtendimentoExemplo(metodo, caminho.slice('/admin/atendimento'.length), q, corpo, estado.admin, erro);
+    }
+
+    // Pedidos simulados (pedidosExemplo.js): em memória, com os que a loja gera ao consultar valores.
+    if (caminho === '/admin/pedidos' || caminho.startsWith('/admin/pedidos/')) {
+      if (vazio && metodo === 'GET') return pedidosVazios();
+      return responderPedidosExemplo(metodo, caminho.slice('/admin/pedidos'.length), q, corpo, erro);
     }
 
     // Fila de revisão fictícia. As fotos são ilustrações de public/exemplo; o vite.config.js
@@ -1231,7 +1238,8 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
     if (estado.carrinho.length === 0) {
       throw erro(400, 'CARRINHO_VAZIO', 'Sua seleção está vazia. Adicione produtos antes de enviar.');
     }
-    const itens = estado.carrinho.map(itemDoCarrinho).map((i) => ({
+    const linhas = estado.carrinho.map(itemDoCarrinho);
+    const itens = linhas.map((i) => ({
       codigo: i.codigo,
       nome: i.nome,
       marca: i.marca.nome,
@@ -1242,6 +1250,21 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
       ...itens.map((i) => `• ${i.codigo} — ${i.nome} (${i.marca}${i.variacao ? `, ${i.variacao}` : ''})`),
     ].join('\n');
     return {
+    // Como o backend: a seleção enviada vira pedido em andamento, com a cópia do que o cliente viu.
+    registrarPedidoExemplo(
+      estado.cliente,
+      linhas.map((i) => ({
+        produtoId: i.id,
+        codigo: i.codigo,
+        nome: i.nome,
+        marca: i.marca.nome,
+        categoria: i.categoria.nome,
+        colecao: i.colecao.nome,
+        imagemUrl: i.capa?.url ?? null,
+        tamanho: i.variacaoTamanho?.valor ?? null,
+        cor: i.variacaoCor?.valor ?? null,
+      })),
+    );
       itens,
       mensagemWhatsapp: mensagem,
       linkWhatsapp: `https://wa.me/${WHATSAPP_EXEMPLO}?text=${encodeURIComponent(mensagem)}`,

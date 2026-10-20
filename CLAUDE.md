@@ -57,7 +57,7 @@ Registro completo, com o porquê e as alternativas descartadas, em `docs/decisoe
 ## Como o código está organizado
 
 - `src/lib/apiClient.js`: o único `fetch` do projeto (envelope de erro → `ErroApi`, `X-Rastreio` nos 500). `src/lib/apiAdmin.js`: `requisitarAdmin`, o `requisitar` das rotas do painel — avisa a sessão do painel quando qualquer chamada volta 401 (sessão de 12h acabou) ou 403 (sessão de cliente). `src/lib/cn.js`: junta classes condicionalmente.
-- `src/services/`: um service por domínio, um método por rota, com o `handler` do contrato no comentário — `catalogoService` (home, produtos, produto, relacionados, marcas, cores, colecoes, categoriasDaColecao), `clienteService` (identificar, eu, atualizarEu, sair), `carrinhoService` (obter, adicionar, trocarVariacao, remover, migrar), `favoritosService` (listar, adicionar, remover), `selecoesService` (enviar, historico). Tela nenhuma chama `requisitar` ou `fetch` direto. Painel: `adminService` (entrar, eu, sair), `coresService` (listar, criar, editar, excluir, produtosDaCor), `marcasService` (listar, criar, editar, excluir), `categoriasService` (listar, criar, editar, excluir), `produtosAdminService` (listar, obter, criar, editar, duplicar, adicionarImagens, reordenarImagens, excluirImagem, definirVariacoes), `bannersService` (listar, criar, editar, excluir, reordenar) e `destaquesService` (produtos, categorias — cada uma manda a lista COMPLETA de ids); todo service novo do painel usa `requisitarAdmin`, nunca `requisitar` — só o login foge disso, porque o 401 dele (`CREDENCIAIS_INVALIDAS`) é erro de formulário. Exceção proposital: a tela de Destaques lê o estado ATUAL via `catalogoService.home` (rota pública) em vez de inventar uma leitura administrativa que o contrato não tem — é dado público, e é exatamente o que a home mostra.
+- `src/services/`: um service por domínio, um método por rota, com o `handler` do contrato no comentário — `catalogoService` (home, produtos, produto, relacionados, marcas, cores, colecoes, categoriasDaColecao), `clienteService` (identificar, eu, atualizarEu, sair), `carrinhoService` (obter, adicionar, trocarVariacao, remover, migrar), `favoritosService` (listar, adicionar, remover), `selecoesService` (enviar, historico). Tela nenhuma chama `requisitar` ou `fetch` direto. Painel: `adminService` (entrar, eu, sair), `coresService` (listar, criar, editar, excluir, produtosDaCor), `marcasService` (listar, criar, editar, excluir), `categoriasService` (listar, criar, editar, excluir), `produtosAdminService` (listar, obter, criar, editar, duplicar, adicionarImagens, reordenarImagens, excluirImagem, definirVariacoes), `bannersService` (listar, criar, editar, excluir, reordenar), `pedidosAdminService` (listar, atualizarStatus) e `destaquesService` (produtos, categorias — cada uma manda a lista COMPLETA de ids); todo service novo do painel usa `requisitarAdmin`, nunca `requisitar` — só o login foge disso, porque o 401 dele (`CREDENCIAIS_INVALIDAS`) é erro de formulário. Exceção proposital: a tela de Destaques lê o estado ATUAL via `catalogoService.home` (rota pública) em vez de inventar uma leitura administrativa que o contrato não tem — é dado público, e é exatamente o que a home mostra.
 - `src/lib/exemplo/`: API simulada para `npm run dev:exemplo` (catálogo e ilustrações fictícios em `public/exemplo/`). Na URL, `?exemplo=lento`, `?exemplo=vazio` e `?exemplo=erro` forçam os três estados; `?exemplo=vibrante` troca os banners da home por 3 de cores vibrantes (imagens em `public/exemplo/banners-teste/`), só para avaliar o carrossel — fora da paleta da marca de propósito. Nunca entra no build de produção.
 - `src/components/ui/`: componentes base — `Button` (variantes `primaria`, `secundaria`, `texto`, `sobre-primaria`, `contorno-sobre-primaria`; vira `<Link>` com `para`), `Field` (input + rótulo + erro, e `ErroGeral`), `Card` (`borda`, `como`), `Modal` (única camada flutuante; `lateral` vira gaveta).
 - `src/components/`: peças da loja — `Estados.jsx` (EstadoVazio, EstadoErro, esqueletos), `Produto.jsx` (FotoProduto, Etiqueta, CartaoProduto), `SeletorVariacoes`, `FormIdentificacao`, `Cabecalho`, `Rodape`, `Estrutura`, `Logo` (**provisório**, em texto, até chegar o SVG oficial).
@@ -69,7 +69,7 @@ Registro completo, com o porquê e as alternativas descartadas, em `docs/decisoe
 
 ## Rotas
 
-Loja: `/`, `/feminino`, `/masculino`, `/colecoes/:slug`, `/todos` (catálogo inteiro, sem filtro), `/novidades`, `/produtos?busca=`, `/categorias`, `/categorias/:categoria?colecao=` (redireciona para a coleção filtrada; slug de categoria só é único dentro da coleção), `/marcas`, `/marcas/:slug` (as listagens aceitam `?cor=slug1,slug2`), `/produto/:codigo`, `/selecao` (`/carrinho` redireciona), `/conta` (`/favoritos` redireciona), `/sobre`, `/contato`. Painel: `/admin/login` (única aberta) e, atrás da rota protegida, `resumo`, `produtos`, `produtos/novo`, `produtos/:id` (por id, não código: no painel o código é editável), `marcas`, `cores`, `categorias`, `banners`, `destaques`, `clientes`, `permissoes`, `atendimento`, `whatsapp`, `mercadopago`.
+Loja: `/`, `/feminino`, `/masculino`, `/colecoes/:slug`, `/todos` (catálogo inteiro, sem filtro), `/novidades`, `/produtos?busca=`, `/categorias`, `/categorias/:categoria?colecao=` (redireciona para a coleção filtrada; slug de categoria só é único dentro da coleção), `/marcas`, `/marcas/:slug` (as listagens aceitam `?cor=slug1,slug2`), `/produto/:codigo`, `/selecao` (`/carrinho` redireciona), `/conta` (`/favoritos` redireciona), `/sobre`, `/contato`. Painel: `/admin/login` (única aberta) e, atrás da rota protegida, `resumo`, `produtos`, `produtos/novo`, `produtos/:id` (por id, não código: no painel o código é editável), `marcas`, `cores`, `categorias`, `banners`, `destaques`, `clientes`, `permissoes`, `atendimento`, `pedidos`, `whatsapp`, `mercadopago`.
 
 ## Rodar
 
@@ -110,3 +110,20 @@ andamento continua disponível. No resumo, o quarto contador passa a Clientes.
 Não existem mais selecoesService.historico, selecoesAdminService, as páginas
 admin/selecoes nem os campos selecoesNoMes e totalSelecoes. Esta decisão
 substitui as referências anteriores ao histórico de seleções.
+
+
+## Pedidos voltam, com status — 20/10/2026
+
+Pedido do dono: o painel ganha `/admin/pedidos` (menu Operação). Isto **reverte em parte** a seção
+acima: o backend e o painel voltam a guardar pedidos; a conta do cliente continua sem histórico
+(`GET /selecoes` segue removida). `POST /selecoes` agora grava o pedido (peças e dados do cliente
+congelados em texto, status `em_andamento`) e responde o mesmo de antes; enviar a mesma seleção de
+novo não duplica o pedido em andamento. Em `/admin/pedidos` a equipe vê os pedidos em andamento,
+finalizados e não finalizados (filtro e página na URL: `?status=&pagina=`; contagens por status
+vindas do backend), com a quantidade de produtos, as peças (código, nome, marca, categoria,
+tamanho, cor, foto) e os dados do cliente (nome, e-mail, telefone), e marca cada um como
+finalizado, não finalizado ou reabre (qualquer status vale para qualquer outro).
+`paginas/admin/Pedidos.jsx`, `services/pedidosAdminService.js` (listar, atualizarStatus) e, no modo
+exemplo, `lib/exemplo/pedidosExemplo.js` (inclui os pedidos que a loja gera ao consultar valores).
+Nenhum componente da loja lê pedido. Backend: migração 0021 e `docs/para-o-frontend.md`
+("Atualização de 20/10/2026"). O pedido guarda e-mail e telefone do cliente sem prazo.
