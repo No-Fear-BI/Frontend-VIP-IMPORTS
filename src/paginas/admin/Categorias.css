@@ -69,7 +69,8 @@
   gap: var(--espaco-2);
 }
 
-.admin-categorias__card {
+.admin-categorias__card,
+.admin-categorias__imagem {
   display: flex;
   flex-direction: column;
   gap: var(--espaco-3);

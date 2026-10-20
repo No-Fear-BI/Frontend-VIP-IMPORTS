@@ -15,6 +15,9 @@
  * 6. "Card Esquerda" / "Card Direita" (0016): a categoria ocupa um dos dois cards de coleção da home
  *    (esquerda = no lugar do Feminina, direita = no lugar do Masculina), com a imagem que o dono
  *    enviar. Cada lado tem UMA categoria: quem marcar toma o lugar de quem estava.
+ * 7. A imagem da categoria (`imagemUrl`, https ou arquivo enviado pelo painel) é a do cartão dela na
+ *    aba Categorias da loja (e nos destaques da home); sem ela, o cartão mostra "Foto em breve".
+ *    Apagar o endereço manda `null` e tira a imagem. É também a reserva do card da home.
  */
 
 import { useState } from 'react';
@@ -164,6 +167,7 @@ function FormCategoria({ categoria, categorias, onPronto }) {
   const [nome, setNome] = useState(categoria?.nome || '');
   const [slug, setSlug] = useState(categoria?.slug || '');
   const [ativa, setAtiva] = useState(categoria ? categoria.ativa : true);
+  const [imagem, setImagem] = useState(categoria?.imagemUrl || '');
   const [card, setCard] = useState(categoria?.cardHome || '');
   const [cardImagem, setCardImagem] = useState(categoria?.cardHomeImagemUrl || '');
   const [erroNome, setErroNome] = useState('');
@@ -197,6 +201,7 @@ function FormCategoria({ categoria, categorias, onPronto }) {
         if (nome.trim() !== categoria.nome) dados.nome = nome.trim();
         if (slugMudou) dados.slug = slug.trim();
         if (ativa !== categoria.ativa) dados.ativa = ativa;
+        if (imagem.trim() !== (categoria.imagemUrl || '')) dados.imagemUrl = imagem.trim() || null;
         if (card !== (categoria.cardHome || '')) dados.cardHome = card || null;
         if (card && cardImagem.trim() !== (categoria.cardHomeImagemUrl || '')) {
           dados.cardHomeImagemUrl = cardImagem.trim() || null;
@@ -207,6 +212,7 @@ function FormCategoria({ categoria, categorias, onPronto }) {
           nome: nome.trim(),
           ativa,
           ...(slug.trim() ? { slug: slug.trim() } : {}),
+          ...(imagem.trim() ? { imagemUrl: imagem.trim() } : {}),
           ...(card ? { cardHome: card } : {}),
           ...(card && cardImagem.trim() ? { cardHomeImagemUrl: cardImagem.trim() } : {}),
         });
@@ -260,6 +266,28 @@ function FormCategoria({ categoria, categorias, onPronto }) {
         </p>
       )}
       {erro?.campos?.ativa && <ErroGeral>{erro.campos.ativa}</ErroGeral>}
+
+      <fieldset className="admin-categorias__imagem">
+        <legend className="t-label-caps">Imagem da categoria</legend>
+        <Field
+          id="categoria-imagem"
+          rotulo="Endereço da imagem"
+          ajuda="Endereço da imagem (https://…) ou envie um arquivo. Aparece no cartão da categoria na aba Categorias da loja. Apague o endereço para tirar a imagem."
+          value={imagem}
+          onChange={(e) => {
+            setImagem(e.target.value);
+            // O erro do envio anterior era sobre o endereço antigo: some ao editar.
+            if (erro?.campos?.imagemUrl) setErro(null);
+          }}
+          erro={erro?.campos?.imagemUrl}
+        />
+        <EnvioArquivo id="categoria-arquivo" alt={nome} onEnviado={setImagem} />
+        <PreviaImagem url={imagem} alt={nome} className="admin-categorias__previa" />
+        <p className="t-body-sm t-muted">
+          Proporção recomendada: quadrada (1:1), por exemplo 1200 × 1200 px. A loja mostra a foto
+          recortada em quadrado, então deixe o assunto no centro.
+        </p>
+      </fieldset>
 
       <fieldset className="admin-categorias__card">
         <legend className="t-label-caps">Card na página inicial</legend>

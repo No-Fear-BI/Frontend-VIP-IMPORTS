@@ -11,6 +11,12 @@
   max-width: var(--medida-texto);
 }
 
+/* Filtro de status: na largura da lista, logo acima dela. */
+.admin-atendimento__filtro {
+  max-width: var(--largura-gaveta);
+  margin-bottom: var(--espaco-4);
+}
+
 .admin-atendimento__colunas {
   display: grid;
   grid-template-columns: var(--largura-gaveta) minmax(0, 1fr);
@@ -74,6 +80,8 @@
 }
 
 .admin-atendimento__previa {
+  /* <button> vem com align-items: flex-start: sem isto a prévia ocupa o texto todo e vaza da lista. */
+  align-self: stretch;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -257,6 +265,14 @@
   /* Uma coluna por vez: a lista, ou a conversa aberta com "← Conversas" para voltar. */
   .admin-atendimento__colunas--aberta .admin-atendimento__lista,
   .admin-atendimento__colunas:not(.admin-atendimento__colunas--aberta) .admin-atendimento__conversa {
+    display: none;
+  }
+
+  .admin-atendimento__filtro {
+    max-width: none;
+  }
+
+  .admin-atendimento__filtro--aberta {
     display: none;
   }
 

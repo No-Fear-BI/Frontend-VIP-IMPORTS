@@ -13,7 +13,7 @@
 
 .seletor-variacoes__grupo legend {
   padding: 0;
-  margin-bottom: var(--espaco-2);
+  margin-bottom: var(--espaco-4);
 }
 
 .seletor-variacoes__escolhida {

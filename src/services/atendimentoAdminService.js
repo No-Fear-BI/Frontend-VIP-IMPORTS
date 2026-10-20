@@ -21,8 +21,12 @@ export const ACOES_CONVERSA = [
 ];
 
 export const atendimentoAdminService = {
-  /** GET conversations — `{ items, next_cursor }`, mais recentes primeiro. */
-  conversas: (sinal) => requisitarAdmin('GET', `${BASE}/conversations`, { query: { limit: 50 }, sinal }),
+  /**
+   * GET conversations — `{ items, next_cursor }`, mais recentes primeiro. `estado` (um `state` da
+   * Burnwood: bot_active, waiting_human…) filtra no servidor; vazio = todas.
+   */
+  conversas: ({ estado } = {}, sinal) =>
+    requisitarAdmin('GET', `${BASE}/conversations`, { query: { limit: 50, state: estado }, sinal }),
 
   /** GET conversations/:id — estado e `available_actions` de agora. */
   conversa: (id, sinal) => requisitarAdmin('GET', `${BASE}/conversations/${id}`, { sinal }),

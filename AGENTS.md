@@ -73,3 +73,20 @@ andamento continua disponível. No resumo, o quarto contador passa a Clientes.
 Não existem mais selecoesService.historico, selecoesAdminService, as páginas
 admin/selecoes nem os campos selecoesNoMes e totalSelecoes. Esta decisão
 substitui as referências anteriores ao histórico de seleções.
+
+
+## Pedidos voltam, com status — 20/10/2026
+
+Pedido do dono: o painel ganha `/admin/pedidos` (menu Operação). Isto **reverte em parte** a seção
+acima: o backend e o painel voltam a guardar pedidos; a conta do cliente continua sem histórico
+(`GET /selecoes` segue removida). `POST /selecoes` agora grava o pedido (peças e dados do cliente
+congelados em texto, status `em_andamento`) e responde o mesmo de antes; enviar a mesma seleção de
+novo não duplica o pedido em andamento. Em `/admin/pedidos` a equipe vê os pedidos em andamento,
+finalizados e não finalizados (filtro e página na URL: `?status=&pagina=`; contagens por status
+vindas do backend), com a quantidade de produtos, as peças (código, nome, marca, categoria,
+tamanho, cor, foto) e os dados do cliente (nome, e-mail, telefone), e marca cada um como
+finalizado, não finalizado ou reabre (qualquer status vale para qualquer outro).
+`paginas/admin/Pedidos.jsx`, `services/pedidosAdminService.js` (listar, atualizarStatus) e, no modo
+exemplo, `lib/exemplo/pedidosExemplo.js` (inclui os pedidos que a loja gera ao consultar valores).
+Nenhum componente da loja lê pedido. Backend: migração 0021 e `docs/para-o-frontend.md`
+("Atualização de 20/10/2026"). O pedido guarda e-mail e telefone do cliente sem prazo.
