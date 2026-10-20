@@ -226,6 +226,7 @@ Além disso, a base de acesso dele não tem rota protegida, não separa 401 de 4
 - **Fila trancada, sem F5:** o estado "pedido na fila" tem botão "Conferir de novo"; não há polling.
 - **Painel:** `/admin/permissoes`. Modo e mensagem atuais vêm de `GET /acesso/estado` (não há GET administrativo). Recusar abre diálogo com motivo opcional e avisa da regra das 3 recusas.
 - **Pendência de produto:** revogar o acesso de um aprovado grava uma recusa e conta nas 3. Separar exigiria campo novo no backend.
+- **Abrir e fechar a loja pelo painel (20/10/2026).** Em 29/09 o backend passou a recusar `modo: "aberto"` (loja sempre fechada); a pedido do dono a equipe volta a abrir e fechar. O backend aceita `aberto` e `aprovacao` em `PATCH /admin/configuracao/acesso` (sem migração; a loja continua nascendo fechada). Em `/admin/permissoes` o bloco "Abertura da loja" mostra se está aberta ou fechada e um botão que troca, sempre com diálogo de confirmação (abrir expõe catálogo e preços a qualquer pessoa; fechar avisa quem continua entrando). O estado vem de `GET /acesso/estado` (não há GET administrativo), e depois de trocar o `ProvedorAcesso` é reconsultado. Abrir e fechar não muda a situação de ninguém: quem se identifica com a loja aberta nasce `aprovado` e continua entrando depois de fechar; só pendentes e recusados voltam a ser barrados. Alternativa descartada: cadastrar `pendente` mesmo com a loja aberta, para o fechamento trancar todo mundo — muda a regra de quem entra e fica para o cliente decidir.
 
 ## 21. Novidades: só os últimos 14 dias (29/09/2026)
 

@@ -294,6 +294,11 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
 
     if (rota === 'PATCH /admin/configuracao/acesso') {
       const acesso = acessoExemplo(estado);
+      if ('modo' in corpo && !['aberto', 'aprovacao'].includes(corpo.modo)) {
+        throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', {
+          campos: { modo: 'Escolha o modo de acesso.' },
+        });
+      }
       if ('modo' in corpo) acesso.modo = corpo.modo;
       if ('mensagemBloqueio' in corpo) acesso.mensagemBloqueio = corpo.mensagemBloqueio;
       gravar({ ...estado, acesso });

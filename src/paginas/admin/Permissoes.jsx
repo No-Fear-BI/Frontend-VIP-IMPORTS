@@ -1,7 +1,11 @@
 /*
- * Permissões de Acesso (/admin/permissoes): decide a fila de pedidos de acesso (backend, seção 05).
- * A loja é SEMPRE fechada (modo aprovação): não há seletor de modo nem edição da mensagem de
- * bloqueio aqui — sem mensagem, o portão usa o texto padrão do backend.
+ * Permissões de Acesso (/admin/permissoes): abre e fecha a loja e decide a fila de pedidos de acesso
+ * (backend, seção 05). A loja nasce FECHADA (modo aprovação); aqui a equipe a abre e fecha. Não há
+ * edição da mensagem de bloqueio — sem mensagem, o portão usa o texto padrão do backend.
+ *
+ * Não existe GET administrativo da configuração: o modo atual vem de GET /acesso/estado, que é
+ * público (mesma exceção da tela de Destaques, que lê a home pública). Depois de mudar o modo, o
+ * ProvedorAcesso da loja é reconsultado para não ficar com o estado antigo.
  *
  * Recusar 3 vezes seguidas deixa a pessoa 3 dias sem poder pedir de novo (regra do backend, vale
  * também para revogação de acesso). A tela avisa a equipe disso antes de recusar.
@@ -13,9 +17,12 @@ import { Esqueleto, EstadoErro, EstadoVazio } from '../../components/Estados.jsx
 import Button from '../../components/ui/Button.jsx';
 import { ErroGeral } from '../../components/ui/Field.jsx';
 import Modal from '../../components/ui/Modal.jsx';
+import { useAcesso } from '../../contexto/AcessoLoja.jsx';
 import { useRequisicao } from '../../hooks/useRequisicao.js';
 import { ErroApi } from '../../lib/apiClient.js';
+import { cn } from '../../lib/cn.js';
 import { acessoAdminService } from '../../services/acessoAdminService.js';
+import { acessoService } from '../../services/acessoService.js';
 import './Permissoes.css';
 
 const POR_PAGINA = 20;
@@ -30,12 +37,139 @@ export default function AdminPermissoes() {
       <header className="admin-permissoes__topo">
         <h1 className="t-headline-lg">Permissões de Acesso</h1>
         <p className="t-body-sm t-muted admin-permissoes__ajuda">
-          Controla quem consegue ver a loja e decide os pedidos de acesso.
+          Abre e fecha a loja e decide os pedidos de acesso.
         </p>
       </header>
 
+      <AberturaDaLoja />
       <Fila />
     </section>
+  );
+}
+
+/** O que cada ação mostra: a pergunta do diálogo, o botão e o aviso depois de gravar. */
+const TROCA_DE_MODO = {
+  aberto: {
+    botao: 'Abrir a loja',
+    titulo: 'Abrir a loja?',
+    texto:
+      'Qualquer pessoa passa a ver a loja, os produtos e os preços, sem pedir acesso. Os pedidos que estão na fila continuam esperando.',
+    confirmar: 'Abrir a loja',
+    enviando: 'Abrindo…',
+    pronto: 'Loja aberta.',
+  },
+  aprovacao: {
+    botao: 'Fechar a loja',
+    titulo: 'Fechar a loja?',
+    texto:
+      'Só entra quem a equipe aprovou. Quem foi aprovado, ou entrou enquanto a loja estava aberta, continua entrando; quem ainda não foi aprovado volta a ver a tela de acesso.',
+    confirmar: 'Fechar a loja',
+    enviando: 'Fechando…',
+    pronto: 'Loja fechada.',
+  },
+};
+
+function AberturaDaLoja() {
+  const { reconsultar } = useAcesso();
+  const config = useRequisicao((sinal) => acessoService.estado(sinal), []);
+  const [alvo, setAlvo] = useState(null); // 'aberto' | 'aprovacao' enquanto o diálogo está aberto
+  const [aviso, setAviso] = useState('');
+
+  const aberta = config.dados?.modo === 'aberto';
+  const proximo = aberta ? 'aprovacao' : 'aberto';
+
+  async function trocar(modo) {
+    await acessoAdminService.configurar({ modo });
+    setAlvo(null);
+    setAviso(TROCA_DE_MODO[modo].pronto);
+    config.recarregar();
+    reconsultar();
+  }
+
+  return (
+    <div className="admin-permissoes__bloco">
+      <h2 className="t-headline-md">Abertura da loja</h2>
+      {config.carregando && !config.dados ? (
+        <div className="estado-carregando" aria-busy="true" aria-label="Carregando o estado da loja">
+          <Esqueleto className="esqueleto--controle" />
+        </div>
+      ) : config.erro ? (
+        <EstadoErro
+          erro={config.erro}
+          onTentar={config.recarregar}
+          titulo="Não conseguimos carregar o estado da loja."
+        />
+      ) : (
+        <>
+          <div className="admin-permissoes__loja">
+            <span
+              className={cn(
+                'admin-permissoes__situacao t-label-caps-sm',
+                aberta && 'admin-permissoes__situacao--aberta',
+              )}
+            >
+              {aberta ? 'Aberta' : 'Fechada'}
+            </span>
+            <p className="t-body-sm t-muted admin-permissoes__loja-texto">
+              {aberta
+                ? 'Qualquer pessoa vê a loja, sem pedir acesso.'
+                : 'Só entra quem a equipe aprovou. Quem pede acesso aparece na fila abaixo.'}
+            </p>
+            <Button variante={aberta ? 'secundaria' : 'primaria'} onClick={() => setAlvo(proximo)}>
+              {TROCA_DE_MODO[proximo].botao}
+            </Button>
+          </div>
+          <p className="t-body-sm admin-permissoes__aviso" role="status">
+            {aviso}
+          </p>
+        </>
+      )}
+
+      <DialogoModo alvo={alvo} onFechar={() => setAlvo(null)} onConfirmar={trocar} />
+    </div>
+  );
+}
+
+function DialogoModo({ alvo, onFechar, onConfirmar }) {
+  return (
+    <Modal aberto={Boolean(alvo)} onFechar={onFechar} titulo={alvo ? TROCA_DE_MODO[alvo].titulo : 'Abertura da loja'}>
+      {/* key: o diálogo nasce sem erro a cada abertura. */}
+      {alvo && <FormModo key={alvo} alvo={alvo} onFechar={onFechar} onConfirmar={onConfirmar} />}
+    </Modal>
+  );
+}
+
+function FormModo({ alvo, onFechar, onConfirmar }) {
+  const textos = TROCA_DE_MODO[alvo];
+  const [enviando, setEnviando] = useState(false);
+  const [erro, setErro] = useState(null);
+
+  async function enviar(evento) {
+    evento.preventDefault();
+    setEnviando(true);
+    setErro(null);
+    try {
+      await onConfirmar(alvo);
+    } catch (falha) {
+      setErro(comoErro(falha, 'Não foi possível mudar agora.'));
+      setEnviando(false);
+    }
+  }
+
+  return (
+    <form className="admin-permissoes__recusa" onSubmit={enviar} noValidate>
+      <h2 className="t-headline-md">{textos.titulo}</h2>
+      <p className="t-body-sm t-muted">{textos.texto}</p>
+      {erro && <ErroGeral>{erro.mensagem}</ErroGeral>}
+      <div className="admin-permissoes__acoes">
+        <Button variante="primaria" type="submit" disabled={enviando}>
+          {enviando ? textos.enviando : textos.confirmar}
+        </Button>
+        <Button variante="secundaria" onClick={onFechar} disabled={enviando}>
+          Cancelar
+        </Button>
+      </div>
+    </form>
   );
 }
 
