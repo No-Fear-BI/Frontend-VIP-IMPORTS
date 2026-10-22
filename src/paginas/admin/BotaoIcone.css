@@ -1,0 +1,36 @@
+/* Alvo de toque de 44px (--altura-controle-compacto) com o desenho de 20px no meio. */
+.botao-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--altura-controle-compacto);
+  height: var(--altura-controle-compacto);
+  color: var(--cor-texto);
+  transition:
+    background-color var(--duracao-rapida) var(--curva-padrao),
+    color var(--duracao-rapida) var(--curva-padrao);
+}
+
+.botao-icone svg {
+  width: var(--icone-md);
+  height: var(--icone-md);
+}
+
+.botao-icone:hover:not(:disabled) {
+  background: var(--cor-secundaria);
+}
+
+/* Seta na ponta da lista (primeira não sobe, última não desce): fica no lugar, apagada,
+   para as linhas continuarem alinhadas. */
+.botao-icone:disabled {
+  color: var(--cor-borda);
+  cursor: default;
+}
+
+/* Nas filas de ações das listas, o espaço transparente em volta do desenho já separa um do
+   outro: a margem negativa (metade do vão de --espaco-4) junta as áreas de toque sem sobrepor. */
+.admin-tabela__acoes .botao-icone,
+.admin-destaques__item-acoes .botao-icone {
+  margin-inline: calc(-1 * var(--espaco-2));
+}

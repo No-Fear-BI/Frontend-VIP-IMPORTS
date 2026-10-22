@@ -18,6 +18,7 @@ import Field, { ErroGeral, LegendaObrigatorio } from '../../components/ui/Field.
 import Modal from '../../components/ui/Modal.jsx';
 import { useRequisicao } from '../../hooks/useRequisicao.js';
 import { coresService } from '../../services/coresService.js';
+import BotaoIcone from './BotaoIcone.jsx';
 import './Cores.css';
 
 export default function AdminCores() {
@@ -92,12 +93,8 @@ export default function AdminCores() {
                 </td>
                 <td>
                   <div className="admin-tabela__acoes">
-                    <button type="button" className="link-caps" onClick={() => setEditando(cor)}>
-                      Editar
-                    </button>
-                    <button type="button" className="link-caps" onClick={() => setExcluindo(cor)}>
-                      Excluir
-                    </button>
+                    <BotaoIcone acao="editar" rotulo={`Editar a cor ${cor.nome}`} onClick={() => setEditando(cor)} />
+                    <BotaoIcone acao="excluir" rotulo={`Excluir a cor ${cor.nome}`} onClick={() => setExcluindo(cor)} />
                   </div>
                 </td>
               </tr>

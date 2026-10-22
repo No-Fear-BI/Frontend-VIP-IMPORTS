@@ -19,12 +19,14 @@
  */
 
 import { useState } from 'react';
+import BotaoIcone from './BotaoIcone.jsx';
+import { BotaoArquivo, ProporcaoRecomendada } from './CampoImagem.jsx';
 import CampoNovidades from './CampoNovidades.jsx';
 import CampoQuantidade, { quantidadeValida, quantidadeParaApi } from './CampoQuantidade.jsx';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Esqueleto, EstadoErro } from '../../components/Estados.jsx';
 import { FotoProduto } from '../../components/Produto.jsx';
-import { IconeFechar } from '../../components/Icones.jsx';
+import { IconeFechar, IconeLixeira } from '../../components/Icones.jsx';
 import Button from '../../components/ui/Button.jsx';
 import Field, { ErroGeral, LegendaObrigatorio, MarcaObrigatorio } from '../../components/ui/Field.jsx';
 import Modal from '../../components/ui/Modal.jsx';
@@ -76,10 +78,9 @@ export default function AdminProduto() {
 /**
  * Formulário de um produto novo. Ao criar, segue para a edição — é lá que a grade de variações
  * entra. As imagens já podem ser escolhidas aqui: como o produto ainda não existe, elas ficam
- * pendentes em memória (`imagensPendentes`) até o `POST /produtos` devolver o id — uma URL
- * digitada só precisa do `POST /imagens` depois; um arquivo escolhido (ver `ImagensPendentes`)
- * também precisa do `POST /imagens/upload`, que exige produtoId e por isso não dava pra chamar
- * antes de o produto existir.
+ * pendentes em memória (`imagensPendentes`) até o `POST /produtos` devolver o id — cada arquivo
+ * escolhido (ver `ImagensPendentes`) precisa do `POST /imagens/upload`, que exige produtoId e por
+ * isso não dava pra chamar antes de o produto existir, e depois do `POST /imagens`.
  */
 export function AdminProdutoNovo() {
   const navegar = useNavigate();
@@ -182,6 +183,7 @@ function ProdutoCarregado({ inicial, aviso }) {
               produto={produto}
               render={(abrir) => (
                 <Button variante="secundaria" onClick={abrir}>
+                  <IconeLixeira />
                   Excluir produto
                 </Button>
               )}
@@ -568,13 +570,12 @@ function CampoSelecao({ id, rotulo, valor, onMudar, opcoes, erro, vazio, disable
 }
 
 /**
- * Imagens do produto: acrescentar por URL, excluir e reordenar. Sem estado próprio de lista —
+ * Imagens do produto: acrescentar por arquivo, excluir e reordenar. Sem estado próprio de lista —
  * `imagens` vem sempre do pai (`ProdutoCarregado`), e cada ação chama a API e devolve a galeria
  * inteira já renumerada, que sobe por `onMudou`. Evita a lista da tela e a do servidor
  * divergirem depois de uma reordenação ou exclusão.
  */
 function ImagensProduto({ produtoId, imagens, onMudou }) {
-  const [url, setUrl] = useState('');
   const [alt, setAlt] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [ocupada, setOcupada] = useState(null);
@@ -582,39 +583,18 @@ function ImagensProduto({ produtoId, imagens, onMudou }) {
 
   const cheia = imagens.length >= 10;
 
-  /** Acrescenta pela URL (digitada ou vinda do upload) — mesma chamada, um lugar só. */
-  async function anexar(urlFinal, altFinal) {
-    const novas = await produtosAdminService.adicionarImagens(produtoId, [
-      { url: urlFinal, ...(altFinal ? { alt: altFinal } : {}) },
-    ]);
-    onMudou(novas);
-    setUrl('');
-    setAlt('');
-  }
-
-  async function adicionar(evento) {
-    evento.preventDefault();
-    if (!url.trim() || cheia) return;
-    setEnviando(true);
-    setErro(null);
-    try {
-      await anexar(url.trim(), alt.trim());
-    } catch (falha) {
-      setErro(falha);
-    } finally {
-      setEnviando(false);
-    }
-  }
-
-  async function enviarArquivo(evento) {
-    const arquivo = evento.target.files?.[0];
-    evento.target.value = ''; // deixa escolher o mesmo arquivo de novo, se precisar
-    if (!arquivo || cheia) return;
+  /** Sobe o arquivo (`POST /imagens/upload`) e acrescenta a URL devolvida (`POST /imagens`). */
+  async function enviarArquivo(arquivo) {
+    if (cheia) return;
     setEnviando(true);
     setErro(null);
     try {
       const enviada = await produtosAdminService.uploadImagem(produtoId, arquivo, alt.trim() || undefined);
-      await anexar(enviada.url, enviada.alt || '');
+      const novas = await produtosAdminService.adicionarImagens(produtoId, [
+        { url: enviada.url, ...(enviada.alt ? { alt: enviada.alt } : {}) },
+      ]);
+      onMudou(novas);
+      setAlt('');
     } catch (falha) {
       setErro(falha);
     } finally {
@@ -669,33 +649,24 @@ function ImagensProduto({ produtoId, imagens, onMudou }) {
                 <p className="t-body-sm t-muted admin-produto__imagem-url">{imagem.url}</p>
               </div>
               <div className="admin-produto__imagem-acoes">
-                {i > 0 && (
-                  <button
-                    type="button"
-                    className="link-caps"
-                    disabled={Boolean(ocupada)}
-                    onClick={() => mover(i, -1)}
-                  >
-                    Mover para cima
-                  </button>
-                )}
-                <button
-                  type="button"
-                  className="link-caps"
+                <BotaoIcone
+                  acao="subir"
+                  rotulo={`Mover a imagem ${i + 1} para cima`}
+                  disabled={i === 0 || Boolean(ocupada)}
+                  onClick={() => mover(i, -1)}
+                />
+                <BotaoIcone
+                  acao="descer"
+                  rotulo={`Mover a imagem ${i + 1} para baixo`}
                   disabled={i === imagens.length - 1 || Boolean(ocupada)}
                   onClick={() => mover(i, 1)}
-                >
-                  Mover para baixo
-                </button>
-                <button
-                  type="button"
-                  className="admin-produto__remover"
-                  onClick={() => excluir(imagem.id)}
+                />
+                <BotaoIcone
+                  acao="excluir"
+                  rotulo={`Excluir a imagem ${i + 1}`}
                   disabled={Boolean(ocupada)}
-                  aria-label="Excluir esta imagem"
-                >
-                  <IconeFechar />
-                </button>
+                  onClick={() => excluir(imagem.id)}
+                />
               </div>
             </li>
           ))}
@@ -704,18 +675,8 @@ function ImagensProduto({ produtoId, imagens, onMudou }) {
 
       {erro && <ErroGeral>{erroGeralDe(erro)}</ErroGeral>}
 
-      <form className="admin-produto__nova-imagem" onSubmit={adicionar}>
-        <Field
-          id="imagem-url"
-          rotulo="URL da imagem"
-          obrigatorio
-          ajuda={AVISO_PROPORCAO_PRODUTO}
-          className="admin-produto__nova-imagem-url"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          disabled={enviando || cheia}
-          placeholder="https://…"
-        />
+      <ProporcaoRecomendada>{AVISO_PROPORCAO_PRODUTO}</ProporcaoRecomendada>
+      <div className="admin-produto__nova-imagem">
         <Field
           id="imagem-alt"
           rotulo="Texto alternativo"
@@ -723,14 +684,8 @@ function ImagensProduto({ produtoId, imagens, onMudou }) {
           onChange={(e) => setAlt(e.target.value)}
           disabled={enviando || cheia}
         />
-        <Button variante="secundaria" type="submit" disabled={enviando || cheia || !url.trim()}>
-          {enviando ? 'Adicionando…' : 'Adicionar'}
-        </Button>
-        <label className="link-caps admin-produto__upload">
-          ou envie um arquivo
-          <input type="file" accept="image/*" capture hidden disabled={enviando || cheia} onChange={enviarArquivo} />
-        </label>
-      </form>
+        <BotaoArquivo capture enviando={enviando} disabled={cheia} onEscolher={enviarArquivo} />
+      </div>
       {cheia && (
         <p className="t-body-sm t-muted">Este produto já tem o máximo de 10 imagens.</p>
       )}
@@ -740,7 +695,7 @@ function ImagensProduto({ produtoId, imagens, onMudou }) {
 
 /** A vitrine (`FotoProduto`/`.vitrine-foto`, components/Produto.css) é 4:5 com object-fit:
  * contain — a foto entra inteira, sem cortar, em qualquer tela do site. */
-const AVISO_PROPORCAO_PRODUTO = 'Só https. Proporção recomendada: 4:5 (retrato) — a foto entra inteira no quadro, sem cortar.';
+const AVISO_PROPORCAO_PRODUTO = 'retrato (4:5), por exemplo 1200 × 1500 px. A foto entra inteira no quadro, sem cortar.';
 
 /**
  * Fotos escolhidas antes do produto existir: como não há id ainda, ficam em memória
@@ -749,22 +704,11 @@ const AVISO_PROPORCAO_PRODUTO = 'Só https. Proporção recomendada: 4:5 (retrat
  * mexem só na lista local.
  */
 function ImagensPendentes({ imagens, onMudar }) {
-  const [url, setUrl] = useState('');
   const [alt, setAlt] = useState('');
   const cheia = imagens.length >= 10;
 
-  function adicionar(evento) {
-    evento.preventDefault();
-    if (!url.trim() || cheia) return;
-    onMudar([...imagens, { chave: `nova-${Math.random()}`, url: url.trim(), alt: alt.trim() }]);
-    setUrl('');
-    setAlt('');
-  }
-
-  function escolherArquivo(evento) {
-    const arquivo = evento.target.files?.[0];
-    evento.target.value = ''; // deixa escolher o mesmo arquivo de novo, se precisar
-    if (!arquivo || cheia) return;
+  function escolherArquivo(arquivo) {
+    if (cheia) return;
     // Sem produtoId ainda para chamar o upload de verdade (POST /imagens/upload exige um) —
     // guarda o arquivo e mostra uma prévia local; o upload acontece em AdminProdutoNovo.criar,
     // assim que o produto existe.
@@ -807,45 +751,27 @@ function ImagensPendentes({ imagens, onMudar }) {
                 </p>
               </div>
               <div className="admin-produto__imagem-acoes">
-                {i > 0 && (
-                  <button type="button" className="link-caps" onClick={() => mover(i, -1)}>
-                    Mover para cima
-                  </button>
-                )}
-                <button
-                  type="button"
-                  className="link-caps"
+                <BotaoIcone
+                  acao="subir"
+                  rotulo={`Mover a imagem ${i + 1} para cima`}
+                  disabled={i === 0}
+                  onClick={() => mover(i, -1)}
+                />
+                <BotaoIcone
+                  acao="descer"
+                  rotulo={`Mover a imagem ${i + 1} para baixo`}
                   disabled={i === imagens.length - 1}
                   onClick={() => mover(i, 1)}
-                >
-                  Mover para baixo
-                </button>
-                <button
-                  type="button"
-                  className="admin-produto__remover"
-                  onClick={() => remover(imagem.chave)}
-                  aria-label="Tirar esta imagem"
-                >
-                  <IconeFechar />
-                </button>
+                />
+                <BotaoIcone acao="excluir" rotulo={`Tirar a imagem ${i + 1}`} onClick={() => remover(imagem.chave)} />
               </div>
             </li>
           ))}
         </ul>
       )}
 
-      <form className="admin-produto__nova-imagem" onSubmit={adicionar}>
-        <Field
-          id="imagem-pendente-url"
-          rotulo="URL da imagem"
-          obrigatorio
-          ajuda={AVISO_PROPORCAO_PRODUTO}
-          className="admin-produto__nova-imagem-url"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          disabled={cheia}
-          placeholder="https://…"
-        />
+      <ProporcaoRecomendada>{AVISO_PROPORCAO_PRODUTO}</ProporcaoRecomendada>
+      <div className="admin-produto__nova-imagem">
         <Field
           id="imagem-pendente-alt"
           rotulo="Texto alternativo"
@@ -853,14 +779,8 @@ function ImagensPendentes({ imagens, onMudar }) {
           onChange={(e) => setAlt(e.target.value)}
           disabled={cheia}
         />
-        <Button variante="secundaria" type="submit" disabled={cheia || !url.trim()}>
-          Adicionar
-        </Button>
-        <label className="link-caps admin-produto__upload">
-          ou envie um arquivo
-          <input type="file" accept="image/*" capture hidden disabled={cheia} onChange={escolherArquivo} />
-        </label>
-      </form>
+        <BotaoArquivo capture disabled={cheia} onEscolher={escolherArquivo} />
+      </div>
       {cheia && <p className="t-body-sm t-muted">Máximo de 10 imagens.</p>}
     </div>
   );

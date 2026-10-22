@@ -21,6 +21,7 @@ import { marcasService } from '../../services/marcasService.js';
 import { produtosAdminService } from '../../services/produtosAdminService.js';
 import { linkDaOrigem } from '../../lib/linkOrigem.js';
 import { formatarReais } from '../../lib/preco.js';
+import BotaoIcone from './BotaoIcone.jsx';
 import { BotaoDuplicar, BotaoExcluir } from './Produto.jsx';
 import { ROTULO_STATUS } from './rotulosProduto.js';
 import './Produtos.css';
@@ -229,13 +230,6 @@ export default function AdminProdutos() {
                     {!produto.emNovidades && <span className="t-muted"> · fora das novidades</span>}
                   </td>
                   <td className="admin-produtos__acoes">
-                    <Link
-                      to={String(produto.id)}
-                      state={{ voltarPara: location.search }}
-                      className="link-caps"
-                    >
-                      Editar
-                    </Link>
                     {nasNovidades(produto) && (
                       <button type="button" className="link-caps" onClick={() => removerDasNovidades(produto)}>
                         Remover das novidades
@@ -259,12 +253,16 @@ export default function AdminProdutos() {
                         </button>
                       )}
                     />
+                    <BotaoIcone
+                      acao="editar"
+                      rotulo={`Editar ${produto.codigo}`}
+                      para={String(produto.id)}
+                      state={{ voltarPara: location.search }}
+                    />
                     <BotaoExcluir
                       produto={produto}
                       render={(abrir) => (
-                        <button type="button" className="link-caps" onClick={abrir}>
-                          Excluir
-                        </button>
+                        <BotaoIcone acao="excluir" rotulo={`Excluir ${produto.codigo}`} onClick={abrir} />
                       )}
                       onExcluido={(texto) => {
                         setAviso(texto);

@@ -69,6 +69,33 @@ export const IconeSetaEsquerda = (props) => (
   </svg>
 );
 
+export const IconeSetaCima = (props) => (
+  <svg {...base} {...props}>
+    <path d="M12 20V5M7 10l5-5 5 5" />
+  </svg>
+);
+
+export const IconeSetaBaixo = (props) => (
+  <svg {...base} {...props}>
+    <path d="M12 4v15M7 14l5 5 5-5" />
+  </svg>
+);
+
+export const IconeLapis = (props) => (
+  <svg {...base} {...props}>
+    <path d="M15.5 4.5l4 4-11 11h-4v-4z" />
+    <path d="M13 7l4 4" />
+  </svg>
+);
+
+export const IconeLixeira = (props) => (
+  <svg {...base} {...props}>
+    <path d="M4.5 6.5h15M9.5 6.5V4h5v2.5" />
+    <path d="M6.5 6.5l1 14h9l1-14" />
+    <path d="M10.5 10.5v6M13.5 10.5v6" />
+  </svg>
+);
+
 export const IconeFiltro = (props) => (
   <svg {...base} {...props}>
     <path d="M3.5 7h17M7 12h10M10 17h4" />

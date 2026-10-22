@@ -90,3 +90,18 @@ finalizado, não finalizado ou reabre (qualquer status vale para qualquer outro)
 exemplo, `lib/exemplo/pedidosExemplo.js` (inclui os pedidos que a loja gera ao consultar valores).
 Nenhum componente da loja lê pedido. Backend: migração 0021 e `docs/para-o-frontend.md`
 ("Atualização de 20/10/2026"). O pedido guarda e-mail e telefone do cliente sem prazo.
+
+## Painel: imagem só por arquivo (22/10/2026)
+
+- Nenhum formulário do painel tem campo de endereço (URL) de imagem. Banners (desktop e celular), a imagem da categoria, a do card da categoria e as imagens do produto (edição e criação) usam o botão "Envie um arquivo".
+- Componentes em `src/paginas/admin/CampoImagem.jsx`: `BotaoArquivo` (um `<button>` que abre o `<input type="file">` escondido), `CampoImagem` (rótulo, proporção recomendada, botão, prévia na mesma proporção e "Remover imagem" no campo opcional; sobe por `POST /admin/banners/upload`), `ProporcaoRecomendada` e `PreviaImagem`. Imagem nova no painel usa esses componentes, nunca um campo de URL.
+- Proporções: banner desktop 21:9, banner celular 2:3, imagem e card da categoria 1:1, produto 4:5.
+- `/categorias`: as fotos dos cartões levam o degradê verde dos cards de coleção da home (`degrade` em `CartaoCategoria`/`FotoProduto`).
+- Registro completo em `docs/decisoes-frontend.md`, seções 29 e 30.
+
+## Painel: ações de lista em desenho (22/10/2026)
+
+- Editar = lápis, Excluir = lixeira, Mover para cima/baixo = setas, sempre com `BotaoIcone` (`src/paginas/admin/BotaoIcone.jsx`; `acao` = `editar` | `excluir` | `subir` | `descer`; `para` vira `<Link>`). Desenhos em `components/Icones.jsx` (`IconeLapis`, `IconeLixeira`, `IconeSetaCima`, `IconeSetaBaixo`).
+- `rotulo` é obrigatório e leva o nome do item ("Editar a categoria Bolsas"): vira `aria-label` e `title`. Seta na ponta da lista fica desativada, não some.
+- Continuam em texto: botões de confirmação das janelas, "Remover" dos Destaques (não exclui nada) e "Excluir produto" no topo do produto (ganhou a lixeira ao lado do texto).
+- Registro completo em `docs/decisoes-frontend.md`, seção 31.

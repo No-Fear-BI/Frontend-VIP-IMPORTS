@@ -26,6 +26,13 @@
   color: var(--cor-texto-suave);
 }
 
+/* O mesmo degradê verde dos cards de coleção da home (.painel-colecao__degrade). */
+.vitrine-foto__degrade {
+  position: absolute;
+  inset: 0;
+  background: var(--degrade-sobre-foto);
+}
+
 /* ---- Etiqueta do código, com ilhós ---- */
 
 .etiqueta {

@@ -43,40 +43,10 @@
   aspect-ratio: 21 / 9;
 }
 
-.admin-banners__envio {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espaco-2);
-}
-
-.admin-banners__upload {
-  display: inline-flex;
-  align-items: center;
-  align-self: flex-start;
-  min-height: var(--altura-controle);
-  cursor: pointer;
-}
-
-/* ---- Prévia de imagem genérica (miniatura na tabela e prévia do formulário) ---- */
-
-.previa-imagem {
-  position: relative;
-  background: var(--cor-fundo-foto);
-  border: var(--borda-fina) solid var(--cor-borda);
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-}
-
-.previa-imagem img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.previa-imagem__vazia {
-  color: var(--cor-texto-suave);
-  text-align: center;
-  padding: var(--espaco-2);
+/* As prévias seguem a proporção recomendada no formulário: 21:9 no desktop, 2:3 no celular.
+   Sem o endereço digitado, a prévia é o único jeito de ver se o banner tem imagem de celular. */
+.admin-banners__previa-celular {
+  width: var(--largura-miniatura-grande);
+  aspect-ratio: 2 / 3;
 }
 
