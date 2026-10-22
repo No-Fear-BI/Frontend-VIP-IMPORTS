@@ -10,7 +10,8 @@ import './Produto.css';
  * Foto 4:5 com object-fit: contain sobre a vitrine branca. `capa: null` (ou URL quebrada)
  * mostra a vitrine vazia com "Foto em breve" — sem imagem genérica.
  */
-export function FotoProduto({ url, alt, className = '', carregamento = 'lazy' }) {
+// `degrade`: o degradê verde dos cards de coleção da home, só quando a foto existe (como lá).
+export function FotoProduto({ url, alt, className = '', carregamento = 'lazy', degrade = false }) {
   const [falhou, setFalhou] = useState(false);
   const semFoto = !url || falhou;
   return (
@@ -18,7 +19,10 @@ export function FotoProduto({ url, alt, className = '', carregamento = 'lazy' })
       {semFoto ? (
         <span className="vitrine-foto__vazia t-label-caps-sm">Foto em breve</span>
       ) : (
-        <img src={url} alt={alt || ''} loading={carregamento} onError={() => setFalhou(true)} />
+        <>
+          <img src={url} alt={alt || ''} loading={carregamento} onError={() => setFalhou(true)} />
+          {degrade && <span className="vitrine-foto__degrade" aria-hidden />}
+        </>
       )}
     </div>
   );

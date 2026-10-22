@@ -350,13 +350,14 @@ function PainelColecao({ nome, rotulo, para, imagem, textoLink }) {
 
 // Desde a migração 0015 a categoria não tem coleção e o slug é único: o link é só `?categoria=`.
 // `colecao` ainda pode vir (página de categorias por público) e, se vier, estreita a listagem.
-export function CartaoCategoria({ categoria, colecao }) {
+// `degrade`: só /categorias usa; a grade de categorias da home fica sem.
+export function CartaoCategoria({ categoria, colecao, degrade = false }) {
   const para = colecao
     ? `/produtos?colecao=${colecao.slug}&categoria=${categoria.slug}`
     : `/produtos?categoria=${categoria.slug}`;
   return (
     <Link to={para} className="cartao-categoria">
-      <FotoProduto url={categoria.imagemUrl} alt="" className="cartao-categoria__foto" />
+      <FotoProduto url={categoria.imagemUrl} alt="" className="cartao-categoria__foto" degrade={degrade} />
       <span className="t-headline-sm">{categoria.nome}</span>
       <span className="t-label-caps-sm t-muted">
         {colecao?.nome}

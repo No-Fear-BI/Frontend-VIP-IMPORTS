@@ -55,7 +55,7 @@ function CategoriasDaColecao({ colecao }) {
         <ul className="grade-categorias">
           {dados.map((categoria) => (
             <li key={categoria.id}>
-              <CartaoCategoria categoria={categoria} colecao={colecao} />
+              <CartaoCategoria categoria={categoria} colecao={colecao} degrade />
             </li>
           ))}
         </ul>
