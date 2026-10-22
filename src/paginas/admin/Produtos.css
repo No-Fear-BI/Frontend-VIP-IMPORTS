@@ -108,6 +108,15 @@
   margin-inline-start: var(--espaco-4);
 }
 
+/* Lápis e lixeira no fim da linha, depois dos links de texto (BotaoIcone). */
+.admin-produtos__acoes .botao-icone {
+  vertical-align: middle;
+}
+
+.admin-produtos__acoes .link-caps + .botao-icone {
+  margin-inline-start: var(--espaco-2);
+}
+
 /* ---------- Produto: grade de variações ---------- */
 
 .admin-produto__voltar {
@@ -207,11 +216,11 @@
   overflow-wrap: anywhere;
 }
 
+/* Só desenhos (setas e lixeira, BotaoIcone): as áreas de toque de 44px encostam uma na outra. */
 .admin-produto__imagem-acoes {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--espaco-3);
 }
 
 .admin-produto__nova-imagem {
@@ -224,18 +233,6 @@
 .admin-produto__nova-imagem .campo {
   flex: 1;
   min-width: 0;
-}
-
-.admin-produto__nova-imagem .admin-produto__nova-imagem-url {
-  flex: 2;
-  min-width: 0;
-}
-
-.admin-produto__upload {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--altura-controle);
-  cursor: pointer;
 }
 
 .admin-produto__grade-topo {

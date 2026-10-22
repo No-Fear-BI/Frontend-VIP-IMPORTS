@@ -311,3 +311,35 @@ substitui as referências anteriores ao histórico de seleções.
 - **Na tela:** filtro por status (com contagem de cada um, vinda do backend) e página na URL, cartão por pedido, três estados (carregando, vazio, erro). No modo exemplo, o envio da loja também gera pedido.
 - **Alternativas descartadas:** só a tela com dados de exemplo (sem dado real); usar os checkouts do Mercado Pago como "pedidos" (não têm peças nem dados do cliente).
 - **Privacidade:** o pedido guarda e-mail e telefone do cliente sem prazo e não há exclusão. Foi a escolha do dono; vale revisar quando houver política de retenção.
+
+## 29. Degradê verde nas fotos de /categorias (22/10/2026)
+
+- **Pedido.** As fotos dos cartões de categoria em `/categorias` levam o mesmo degradê verde dos dois cards de coleção da home (token `--degrade-sobre-foto`, de baixo para cima). O nome e a contagem de peças continuam abaixo da foto.
+- **Como.** `FotoProduto` ganhou `degrade` (desenha `.vitrine-foto__degrade` só quando a foto existe; "Foto em breve" fica sem, como no card da home) e `CartaoCategoria` repassa a prop. Só `Categorias.jsx` passa `degrade`; a grade "Categorias" da home continua sem.
+
+## 30. Imagem no painel só por arquivo: "Envie um arquivo" (22/10/2026)
+
+- **Pedido.** Em todo lugar do painel que põe imagem no site, o campo de endereço da imagem (URL) saiu; no lugar dele fica um botão "Envie um arquivo". Vale para Banners (desktop e celular), a imagem da categoria e a do card da categoria (Categorias) e as imagens do produto (edição e criação). Substitui o "URL https:// ou envio de arquivo" da seção 25 e o "Endereço da imagem" da imagem da categoria (20/10). "Endereço na loja" (slug) e "Link de origem" não são imagem e continuam iguais.
+- **Componentes** (`src/paginas/admin/CampoImagem.jsx`). `BotaoArquivo`: um `<button>` de verdade (`Button` variante `secundaria`, funciona com teclado) que abre o `<input type="file">` escondido; mostra "Enviando…" durante o envio. `CampoImagem`: rótulo, proporção, ajuda, botão, prévia e, no campo opcional, "Remover imagem" (antes era apagar o endereço); sobe pelo `POST /admin/banners/upload` e guarda a URL devolvida, então o corpo do `POST`/`PATCH` não mudou. `PreviaImagem` e `EnvioArquivo` saíram de `Banners.jsx` (o segundo deixou de existir).
+- **Banner de celular** ganhou prévia: sem o endereço escrito, é o único jeito de ver que ele tem imagem.
+- **Proporção recomendada em todo campo de imagem** (`ProporcaoRecomendada`, a mesma linha "Proporção recomendada: …" em todos). A prévia de cada campo usa a mesma proporção:
+
+  | Imagem | Proporção | Exemplo | De onde vem |
+  |---|---|---|---|
+  | Banner (desktop) | 21:9, paisagem larga | 2100 × 900 px | o topo da home ocupa a largura toda com altura `--altura-hero` (460–720 px): de 2:1 a 8:3 nas telas comuns, cortado nas bordas (`object-fit: cover`) |
+  | Banner (celular) | 2:3, retrato | 1080 × 1620 px | até 767px o mesmo topo fica perto de 2:3; sem esta imagem, o celular usa a de desktop cortada nas laterais |
+  | Imagem da categoria | 1:1, quadrada | 1200 × 1200 px | o cartão de `/categorias` e da grade da home é quadrado (`object-fit: cover`) |
+  | Card da categoria | 1:1, quadrada | 1200 × 1200 px | o card de coleção da home é quase quadrado no desktop e mais largo que alto no celular |
+  | Produto | 4:5, retrato | 1200 × 1500 px | a vitrine (`.vitrine-foto`) é 4:5 com `object-fit: contain`: a foto entra inteira, sem cortar |
+
+- **Produto.** Sobra "Texto alternativo" (preencha antes de enviar) e o botão. Continua com `capture` (no celular abre a câmera), como já era.
+- **Modo exemplo.** `servidorExemplo.js` responde aos dois uploads com um `blob:` (vale só na aba; depois de recarregar, a prévia fica indisponível) e aceita `blob:` além de `https://` nas imagens.
+
+## 31. Ações de lista do painel em desenho: lápis, lixeira e setas (22/10/2026)
+
+- **Pedido.** Nas listas do painel, "Editar" virou um lápis, "Excluir" uma lixeira e "Mover para cima/baixo" setas. Vale para Banners, Categorias, Cores, Marcas e Produtos (lista), as imagens do produto (edição e criação) e as setas dos Destaques.
+- **Componente** `src/paginas/admin/BotaoIcone.jsx` (`acao`: `editar`, `excluir`, `subir`, `descer`; com `para` vira `<Link>`). Desenhos novos em `components/Icones.jsx`: `IconeLapis`, `IconeLixeira`, `IconeSetaCima`, `IconeSetaBaixo`, no mesmo traço dos outros. Área de toque de 44px (`--altura-controle-compacto`), desenho de 20px, fundo creme ao passar o mouse.
+- **O texto não sumiu**: `rotulo` vira `aria-label` (leitor de tela) e `title` (dica ao parar o mouse), com o nome do item — "Editar a categoria Bolsas", "Mover a imagem 2 para cima".
+- **Setas sempre no lugar.** Antes, "Mover para cima" sumia na primeira linha; agora a seta fica apagada (desativada) na primeira e na última, para os ícones ficarem alinhados de uma linha para a outra.
+- **Na lista de Produtos**, lápis e lixeira foram para o fim da linha, depois dos links de texto (Remover das novidades, Ver origem, Duplicar).
+- **Ficaram em texto, de propósito:** "Excluir produto" no topo da tela do produto ganhou a lixeira ao lado do texto (é um botão grande ao lado de "Duplicar"); os botões de confirmação das janelas ("Excluir", "Excluir definitivamente") continuam texto; "Remover" dos Destaques só tira o item da lista (não exclui nada), então não leva lixeira; o "×" de tirar tamanho/cor da grade de variações continua igual.

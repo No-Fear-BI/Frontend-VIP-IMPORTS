@@ -18,7 +18,12 @@ import Field, { ErroGeral, LegendaObrigatorio } from '../../components/ui/Field.
 import Modal from '../../components/ui/Modal.jsx';
 import { useRequisicao } from '../../hooks/useRequisicao.js';
 import { bannersService } from '../../services/bannersService.js';
+import BotaoIcone from './BotaoIcone.jsx';
+import CampoImagem, { PreviaImagem } from './CampoImagem.jsx';
 import './Banners.css';
+
+/** Como o banner é chamado nas dicas dos ícones: o título, ou o número, se não tiver título. */
+const nomeDoBanner = (banner) => (banner.titulo ? `o banner "${banner.titulo}"` : `o banner #${banner.id}`);
 
 export default function AdminBanners() {
   const { dados: banners, erro, carregando, recarregar } = useRequisicao(
@@ -103,30 +108,28 @@ export default function AdminBanners() {
                   </td>
                   <td>
                     <div className="admin-tabela__acoes">
-                      {i > 0 && (
-                        <button
-                          type="button"
-                          className="link-caps"
-                          disabled={Boolean(movendo)}
-                          onClick={() => mover(i, -1)}
-                        >
-                          Mover para cima
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        className="link-caps"
+                      <BotaoIcone
+                        acao="subir"
+                        rotulo={`Mover ${nomeDoBanner(banner)} para cima`}
+                        disabled={i === 0 || Boolean(movendo)}
+                        onClick={() => mover(i, -1)}
+                      />
+                      <BotaoIcone
+                        acao="descer"
+                        rotulo={`Mover ${nomeDoBanner(banner)} para baixo`}
                         disabled={i === banners.length - 1 || Boolean(movendo)}
                         onClick={() => mover(i, 1)}
-                      >
-                        Mover para baixo
-                      </button>
-                      <button type="button" className="link-caps" onClick={() => setEditando(banner)}>
-                        Editar
-                      </button>
-                      <button type="button" className="link-caps" onClick={() => setExcluindo(banner)}>
-                        Excluir
-                      </button>
+                      />
+                      <BotaoIcone
+                        acao="editar"
+                        rotulo={`Editar ${nomeDoBanner(banner)}`}
+                        onClick={() => setEditando(banner)}
+                      />
+                      <BotaoIcone
+                        acao="excluir"
+                        rotulo={`Excluir ${nomeDoBanner(banner)}`}
+                        onClick={() => setExcluindo(banner)}
+                      />
                     </div>
                   </td>
                 </tr>
@@ -169,63 +172,6 @@ export default function AdminBanners() {
         )}
       </Modal>
     </section>
-  );
-}
-
-/** A mesma ideia de `FotoProduto`, mas para uma URL solta de formulário: sem imagem ainda, ou
- * imagem quebrada, mostra um aviso em vez de um ícone de erro do navegador. */
-export function PreviaImagem({ url, alt, className = '' }) {
-  // Guarda QUAL endereço falhou, não só "falhou": quem digita o endereço passa por pedaços que não
-  // carregam, e a prévia tem de voltar quando o endereço fica completo.
-  const [urlQueFalhou, setUrlQueFalhou] = useState(null);
-  const falhou = url === urlQueFalhou;
-  const semImagem = !url || falhou;
-  return (
-    <div className={`previa-imagem ${className}`}>
-      {semImagem ? (
-        <span className="previa-imagem__vazia t-label-caps-sm">
-          {url ? 'Prévia indisponível' : 'Sem imagem'}
-        </span>
-      ) : (
-        <img src={url} alt={alt || ''} onError={() => setUrlQueFalhou(url)} />
-      )}
-    </div>
-  );
-}
-
-/**
- * "ou envie um arquivo" ao lado de um campo de URL: sobe o arquivo (`POST /banners/upload`) e
- * devolve a URL pronta em `onEnviado`, que preenche o campo — o resto do formulário não muda.
- * Sem `capture`: no celular deixa escolher entre câmera e galeria.
- */
-export function EnvioArquivo({ id, alt, onEnviado }) {
-  const [enviando, setEnviando] = useState(false);
-  const [erro, setErro] = useState(null);
-
-  async function enviar(evento) {
-    const arquivo = evento.target.files?.[0];
-    evento.target.value = ''; // deixa escolher o mesmo arquivo de novo
-    if (!arquivo) return;
-    setEnviando(true);
-    setErro(null);
-    try {
-      const enviada = await bannersService.uploadImagem(arquivo, alt.trim() || undefined);
-      onEnviado(enviada.url);
-    } catch (falha) {
-      setErro(falha);
-    } finally {
-      setEnviando(false);
-    }
-  }
-
-  return (
-    <div className="admin-banners__envio">
-      <label className="link-caps admin-banners__upload">
-        {enviando ? 'Enviando…' : 'ou envie um arquivo'}
-        <input id={id} type="file" accept="image/*" hidden disabled={enviando} onChange={enviar} />
-      </label>
-      {erro && <ErroGeral>{erro.campos?.arquivo || erro.mensagem}</ErroGeral>}
-    </div>
   );
 }
 
@@ -279,29 +225,29 @@ function FormBanner({ banner, onPronto }) {
   return (
     <form className="admin-banners__form" onSubmit={salvar}>
       <LegendaObrigatorio />
-      <Field
-        id="banner-imagem-url"
+      <CampoImagem
+        id="banner-arquivo-desktop"
         rotulo="Imagem (desktop)"
         obrigatorio
-        ajuda="Só https. Ocupa a largura toda do topo da home e é cortada nas bordas para preencher: use foto em paisagem e deixe o assunto no centro."
-        value={imagemUrl}
-        onChange={(e) => setImagemUrl(e.target.value)}
+        proporcao="paisagem larga (21:9), por exemplo 2100 × 900 px."
+        ajuda="Ocupa a largura toda do topo da home e é cortada nas bordas para preencher: deixe o assunto no centro."
+        valor={imagemUrl}
+        onMudar={setImagemUrl}
+        alt={alt}
         erro={erro?.campos?.imagemUrl}
-        placeholder="https://…"
-        required
+        classePrevia="admin-banners__previa-form"
       />
-      <EnvioArquivo id="banner-arquivo-desktop" alt={alt} onEnviado={setImagemUrl} />
-      <PreviaImagem url={imagemUrl} alt={alt} className="admin-banners__previa-form" />
-      <Field
-        id="banner-imagem-url-mobile"
+      <CampoImagem
+        id="banner-arquivo-mobile"
         rotulo="Imagem (celular)"
-        ajuda="Opcional. Só https. No celular o topo é estreito e alto, então uma foto em retrato aproveita melhor o espaço."
-        value={imagemUrlMobile}
-        onChange={(e) => setImagemUrlMobile(e.target.value)}
+        proporcao="retrato (2:3), por exemplo 1080 × 1620 px."
+        ajuda="Opcional. No celular o topo é estreito e alto; sem esta imagem, ele usa a de desktop cortada nas laterais. Deixe o assunto no centro."
+        valor={imagemUrlMobile}
+        onMudar={setImagemUrlMobile}
+        alt={alt}
         erro={erro?.campos?.imagemUrlMobile}
-        placeholder="https://…"
+        classePrevia="admin-banners__previa-celular"
       />
-      <EnvioArquivo id="banner-arquivo-mobile" alt={alt} onEnviado={setImagemUrlMobile} />
       <Field
         id="banner-titulo"
         rotulo="Título"

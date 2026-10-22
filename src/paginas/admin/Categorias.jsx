@@ -15,9 +15,9 @@
  * 6. "Card Esquerda" / "Card Direita" (0016): a categoria ocupa um dos dois cards de coleção da home
  *    (esquerda = no lugar do Feminina, direita = no lugar do Masculina), com a imagem que o dono
  *    enviar. Cada lado tem UMA categoria: quem marcar toma o lugar de quem estava.
- * 7. A imagem da categoria (`imagemUrl`, https ou arquivo enviado pelo painel) é a do cartão dela na
- *    aba Categorias da loja (e nos destaques da home); sem ela, o cartão mostra "Foto em breve".
- *    Apagar o endereço manda `null` e tira a imagem. É também a reserva do card da home.
+ * 7. A imagem da categoria (`imagemUrl`, sempre um arquivo enviado pelo painel) é a do cartão dela
+ *    na aba Categorias da loja (e nos destaques da home); sem ela, o cartão mostra "Foto em breve".
+ *    "Remover imagem" manda `null` e tira a imagem. É também a reserva do card da home.
  */
 
 import { useState } from 'react';
@@ -27,7 +27,8 @@ import Field, { ErroGeral, LegendaObrigatorio } from '../../components/ui/Field.
 import Modal from '../../components/ui/Modal.jsx';
 import { useRequisicao } from '../../hooks/useRequisicao.js';
 import { cn } from '../../lib/cn.js';
-import { EnvioArquivo, PreviaImagem } from './Banners.jsx';
+import BotaoIcone from './BotaoIcone.jsx';
+import CampoImagem from './CampoImagem.jsx';
 import { categoriasService } from '../../services/categoriasService.js';
 import './Categorias.css';
 
@@ -105,12 +106,16 @@ export default function AdminCategorias() {
                 </td>
                 <td>
                   <div className="admin-tabela__acoes">
-                    <button type="button" className="link-caps" onClick={() => setEditando(categoria)}>
-                      Editar
-                    </button>
-                    <button type="button" className="link-caps" onClick={() => setExcluindo(categoria)}>
-                      Excluir
-                    </button>
+                    <BotaoIcone
+                      acao="editar"
+                      rotulo={`Editar a categoria ${categoria.nome}`}
+                      onClick={() => setEditando(categoria)}
+                    />
+                    <BotaoIcone
+                      acao="excluir"
+                      rotulo={`Excluir a categoria ${categoria.nome}`}
+                      onClick={() => setExcluindo(categoria)}
+                    />
                   </div>
                 </td>
               </tr>
@@ -267,27 +272,23 @@ function FormCategoria({ categoria, categorias, onPronto }) {
       )}
       {erro?.campos?.ativa && <ErroGeral>{erro.campos.ativa}</ErroGeral>}
 
-      <fieldset className="admin-categorias__imagem">
-        <legend className="t-label-caps">Imagem da categoria</legend>
-        <Field
-          id="categoria-imagem"
-          rotulo="Endereço da imagem"
-          ajuda="Endereço da imagem (https://…) ou envie um arquivo. Aparece no cartão da categoria na aba Categorias da loja. Apague o endereço para tirar a imagem."
-          value={imagem}
-          onChange={(e) => {
-            setImagem(e.target.value);
-            // O erro do envio anterior era sobre o endereço antigo: some ao editar.
+      <div className="admin-categorias__imagem">
+        <CampoImagem
+          id="categoria-arquivo"
+          rotulo="Imagem da categoria"
+          proporcao="quadrada (1:1), por exemplo 1200 × 1200 px."
+          ajuda="Aparece no cartão da categoria na aba Categorias da loja, recortada em quadrado: deixe o assunto no centro."
+          valor={imagem}
+          onMudar={(url) => {
+            setImagem(url);
+            // O erro do envio anterior era sobre a imagem antiga: some ao trocar.
             if (erro?.campos?.imagemUrl) setErro(null);
           }}
+          alt={nome}
           erro={erro?.campos?.imagemUrl}
+          classePrevia="admin-categorias__previa"
         />
-        <EnvioArquivo id="categoria-arquivo" alt={nome} onEnviado={setImagem} />
-        <PreviaImagem url={imagem} alt={nome} className="admin-categorias__previa" />
-        <p className="t-body-sm t-muted">
-          Proporção recomendada: quadrada (1:1), por exemplo 1200 × 1200 px. A loja mostra a foto
-          recortada em quadrado, então deixe o assunto no centro.
-        </p>
-      </fieldset>
+      </div>
 
       <fieldset className="admin-categorias__card">
         <legend className="t-label-caps">Card na página inicial</legend>
@@ -310,22 +311,17 @@ function FormCategoria({ categoria, categorias, onPronto }) {
           </p>
         )}
         {card && (
-          <>
-            <Field
-              id="categoria-card-imagem"
-              rotulo="Imagem do card"
-              ajuda="Endereço da imagem (https://…) ou envie um arquivo. Sem imagem, vale a imagem da categoria."
-              value={cardImagem}
-              onChange={(e) => setCardImagem(e.target.value)}
-              erro={erro?.campos?.cardHomeImagemUrl}
-            />
-            <EnvioArquivo id="categoria-card-arquivo" alt={nome} onEnviado={setCardImagem} />
-            <PreviaImagem url={cardImagem} alt={nome} className="admin-categorias__previa" />
-            <p className="t-body-sm t-muted">
-              Proporção recomendada: quadrada (1:1), por exemplo 1200 × 1200 px. No celular o card fica
-              mais largo que alto, então deixe o assunto da foto no centro.
-            </p>
-          </>
+          <CampoImagem
+            id="categoria-card-arquivo"
+            rotulo="Imagem do card"
+            proporcao="quadrada (1:1), por exemplo 1200 × 1200 px."
+            ajuda="Sem imagem, vale a imagem da categoria. No celular o card fica mais largo que alto, então deixe o assunto da foto no centro."
+            valor={cardImagem}
+            onMudar={setCardImagem}
+            alt={nome}
+            erro={erro?.campos?.cardHomeImagemUrl}
+            classePrevia="admin-categorias__previa"
+          />
         )}
       </fieldset>
       {erro && !erro.campos && <ErroGeral>{erro.mensagem}</ErroGeral>}

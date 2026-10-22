@@ -1,0 +1,35 @@
+.campo-imagem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.campo-imagem__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-4);
+}
+
+/* ---- Prévia de imagem genérica (miniatura na tabela e prévia do formulário) ---- */
+
+.previa-imagem {
+  position: relative;
+  background: var(--cor-fundo-foto);
+  border: var(--borda-fina) solid var(--cor-borda);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.previa-imagem img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.previa-imagem__vazia {
+  color: var(--cor-texto-suave);
+  text-align: center;
+  padding: var(--espaco-2);
+}

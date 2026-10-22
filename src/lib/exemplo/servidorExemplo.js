@@ -225,6 +225,15 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
       return responderPedidosExemplo(metodo, caminho.slice('/admin/pedidos'.length), q, corpo, erro);
     }
 
+    // Upload de imagem (banners, categoria e produto). Sem disco aqui: devolve um `blob:` que vale
+    // só nesta aba — depois de recarregar, a prévia aparece como indisponível.
+    if (rota === 'POST /admin/banners/upload' || /^POST \/admin\/produtos\/\d+\/imagens\/upload$/.test(rota)) {
+      if (!corpo?.arquivo) {
+        throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', { campos: { arquivo: 'Envie um arquivo de imagem.' } });
+      }
+      return { url: URL.createObjectURL(corpo.arquivo), alt: corpo.alt || null };
+    }
+
     // Fila de revisão fictícia. As fotos são ilustrações de public/exemplo; o vite.config.js
     // (modo exemplo) faz /admin/revisao/imagem redirecionar para elas.
     if (rota === 'GET /admin/revisao/pendentes') {
@@ -715,7 +724,7 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
         throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', { campos: { imagens: 'Envie ao menos uma imagem.' } });
       }
       for (const im of entradas) {
-        if (!String(im?.url || '').toLowerCase().startsWith('https://')) {
+        if (!urlDeImagemAceita(im?.url || '')) {
           throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', {
             campos: { imagens: 'A URL da imagem precisa começar com https://.' },
           });
@@ -829,13 +838,13 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
 
     if (rota === 'POST /admin/banners') {
       const imagemUrl = String(corpo?.imagemUrl || '').trim();
-      if (!imagemUrl || !imagemUrl.toLowerCase().startsWith('https://')) {
+      if (!imagemUrl || !urlDeImagemAceita(imagemUrl)) {
         throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', {
           campos: { imagemUrl: 'A URL da imagem precisa começar com https://.' },
         });
       }
       const imagemUrlMobile = corpo?.imagemUrlMobile ? String(corpo.imagemUrlMobile).trim() : null;
-      if (imagemUrlMobile && !imagemUrlMobile.toLowerCase().startsWith('https://')) {
+      if (imagemUrlMobile && !urlDeImagemAceita(imagemUrlMobile)) {
         throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', {
           campos: { imagemUrlMobile: 'A URL da imagem precisa começar com https://.' },
         });
@@ -897,7 +906,7 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
       const mudancas = {};
       if ('imagemUrl' in corpo && corpo.imagemUrl) {
         const url = String(corpo.imagemUrl).trim();
-        if (!url.toLowerCase().startsWith('https://')) {
+        if (!urlDeImagemAceita(url)) {
           throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', {
             campos: { imagemUrl: 'A URL da imagem precisa começar com https://.' },
           });
@@ -906,7 +915,7 @@ export async function responderExemplo(metodo, url, corpo, sinal) {
       }
       if ('imagemUrlMobile' in corpo) {
         const url = corpo.imagemUrlMobile ? String(corpo.imagemUrlMobile).trim() : null;
-        if (url && !url.toLowerCase().startsWith('https://')) {
+        if (url && !urlDeImagemAceita(url)) {
           throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', {
             campos: { imagemUrlMobile: 'A URL da imagem precisa começar com https://.' },
           });
@@ -1432,10 +1441,15 @@ function categoriasBase(estado) {
   }));
 }
 
+/** Como o backend, imagem só por https — mais o `blob:` que o upload de exemplo devolve. */
+function urlDeImagemAceita(url) {
+  return /^(https:\/\/|blob:)/i.test(String(url));
+}
+
 /** A imagem da categoria precisa ser https (o arquivo enviado pelo painel também passa no backend real). */
 function validarImagemCategoria(corpo) {
   const url = corpo?.imagemUrl;
-  if (url && !String(url).toLowerCase().startsWith('https://')) {
+  if (url && !urlDeImagemAceita(url)) {
     throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', {
       campos: { imagemUrl: 'A URL da imagem precisa começar com https://.' },
     });
@@ -1448,7 +1462,7 @@ function validarCard(corpo) {
     throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', { campos: { cardHome: 'Escolha esquerda ou direita.' } });
   }
   const url = corpo.cardHomeImagemUrl;
-  if (url && !String(url).toLowerCase().startsWith('https://')) {
+  if (url && !urlDeImagemAceita(url)) {
     throw erro(400, 'DADOS_INVALIDOS', 'Há campos inválidos no envio.', {
       campos: { cardHomeImagemUrl: 'A URL da imagem precisa começar com https://.' },
     });

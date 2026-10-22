@@ -25,6 +25,7 @@ import { catalogoService } from '../../services/catalogoService.js';
 import { categoriasService } from '../../services/categoriasService.js';
 import { destaquesService } from '../../services/destaquesService.js';
 import { produtosAdminService } from '../../services/produtosAdminService.js';
+import BotaoIcone from './BotaoIcone.jsx';
 import './Destaques.css';
 
 const TETO_PRODUTOS = 12;
@@ -140,19 +141,18 @@ function GradeDestaqueProdutos({ inicial }) {
                 )}
               </div>
               <div className="admin-destaques__item-acoes">
-                {i > 0 && (
-                  <button type="button" className="link-caps" disabled={salvando} onClick={() => mover(i, -1)}>
-                    Mover para cima
-                  </button>
-                )}
-                <button
-                  type="button"
-                  className="link-caps"
+                <BotaoIcone
+                  acao="subir"
+                  rotulo={`Mover ${produto.codigo} para cima`}
+                  disabled={i === 0 || salvando}
+                  onClick={() => mover(i, -1)}
+                />
+                <BotaoIcone
+                  acao="descer"
+                  rotulo={`Mover ${produto.codigo} para baixo`}
                   disabled={i === linhas.length - 1 || salvando}
                   onClick={() => mover(i, 1)}
-                >
-                  Mover para baixo
-                </button>
+                />
                 <button type="button" className="link-caps" disabled={salvando} onClick={() => remover(produto.id)}>
                   Remover
                 </button>
@@ -336,19 +336,18 @@ function GradeDestaqueCategorias({ inicial }) {
                 )}
               </div>
               <div className="admin-destaques__item-acoes">
-                {i > 0 && (
-                  <button type="button" className="link-caps" disabled={salvando} onClick={() => mover(i, -1)}>
-                    Mover para cima
-                  </button>
-                )}
-                <button
-                  type="button"
-                  className="link-caps"
+                <BotaoIcone
+                  acao="subir"
+                  rotulo={`Mover ${categoria.nome} para cima`}
+                  disabled={i === 0 || salvando}
+                  onClick={() => mover(i, -1)}
+                />
+                <BotaoIcone
+                  acao="descer"
+                  rotulo={`Mover ${categoria.nome} para baixo`}
                   disabled={i === linhas.length - 1 || salvando}
                   onClick={() => mover(i, 1)}
-                >
-                  Mover para baixo
-                </button>
+                />
                 <button type="button" className="link-caps" disabled={salvando} onClick={() => remover(categoria.id)}>
                   Remover
                 </button>

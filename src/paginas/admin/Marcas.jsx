@@ -18,6 +18,7 @@ import Field, { ErroGeral, LegendaObrigatorio } from '../../components/ui/Field.
 import Modal from '../../components/ui/Modal.jsx';
 import { useRequisicao } from '../../hooks/useRequisicao.js';
 import { marcasService } from '../../services/marcasService.js';
+import BotaoIcone from './BotaoIcone.jsx';
 import './Marcas.css';
 
 export default function AdminMarcas() {
@@ -81,12 +82,8 @@ export default function AdminMarcas() {
                 </td>
                 <td>
                   <div className="admin-tabela__acoes">
-                    <button type="button" className="link-caps" onClick={() => setEditando(marca)}>
-                      Editar
-                    </button>
-                    <button type="button" className="link-caps" onClick={() => setExcluindo(marca)}>
-                      Excluir
-                    </button>
+                    <BotaoIcone acao="editar" rotulo={`Editar a marca ${marca.nome}`} onClick={() => setEditando(marca)} />
+                    <BotaoIcone acao="excluir" rotulo={`Excluir a marca ${marca.nome}`} onClick={() => setExcluindo(marca)} />
                   </div>
                 </td>
               </tr>
