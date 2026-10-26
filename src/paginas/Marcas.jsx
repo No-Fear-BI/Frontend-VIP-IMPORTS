@@ -1,5 +1,6 @@
 import { catalogoService } from '../services/catalogoService.js';
-import { Esqueleto, EstadoErro, EstadoVazio } from '../components/Estados.jsx';
+import Carregando from '../components/Carregando.jsx';
+import { EstadoErro, EstadoVazio } from '../components/Estados.jsx';
 import { useRequisicao } from '../hooks/useRequisicao.js';
 import { GradeMarcas } from './Home.jsx';
 
@@ -15,13 +16,9 @@ export default function Marcas() {
       </header>
       <section className="secao secao--proxima" aria-label="Lista de marcas">
         {carregando ? (
-          <div className="grade-marcas">
-            {Array.from({ length: 12 }, (_, i) => (
-              <Esqueleto key={i} className="esqueleto--bloco" />
-            ))}
-          </div>
+          <Carregando rotulo="Carregando marcas…" />
         ) : erro ? (
-          <EstadoErro erro={erro} onTentar={recarregar} titulo="Não conseguimos carregar as marcas." />
+          <EstadoErro sacola erro={erro} onTentar={recarregar} titulo="Não conseguimos carregar as marcas." />
         ) : ordenadas.length === 0 ? (
           <EstadoVazio titulo="Nenhuma marca cadastrada ainda." acao={{ rotulo: 'Ver novidades', para: '/novidades' }} />
         ) : (

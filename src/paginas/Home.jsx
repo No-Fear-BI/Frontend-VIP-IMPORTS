@@ -2,10 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { catalogoService } from '../services/catalogoService.js';
 import CabecalhoSecao from '../components/CabecalhoSecao.jsx';
-import { Esqueleto, EsqueletoGrade, EstadoErro, EstadoVazio } from '../components/Estados.jsx';
+import Carregando from '../components/Carregando.jsx';
+import DivisorOnda from '../components/DivisorOnda.jsx';
+import { EstadoErro, EstadoVazio } from '../components/Estados.jsx';
 import { IconeSeta, IconeSetaEsquerda, IconeWhatsApp } from '../components/Icones.jsx';
 import { CartaoProduto, FotoProduto } from '../components/Produto.jsx';
 import { IMAGEM_COLECAO_FEMININA, IMAGEM_COLECAO_MASCULINA, LINK_WHATSAPP_CONTATO } from '../config.js';
+import { useAparecerNaRolagem } from '../hooks/useAparecerNaRolagem.js';
 import { useArrastoCarrossel } from '../hooks/useArrastoCarrossel.js';
 import { useRequisicao } from '../hooks/useRequisicao.js';
 import Button from '../components/ui/Button.jsx';
@@ -19,14 +22,17 @@ export default function Home() {
   if (erro) {
     return (
       <div className="container">
-        <EstadoErro erro={erro} onTentar={recarregar} titulo="Não conseguimos abrir a vitrine agora." />
+        <EstadoErro sacola erro={erro} onTentar={recarregar} titulo="Não conseguimos abrir a vitrine agora." />
       </div>
     );
   }
 
+  // GET /home traz a página inteira de uma vez: um carregador só, não um por seção.
+  if (carregando) return <Carregando variante="pagina" rotulo="Carregando a vitrine…" />;
+
   return (
     <>
-      {carregando ? <HeroEsqueleto /> : <Hero banners={dados.banners} />}
+      <Hero banners={dados.banners} />
 
       <section className="container secao" aria-labelledby="titulo-destaques">
         <CabecalhoSecao
@@ -35,9 +41,7 @@ export default function Home() {
           titulo="Destaques"
           link={{ rotulo: 'Ver novidades', para: '/novidades' }}
         />
-        {carregando ? (
-          <EsqueletoGrade quantidade={8} />
-        ) : destaques.length === 0 ? (
+        {destaques.length === 0 ? (
           <EstadoVazio
             titulo="Nenhum destaque no momento."
             texto="As peças novas continuam chegando na página de novidades."
@@ -52,17 +56,19 @@ export default function Home() {
         )}
       </section>
 
-      <section className="container secao secao--proxima" aria-label="Coleções">
+      <DivisorOnda />
+
+      <section className="container secao" aria-label="Coleções">
         <div className="colecoes">
           <PainelColecao
-            {...painelDoLado(dados?.cardsColecao, 'esquerda', {
+            {...painelDoLado(dados.cardsColecao, 'esquerda', {
               nome: 'Feminina',
               para: '/feminino',
               imagem: IMAGEM_COLECAO_FEMININA,
             })}
           />
           <PainelColecao
-            {...painelDoLado(dados?.cardsColecao, 'direita', {
+            {...painelDoLado(dados.cardsColecao, 'direita', {
               nome: 'Masculina',
               para: '/masculino',
               imagem: IMAGEM_COLECAO_MASCULINA,
@@ -78,13 +84,7 @@ export default function Home() {
           titulo="Categorias"
           link={{ rotulo: 'Todas as categorias', para: '/categorias' }}
         />
-        {carregando ? (
-          <div className="grade-categorias">
-            {Array.from({ length: 4 }, (_, i) => (
-              <Esqueleto key={i} className="esqueleto--quadrado" />
-            ))}
-          </div>
-        ) : dados.categoriasDestaque.length === 0 ? (
+        {dados.categoriasDestaque.length === 0 ? (
           <EstadoVazio
             titulo="Nenhuma categoria em destaque."
             acao={{ rotulo: 'Ver todas as categorias', para: '/categorias' }}
@@ -100,6 +100,8 @@ export default function Home() {
         )}
       </section>
 
+      <DivisorOnda fase={2} />
+
       <section className="container secao" aria-labelledby="titulo-marcas">
         <CabecalhoSecao
           id="titulo-marcas"
@@ -107,13 +109,7 @@ export default function Home() {
           titulo="Marcas"
           link={{ rotulo: 'Todas as marcas', para: '/marcas' }}
         />
-        {carregando ? (
-          <div className="grade-marcas">
-            {Array.from({ length: 8 }, (_, i) => (
-              <Esqueleto key={i} className="esqueleto--bloco" />
-            ))}
-          </div>
-        ) : dados.marcas.length === 0 ? (
+        {dados.marcas.length === 0 ? (
           <EstadoVazio titulo="Nenhuma marca cadastrada ainda." acao={{ rotulo: 'Ver novidades', para: '/novidades' }} />
         ) : (
           <GradeMarcas marcas={dados.marcas.slice(0, 12)} />
@@ -301,18 +297,6 @@ function HeroSemBanner() {
   );
 }
 
-function HeroEsqueleto() {
-  return (
-    <section className="hero faixa-primaria" aria-busy="true" aria-label="Carregando destaques">
-      <div className="container hero__texto">
-        <span className="hero__esqueleto hero__esqueleto--rotulo" />
-        <span className="hero__esqueleto hero__esqueleto--titulo" />
-        <span className="hero__esqueleto hero__esqueleto--titulo hero__esqueleto--curto" />
-      </div>
-    </section>
-  );
-}
-
 // ---- Coleções, categorias e marcas ----
 
 /* Os dois cards de coleção. O dono pode pôr uma categoria no lugar de cada um (Card Esquerda =
@@ -351,12 +335,14 @@ function PainelColecao({ nome, rotulo, para, imagem, textoLink }) {
 // Desde a migração 0015 a categoria não tem coleção e o slug é único: o link é só `?categoria=`.
 // `colecao` ainda pode vir (página de categorias por público) e, se vier, estreita a listagem.
 // `degrade`: só /categorias usa; a grade de categorias da home fica sem.
+// Abaixo da dobra, o cartão aparece quando a rolagem chega nele, como o de produto.
 export function CartaoCategoria({ categoria, colecao, degrade = false }) {
   const para = colecao
     ? `/produtos?colecao=${colecao.slug}&categoria=${categoria.slug}`
     : `/produtos?categoria=${categoria.slug}`;
+  const ref = useAparecerNaRolagem();
   return (
-    <Link to={para} className="cartao-categoria">
+    <Link ref={ref} to={para} className="cartao-categoria">
       <FotoProduto url={categoria.imagemUrl} alt="" className="cartao-categoria__foto" degrade={degrade} />
       <span className="t-headline-sm">{categoria.nome}</span>
       <span className="t-label-caps-sm t-muted">

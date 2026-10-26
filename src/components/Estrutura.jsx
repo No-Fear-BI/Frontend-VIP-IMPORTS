@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { useAcesso } from '../contexto/AcessoLoja.jsx';
 import { useSessaoCliente } from '../contexto/SessaoCliente.jsx';
+import { tirarCarregadorInicial } from '../lib/carregadorInicial.js';
 import Cabecalho from './Cabecalho.jsx';
 import ChatAtendimento from './ChatAtendimento.jsx';
 import PortaoAcesso, { PortaoCarregando } from './PortaoAcesso.jsx';
@@ -20,6 +21,11 @@ export default function Estrutura() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
+
+  // O carregador do index.html fica por cima até sair a resposta do acesso (loja ou portão).
+  useEffect(() => {
+    if (!carregando) tirarCarregadorInicial();
+  }, [carregando]);
 
   if (carregando) return <PortaoCarregando />;
   // Falha ABERTA, igual ao backend: sem resposta válida do /acesso/estado, a loja

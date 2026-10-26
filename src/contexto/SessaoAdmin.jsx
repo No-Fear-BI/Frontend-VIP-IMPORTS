@@ -15,6 +15,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { aoPerderAcessoAdmin, ehSessaoAdminVencida, ehSessaoDeCliente } from '../lib/apiAdmin.js';
+import { tirarCarregadorInicial } from '../lib/carregadorInicial.js';
 import { adminService } from '../services/adminService.js';
 
 const Contexto = createContext(null);
@@ -25,6 +26,9 @@ export function ProvedorSessaoAdmin({ children }) {
   const [erro, setErro] = useState(null);
   // Frase para a tela de login quando a sessão caiu no meio do uso (não na primeira visita).
   const [avisoLogin, setAvisoLogin] = useState(null);
+
+  // O painel tem os próprios esqueletos: o carregador da abertura (index.html) sai na hora.
+  useEffect(tirarCarregadorInicial, []);
 
   const verificar = useCallback(async (sinal) => {
     setSituacao('verificando');

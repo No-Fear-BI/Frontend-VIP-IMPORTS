@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAparecerNaRolagem } from '../hooks/useAparecerNaRolagem.js';
 import { IconeSeta } from './Icones.jsx';
 import Card from './ui/Card.jsx';
 import './Produto.css';
@@ -46,10 +47,13 @@ export function QuantidadeProduto({ produto }) {
   return <p className="t-body-sm t-muted">{produto.quantidadeDisponivel} {produto.quantidadeDisponivel === 1 ? 'unidade disponível' : 'unidades disponíveis'}</p>;
 }
 
+// Abaixo da dobra, o cartão aparece quando a rolagem chega nele (hooks/useAparecerNaRolagem.js,
+// CSS em global.css).
 export function CartaoProduto({ produto, carregamento }) {
   const destino = `/produto/${encodeURIComponent(produto.codigo)}`;
+  const ref = useAparecerNaRolagem();
   return (
-    <Card como="article" className="cartao-produto">
+    <Card ref={ref} como="article" className="cartao-produto">
       <Link to={destino} className="cartao-produto__link">
         <div className="cartao-produto__foto">
           <FotoProduto url={produto.capa?.url} alt={produto.capa?.alt || produto.nome} carregamento={carregamento} />

@@ -112,6 +112,46 @@
   margin-top: var(--espaco-10);
 }
 
+/* Sobre: texto à esquerda e a ilustração à direita, acompanhando a rolagem; abaixo de 1024px a
+   ilustração sobe para antes do texto. */
+.sobre {
+  display: grid;
+  grid-template-columns: minmax(0, var(--medida-texto)) minmax(0, 1fr);
+  gap: var(--espaco-secao);
+  align-items: start;
+}
+
+.sobre .ilustracao-sobre {
+  position: sticky;
+  top: calc(var(--altura-cabecalho) + var(--espaco-6));
+  margin-top: var(--espaco-10);
+}
+
+@media (max-width: 1023px) {
+  .sobre {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .sobre .ilustracao-sobre {
+    position: static;
+    order: -1;
+    max-width: var(--largura-formulario);
+  }
+}
+
+/* Fecho do Sobre: o slogan da VIP Imports depois de um filete, antes do botão. */
+.sobre__assinatura {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  margin-block: var(--espaco-10) var(--espaco-4);
+}
+
+.sobre__assinatura .filete {
+  margin-bottom: var(--espaco-6);
+}
+
 .lista-contato {
   display: flex;
   flex-direction: column;

@@ -12,7 +12,8 @@ import { carrinhoService } from '../services/carrinhoService.js';
 import { catalogoService } from '../services/catalogoService.js';
 import { selecoesService } from '../services/selecoesService.js';
 import { ErroGeral } from '../components/ui/Field.jsx';
-import { Esqueleto, EstadoErro, EstadoVazio } from '../components/Estados.jsx';
+import Carregando from '../components/Carregando.jsx';
+import { EstadoErro, EstadoVazio } from '../components/Estados.jsx';
 import FormIdentificacao from '../components/FormIdentificacao.jsx';
 import { IconeWhatsApp } from '../components/Icones.jsx';
 import { Etiqueta, FotoProduto } from '../components/Produto.jsx';
@@ -83,7 +84,7 @@ export default function Selecao() {
     return (
       <div className="container selecao">
         {topo}
-        <SelecaoEsqueleto />
+        <Carregando rotulo="Carregando sua seleção…" />
       </div>
     );
   }
@@ -107,9 +108,9 @@ export default function Selecao() {
       {topo}
 
       {estado.carregando && itens.length === 0 ? (
-        <SelecaoEsqueleto />
+        <Carregando rotulo="Carregando sua seleção…" />
       ) : estado.erro ? (
-        <EstadoErro erro={estado.erro} onTentar={carregar} titulo="Não conseguimos abrir sua seleção." />
+        <EstadoErro sacola erro={estado.erro} onTentar={carregar} titulo="Não conseguimos abrir sua seleção." />
       ) : itens.length === 0 ? (
         <EstadoVazio
           titulo="Sua seleção está vazia."
@@ -244,7 +245,7 @@ function ItemSelecao({ item, onMudou }) {
 
         {editando ? (
           <div className="item-selecao__edicao">
-            {!detalhe.dados && !detalhe.erro && <Esqueleto className="esqueleto--controle-compacto" style={{ width: '60%' }} />}
+            {!detalhe.dados && !detalhe.erro && <Carregando variante="compacto" rotulo="Carregando tamanhos e cores…" />}
             {detalhe.erro && <ErroGeral>{detalhe.erro.mensagem}</ErroGeral>}
             {detalhe.dados && detalhe.dados.variacoes.length === 0 && (
               <p className="t-body-sm t-muted">Esta peça não tem tamanho nem cor para escolher.</p>
@@ -280,24 +281,5 @@ function ItemSelecao({ item, onMudou }) {
         )}
       </div>
     </li>
-  );
-}
-
-function SelecaoEsqueleto() {
-  return (
-    <div className="selecao__grade" aria-busy="true" aria-label="Carregando seleção">
-      <div className="selecao__lista">
-        {[0, 1].map((i) => (
-          <div key={i} className="item-selecao">
-            <Esqueleto className="esqueleto--foto" />
-            <div className="item-selecao__info">
-              <Esqueleto className="esqueleto--linha esqueleto--curta" />
-              <Esqueleto className="esqueleto--titulo" style={{ width: '40%' }} />
-              <Esqueleto className="esqueleto--titulo" style={{ width: '70%' }} />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
   );
 }

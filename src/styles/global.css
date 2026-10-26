@@ -396,6 +396,37 @@ a:hover > .link-caps svg {
   }
 }
 
+/* ---------- Aparecer na rolagem ----------
+ * Cartão de produto e de categoria abaixo da dobra: espera escondido e aparece quando a rolagem
+ * chega nele, em cascata dentro da fileira. Uma vez só. Quem marca é hooks/useAparecerNaRolagem.js.
+ */
+
+[data-aparece='espera'] {
+  opacity: 0;
+  transform: translateY(var(--deslocamento-aparece-rolagem));
+}
+
+[data-aparece='visivel'] {
+  animation: aparece-na-rolagem var(--duracao-aparece-rolagem) var(--curva-suave) backwards;
+  animation-delay: calc(var(--ordem-aparece, 0) * var(--atraso-cascata));
+}
+
+@keyframes aparece-na-rolagem {
+  from {
+    opacity: 0;
+    transform: translateY(var(--deslocamento-aparece-rolagem));
+  }
+}
+
+/* O hook já não esconde nada com movimento reduzido; isto cobre a troca da preferência no meio da visita. */
+@media (prefers-reduced-motion: reduce) {
+  [data-aparece] {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}
+
 /* ---------- Filete ---------- */
 
 .filete {
@@ -411,7 +442,7 @@ a:hover > .link-caps svg {
 
 /* ---------- Os três estados de toda tela que busca dado ----------
  * Componentes prontos em src/components/Estados.jsx; o hook é src/hooks/useRequisicao.js.
- *   carregando → .estado-carregando + .esqueleto*   (nunca tela branca)
+ *   carregando → loja: <Carregando> (components/Carregando.jsx); painel: .estado-carregando + .esqueleto*   (nunca tela branca)
  *   vazio      → .estado .estado--vazio             (sempre com uma saída: limpar filtros, ver novidades…)
  *   erro       → .estado .estado--erro              (sempre com "Tentar de novo")
  */

@@ -19,7 +19,7 @@ Instruções para agentes de código (Codex e outros). O Claude Code lê `CLAUDE
 - `PATCH /carrinho/:itemId` recebe sempre `variacaoTamanhoId` **e** `variacaoCorId`. Listas de variações, imagens, destaques e ordens do painel substituem o conjunto inteiro (a de imagens manda a lista COMPLETA de ids; a de ordem 1 vira a capa).
 - Grade de variações do painel (`src/paginas/admin/Produto.jsx`): carregue a grade atual, edite e mande TUDO de volta, cada cor com o `corId` que veio da leitura. Sem `corId`, uma cor renomeada na paleta vira cor nova, sem erro. Cor nova entra escolhida de `GET /admin/cores`, nunca digitada.
 - Criar/editar produto no painel: **não existe `colecaoId` no corpo** — só `categoriaId` (a categoria já diz a coleção). A "Coleção" do formulário é filtro de tela para o seletor de categoria, não um campo que viaja para o backend. `PATCH /admin/produtos/:id` é parcial: só manda o que mudou; `descricao: null` apaga.
-- Toda tela que busca dado tem os três estados: carregando (esqueleto), vazio (com saída) e erro ("Tentar de novo"). Use `useRequisicao`, `components/Estados.jsx` e as classes de estado de `styles/global.css`.
+- Toda tela que busca dado tem os três estados: carregando (na loja, `<Carregando>` de `components/Carregando.jsx`; no painel, esqueleto), vazio (com saída) e erro ("Tentar de novo"). Use `useRequisicao`, `components/Estados.jsx` e as classes de estado de `styles/global.css`.
 - Código, nomes e rotas em português.
 - `docs/comparacao/` e `docs/propostas/` não são código do site. Não importe de lá e não "conserte" lá.
 
@@ -105,3 +105,38 @@ Nenhum componente da loja lê pedido. Backend: migração 0021 e `docs/para-o-fr
 - `rotulo` é obrigatório e leva o nome do item ("Editar a categoria Bolsas"): vira `aria-label` e `title`. Seta na ponta da lista fica desativada, não some.
 - Continuam em texto: botões de confirmação das janelas, "Remover" dos Destaques (não exclui nada) e "Excluir produto" no topo do produto (ganhou a lixeira ao lado do texto).
 - Registro completo em `docs/decisoes-frontend.md`, seção 31.
+
+## Onda entre seções: home, produto e categorias (26/10/2026)
+
+- `src/components/DivisorOnda.jsx` na home, entre Destaques/Coleções e Categorias/Marcas — acima de Categorias não tem, a pedido —, e na página do produto, acima de "Você Também Pode Gostar" (renderizada dentro de `Relacionados`, some com a seção), e em `/categorias` entre Feminina e Masculina (cada bloco da página tem o próprio `.container`, para a onda ir de ponta a ponta) (`espelhada` e `fase` variam o desenho). Três faixas de SVG em degradê creme → verde, desfocadas, em loop lento.
+- Só `transform` anima: cada SVG tem 200% da largura e o desenho se repete na metade, então `translateX` até −50% fecha o ciclo sem repintar. Nunca anime o `d` do caminho. Pausa fora da tela; com `prefers-reduced-motion` fica parada.
+- Ao rolar, a onda se completa da esquerda para a direita (máscara em `.onda__desenho` com `animation-timeline: --onda-na-tela`, nomeada na `.onda`). Não troque por `view()` anônimo no filho: o `overflow: hidden` da `.onda` faria ele medir a rolagem dentro dela.
+- Só nesses lugares: o `DESIGN.md` continua proibindo qualquer outra onda ou gradiente animado.
+- Registro completo em `docs/decisoes-frontend.md`, seção 32.
+
+## Cartão de produto e de categoria aparecem com a rolagem (26/10/2026)
+
+- Todo `CartaoProduto` e todo `CartaoCategoria` usam `useAparecerNaRolagem` (`src/hooks/useAparecerNaRolagem.js`): abaixo da dobra ele espera escondido (`data-aparece="espera"`) e aparece uma vez quando a rolagem chega nele (`visivel`, CSS genérico em `src/styles/global.css`). O que já está na tela ao abrir a página não se mexe; com `prefers-reduced-motion` nada se esconde.
+- Um `IntersectionObserver` só para a página toda e estado direto no DOM, sem re-render. Não crie observador por cartão nem guarde isso em estado do React.
+- Só os cartões de produto e de categoria têm esse efeito: texto corrido e os outros cartões (marca, coleção) continuam sem fade-up.
+- Registro completo em `docs/decisoes-frontend.md`, seção 33.
+
+## Loja: carregador no lugar dos esqueletos (26/10/2026)
+
+- Toda espera por dado na loja usa `<Carregando>` (`src/components/Carregando.jsx`): `variante` = `tela` (abertura) | `pagina` (home, produto — um por página) | `bloco` (seção, o padrão) | `compacto` (filtro, botão, janela); `rotulo` é o texto para leitor de tela; `decorativo` quando o texto ao lado já diz "Carregando…". Não use `Esqueleto` na loja; o painel continua com eles.
+- Animação em CSS refeita de um Lottie (sem `lottie-web`): só `translate` e `rotate`, cores e tamanhos em tokens (`--cor-carregador-*`, `--tamanho-carregador*`, `--duracao-carregador`). Os cantos arredondados (`--raio-carregador`) são exceção pedida pelo cliente à regra de raio 0.
+- `index.html` tem a mesma marcação (`#carregador-inicial`); ela fica por cima até a resposta do acesso e sai por `src/lib/carregadorInicial.js` (`Estrutura` e `ProvedorSessaoAdmin`). Mudou a marcação de um, mude a do outro.
+- Registro completo em `docs/decisoes-frontend.md`, seção 34.
+
+## Loja: sacola triste no estado de erro (26/10/2026)
+
+- Na loja, todo `EstadoErro` recebe `sacola` (`<EstadoErro sacola erro={…} onTentar={…} />`): a sacola animada (`src/components/SacolaErro.jsx`) entra no lugar do ícone de alerta. A 404 (`NaoEncontrada`) também mostra a sacola. O painel continua sem `sacola`, e erro de campo/`ErroGeral` continua com o ícone.
+- SVG + CSS refeitos de um Lottie (sem `lottie-web`), cores em `--cor-sacola-*`, sem vermelho. Com `prefers-reduced-motion`, fica parada de cabeça para baixo, com a cara triste.
+- Registro completo em `docs/decisoes-frontend.md`, seção 35.
+
+## Sobre: ilustração animada (26/10/2026)
+
+- `src/components/IlustracaoSobre.jsx` toca `src/assets/animacoes/sobre-equipe.json` (Lottie, sem mudança) com `lottie-web/build/player/lottie_light` (fixado em 5.12.2), os dois por `import()` dentro do componente: só o Sobre baixa. Não importe o `lottie-web` em outro lugar sem necessidade: o carregador e a sacola de erro são CSS puro de propósito.
+- Cores: na carga, cada cor sólida do JSON vira um tom da rampa `--cor-ilustracao-escura` → `-clara` → `-luz` pela claridade (L*). Não edite cores no JSON.
+- Recorte `RECORTE` no componente casado com o token `--proporcao-ilustracao-sobre`; ao mudar, meça o desenho em todos os quadros (a mão que acena passa da borda no quadro 71). Pausa fora da tela, `destroy()` ao desmontar, parada no primeiro quadro com `prefers-reduced-motion`.
+- Registro completo em `docs/decisoes-frontend.md`, seção 36.

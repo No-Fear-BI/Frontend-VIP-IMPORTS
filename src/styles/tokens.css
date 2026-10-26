@@ -49,6 +49,33 @@
   --brilho-botao-primario: linear-gradient(105deg, transparent 20%, rgb(252 234 179 / 0.22) 50%, transparent 80%);
   --brilho-botao-sobre-primaria: linear-gradient(105deg, transparent 20%, rgb(255 255 255 / 0.55) 50%, transparent 80%);
 
+  /* Onda entre as seções da home (components/DivisorOnda). O degradê vai de uma à outra,
+     passando pelas misturas das duas; a opacidade de cada parada fica no desenho do SVG. */
+  --cor-onda-luz: #fceab3;                 /* creme oficial: o trecho claro da onda */
+  --cor-onda-corpo: #28361f;               /* verde oficial: o trecho cheio da onda */
+  --mascara-onda: linear-gradient(to right, transparent 0%, #000 18%, #000 82%, transparent 100%);
+  /* Ponta da onda enquanto ela se completa com a rolagem: o último quarto some aos poucos. */
+  --mascara-onda-avanco: linear-gradient(to right, #000 75%, transparent 100%);
+
+  /* Carregador (components/Carregando): o quadrado da frente e os dois do rastro, do mais
+     forte ao mais claro, sobre o papel. */
+  --cor-carregador-frente: #28361f;        /* verde oficial */
+  --cor-carregador-rastro: #c1b88a;        /* creme 72% sobre verde (o mesmo de --cor-sobre-primaria-suave) */
+  --cor-carregador-rastro-fim: #fceab3;    /* creme oficial */
+
+  /* Sacola triste do estado de erro da loja (components/SacolaErro). */
+  --cor-sacola-fundo: #fceab3;             /* creme oficial: o círculo atrás da sacola */
+  --cor-sacola: #ffffff;                   /* branco oficial: a sacola por fora */
+  --cor-sacola-dentro: #c1b88a;            /* creme 72% sobre verde: o lado de dentro */
+  --cor-sacola-contorno: #79806e;          /* verde 62% sobre a superfície (o mesmo de --cor-borda-forte) */
+  --cor-sacola-rosto: #28361f;             /* verde oficial: olhos e boca */
+
+  /* Ilustração do Sobre (components/IlustracaoSobre): cada cor do desenho vira um tom desta
+     rampa pela claridade dela — o mais escuro em verde, o meio em creme, o mais claro em branco. */
+  --cor-ilustracao-escura: #28361f;        /* verde oficial */
+  --cor-ilustracao-clara: #fceab3;         /* creme oficial */
+  --cor-ilustracao-luz: #ffffff;           /* branco oficial */
+
   /* ---------- Tipografia ---------- */
 
   /* Bodoni Moda (voz, Didone) e Jost (aparato, geométrica) — @fontsource-variable, licença SIL OFL. */
@@ -150,6 +177,11 @@
   --altura-hero: clamp(460px, 72vh, 720px);
   --altura-painel-colecao: clamp(320px, 42vw, 560px);
   --altura-cartao-marca: 120px;
+  --altura-carregador-bloco: 240px;        /* carregador no lugar de uma seção */
+  --proporcao-ilustracao-sobre: 1570 / 1110; /* recorte da ilustração do Sobre (RECORTE em IlustracaoSobre.jsx) */
+  --altura-onda: clamp(96px, 10vw, 160px);
+  /* A onda avança sobre o respiro das duas seções vizinhas: o desenho ocupa só o meio da faixa. */
+  --margem-onda: calc(var(--espaco-secao) / -2);
 
   /* ---------- Controles e ícones ---------- */
 
@@ -161,6 +193,10 @@
   --icone-md: 20px;
   --icone-lg: 28px;
   --selo-tamanho: 18px;                    /* contador da seleção no cabeçalho */
+  --tamanho-carregador: 24px;              /* lado do quadrado do carregador; o palco tem 3,8 lados */
+  --tamanho-carregador-tela: 36px;         /* abertura do site */
+  --tamanho-carregador-compacto: 10px;     /* filtro, botão, janela */
+  --tamanho-sacola-erro: 120px;            /* sacola triste no estado de erro e na 404 */
 
   /* ---------- Tela de bloqueio (portão de acesso) ---------- */
 
@@ -180,6 +216,9 @@
 
   --raio: 0px;                              /* "Não existe raio de 4, 8 ou 16px" — quadrado ou círculo, nada no meio */
   --raio-circulo: 9999px;
+  /* Exceção pedida pelo cliente em 26/10/2026: o quadrado do carregador mantém o canto do original
+     (raio 64 num quadrado de 200). Para seguir a regra de raio 0, troque por var(--raio). */
+  --raio-carregador: 32%;
   /* "Não existe sombra no sistema" (DESIGN.md, Elevation & Depth): a profundidade vem de
      plano tonal, filete de 1px e espaço. O modal já tem o filete (--cor-borda-forte) e o véu
      (--cor-veu) para a camada flutuante — isso é o que substitui a sombra, não este token. */
@@ -201,6 +240,7 @@
   --camada-cabecalho: 20;
   --camada-aviso: 40;
   --camada-pular-conteudo: 50;
+  --camada-carregador: 60;                 /* carregador da abertura, por cima de tudo */
 
   /* ---------- Movimento ---------- */
 
@@ -215,11 +255,25 @@
      na tela; o filete se desenha 100ms mais devagar do que o especificado. */
   --duracao-muito-lenta: 1000ms;
   --duracao-carrossel: 7000ms;             /* tempo de cada slide do hero */
+  /* Uma volta da onda = a faixa desliza uma largura de tela. Três tempos diferentes para as
+     camadas se cruzarem sem repetir o mesmo desenho; a névoa vai no sentido contrário. */
+  --duracao-onda-nevoa: 120s;
+  --duracao-onda-faixa: 72s;
+  --duracao-onda-fio: 48s;
+  --atraso-onda: 13s;                      /* quanto cada onda da página sai adiantada da anterior */
+  /* Carregador: 45 quadros a 24 fps; o rastro anda 1 quadro atrás. */
+  --duracao-carregador: 1875ms;
+  --atraso-rastro-carregador: 42ms;
+  --atraso-carregador: 200ms;              /* espera antes de aparecer, para resposta rápida não piscar */
+  --duracao-sacola-erro: 5005ms;           /* sacola triste: 150 quadros a 29,97 fps, em loop */
   --atraso-cascata: 90ms;
   /* Entrada das páginas (.entra, .topo-pagina e o texto do slide do hero): lenta, para a
      página se arrumar sem pressa. */
   --duracao-entrada-pagina: 1200ms;
   --atraso-cascata-pagina: 160ms;
+  /* Cartão de produto aparecendo quando a rolagem chega nele (cascata: --atraso-cascata). */
+  --duracao-aparece-rolagem: 900ms;
+  --deslocamento-aparece-rolagem: 24px;
 
   /* Saída do modal/gaveta (DESIGN.md: "saem em 160ms ease-in"). Usados em Modal.jsx/Modal.css. */
   --duracao-saida: 160ms;
@@ -244,6 +298,8 @@
     --deslocamento-portao-painel: 0px;
     --duracao-muito-lenta: 0ms;
     --duracao-entrada-pagina: 0ms;
+    --duracao-aparece-rolagem: 0ms;
+    --deslocamento-aparece-rolagem: 0px;
     --duracao-saida: 0ms;
     --deslocamento-entrada: 0px;
     --deslocamento-seta: 0px;

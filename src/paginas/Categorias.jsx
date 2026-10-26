@@ -1,6 +1,9 @@
+import { Fragment } from 'react';
 import { catalogoService } from '../services/catalogoService.js';
 import CabecalhoSecao from '../components/CabecalhoSecao.jsx';
-import { Esqueleto, EstadoErro, EstadoVazio } from '../components/Estados.jsx';
+import Carregando from '../components/Carregando.jsx';
+import DivisorOnda from '../components/DivisorOnda.jsx';
+import { EstadoErro, EstadoVazio } from '../components/Estados.jsx';
 import { useRequisicao } from '../hooks/useRequisicao.js';
 import { CartaoCategoria } from './Home.jsx';
 
@@ -10,17 +13,22 @@ const COLECOES = [
   { slug: 'masculino', nome: 'Masculina' },
 ];
 
+// Cada bloco tem o próprio .container para a onda entre Feminina e Masculina ocupar a largura toda
+// da tela, como na home.
 export default function Categorias() {
   return (
-    <div className="container">
-      <header className="topo-pagina">
+    <>
+      <header className="container topo-pagina">
         <p className="t-label-caps t-muted">Por tipo de peça</p>
         <h1 className="t-headline-lg">Categorias</h1>
       </header>
-      {COLECOES.map((colecao) => (
-        <CategoriasDaColecao key={colecao.slug} colecao={colecao} />
+      {COLECOES.map((colecao, i) => (
+        <Fragment key={colecao.slug}>
+          {i > 0 && <DivisorOnda />}
+          <CategoriasDaColecao colecao={colecao} />
+        </Fragment>
       ))}
-    </div>
+    </>
   );
 }
 
@@ -31,7 +39,7 @@ function CategoriasDaColecao({ colecao }) {
   );
 
   return (
-    <section className="secao" aria-labelledby={`titulo-${colecao.slug}`}>
+    <section className="container secao" aria-labelledby={`titulo-${colecao.slug}`}>
       <CabecalhoSecao
         id={`titulo-${colecao.slug}`}
         rotulo="Coleção"
@@ -39,13 +47,9 @@ function CategoriasDaColecao({ colecao }) {
         link={{ rotulo: `Ver toda a coleção ${colecao.nome.toLowerCase()}`, para: `/${colecao.slug}` }}
       />
       {carregando ? (
-        <div className="grade-categorias">
-          {Array.from({ length: 4 }, (_, i) => (
-            <Esqueleto key={i} className="esqueleto--quadrado" />
-          ))}
-        </div>
+        <Carregando rotulo="Carregando categorias…" />
       ) : erro ? (
-        <EstadoErro erro={erro} onTentar={recarregar} titulo="Não conseguimos carregar as categorias." />
+        <EstadoErro sacola erro={erro} onTentar={recarregar} titulo="Não conseguimos carregar as categorias." />
       ) : dados.length === 0 ? (
         <EstadoVazio
           titulo="Nenhuma categoria nesta coleção ainda."

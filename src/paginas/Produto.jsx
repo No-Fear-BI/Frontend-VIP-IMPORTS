@@ -4,7 +4,9 @@ import { catalogoService } from '../services/catalogoService.js';
 import CabecalhoSecao from '../components/CabecalhoSecao.jsx';
 import { ErroGeral } from '../components/ui/Field.jsx';
 import Modal from '../components/ui/Modal.jsx';
-import { Esqueleto, EsqueletoGrade, EstadoErro } from '../components/Estados.jsx';
+import Carregando from '../components/Carregando.jsx';
+import DivisorOnda from '../components/DivisorOnda.jsx';
+import { EstadoErro } from '../components/Estados.jsx';
 import FormIdentificacao from '../components/FormIdentificacao.jsx';
 import { IconeCoracao, IconeWhatsApp } from '../components/Icones.jsx';
 import { CartaoProduto, Etiqueta, FotoProduto, QuantidadeProduto, rotuloCompra } from '../components/Produto.jsx';
@@ -32,11 +34,11 @@ export default function Produto() {
     };
   }, [produto]);
 
-  if (carregando) return <ProdutoEsqueleto />;
+  if (carregando) return <Carregando variante="pagina" rotulo="Carregando a peça…" />;
   if (erro) {
     return (
       <div className="container">
-        <EstadoErro erro={erro} onTentar={recarregar} titulo="Não conseguimos abrir esta peça." />
+        <EstadoErro sacola erro={erro} onTentar={recarregar} titulo="Não conseguimos abrir esta peça." />
       </div>
     );
   }
@@ -205,42 +207,26 @@ function Relacionados({ codigo }) {
     [codigo],
   );
 
-  // Vazio aqui não é um beco sem saída: a seção simplesmente não aparece.
+  // Vazio aqui não é um beco sem saída: a seção simplesmente não aparece, e a onda acima dela também não.
   if (!carregando && !erro && dados.length === 0) return null;
 
   return (
-    <section className="container secao" aria-labelledby="titulo-relacionados">
-      <CabecalhoSecao id="titulo-relacionados" rotulo="Continue olhando" titulo="Peças da mesma linha" />
-      {carregando ? (
-        <EsqueletoGrade quantidade={4} />
-      ) : erro ? (
-        <EstadoErro erro={erro} onTentar={recarregar} titulo="Não conseguimos carregar as sugestões." />
-      ) : (
-        <div className="grade-produtos">
-          {dados.slice(0, 4).map((produto) => (
-            <CartaoProduto key={produto.id} produto={produto} />
-          ))}
-        </div>
-      )}
-    </section>
-  );
-}
-
-function ProdutoEsqueleto() {
-  return (
-    <div className="container produto" aria-busy="true" aria-label="Carregando peça">
-      <Esqueleto className="esqueleto--linha" style={{ width: '25%', marginBlock: 'var(--espaco-10) var(--espaco-6)' }} />
-      <div className="produto__grade">
-        <Esqueleto className="esqueleto--foto" />
-        <div className="produto__info">
-          <Esqueleto className="esqueleto--linha esqueleto--curta" />
-          <Esqueleto className="esqueleto--titulo" style={{ width: '40%' }} />
-          <Esqueleto className="esqueleto--controle-compacto" style={{ width: '85%' }} />
-          <Esqueleto className="esqueleto--linha" style={{ width: '40%' }} />
-          <Esqueleto className="esqueleto--controle" style={{ marginTop: 'var(--espaco-10)' }} />
-          <Esqueleto className="esqueleto--controle" />
-        </div>
-      </div>
-    </div>
+    <>
+      <DivisorOnda />
+      <section className="container secao" aria-labelledby="titulo-relacionados">
+        <CabecalhoSecao id="titulo-relacionados" rotulo="Continue olhando" titulo="Você Também Pode Gostar" />
+        {carregando ? (
+          <Carregando rotulo="Carregando sugestões…" />
+        ) : erro ? (
+          <EstadoErro sacola erro={erro} onTentar={recarregar} titulo="Não conseguimos carregar as sugestões." />
+        ) : (
+          <div className="grade-produtos">
+            {dados.slice(0, 4).map((produto) => (
+              <CartaoProduto key={produto.id} produto={produto} />
+            ))}
+          </div>
+        )}
+      </section>
+    </>
   );
 }

@@ -3,7 +3,7 @@ import { useAcesso } from '../contexto/AcessoLoja.jsx';
 import { useSessaoCliente } from '../contexto/SessaoCliente.jsx';
 import { ErroApi } from '../lib/apiClient.js';
 import { acessoService } from '../services/acessoService.js';
-import { Esqueleto } from './Estados.jsx';
+import Carregando from './Carregando.jsx';
 import FormIdentificacao from './FormIdentificacao.jsx';
 import { IconeSeta } from './Icones.jsx';
 import Logo from './Logo.jsx';
@@ -32,16 +32,9 @@ const formatoDataLiberacao = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long
 
 const formatarLiberacao = (iso) => formatoDataLiberacao.format(new Date(iso));
 
+// Na abertura, o carregador do index.html está por cima deste até o acesso responder.
 export function PortaoCarregando() {
-  return (
-    <Moldura>
-      <div className="estado-carregando" aria-busy="true" aria-label="Verificando o acesso à loja">
-        <Esqueleto className="esqueleto--titulo" />
-        <Esqueleto className="esqueleto--controle" />
-        <Esqueleto className="esqueleto--controle" />
-      </div>
-    </Moldura>
-  );
+  return <Carregando variante="tela" rotulo="Carregando a loja…" />;
 }
 
 export default function PortaoAcesso() {

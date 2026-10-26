@@ -10,6 +10,16 @@
   </head>
   <body>
     <div id="raiz"></div>
+    <!-- Carregador enquanto o JavaScript baixa: a mesma marcação de src/components/Carregando.jsx
+         (o estilo vem do CSS do site). src/lib/carregadorInicial.js tira quando a primeira tela monta. -->
+    <div id="carregador-inicial" class="carregador carregador--tela" role="status">
+      <span class="carregador__palco" aria-hidden="true">
+        <span class="carregador__quadrado carregador__quadrado--rastro-fim"></span>
+        <span class="carregador__quadrado carregador__quadrado--rastro"></span>
+        <span class="carregador__quadrado carregador__quadrado--frente"></span>
+      </span>
+      <span class="carregador__rotulo t-label-caps t-muted">Carregando a loja…</span>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

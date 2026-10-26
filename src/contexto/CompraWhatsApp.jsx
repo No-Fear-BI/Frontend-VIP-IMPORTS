@@ -18,7 +18,7 @@ import { catalogoService } from '../services/catalogoService.js';
 import { selecoesService } from '../services/selecoesService.js';
 import { ErroGeral } from '../components/ui/Field.jsx';
 import Modal from '../components/ui/Modal.jsx';
-import { Esqueleto } from '../components/Estados.jsx';
+import Carregando from '../components/Carregando.jsx';
 import FormIdentificacao from '../components/FormIdentificacao.jsx';
 import { IconeWhatsApp } from '../components/Icones.jsx';
 import { FotoProduto, rotuloCompra } from '../components/Produto.jsx';
@@ -211,10 +211,7 @@ function ConteudoCompra({
         {etapa === 'escolha' && (
           <div className="compra__etapa">
             {!compra.detalhe && !compra.erro && (
-              <div className="estado-carregando" aria-busy="true">
-                <Esqueleto className="esqueleto--linha" style={{ width: '30%' }} />
-                <Esqueleto className="esqueleto--controle-compacto" />
-              </div>
+              <Carregando variante="compacto" rotulo="Carregando tamanhos e cores…" />
             )}
             {compra.erro && (
               <>
@@ -284,6 +281,7 @@ function ConteudoCompra({
 
         {etapa === 'processando' && (
           <div className="compra__etapa" aria-busy="true">
+            <Carregando variante="compacto" decorativo />
             <p className="t-body-lg">{compra.texto}</p>
           </div>
         )}

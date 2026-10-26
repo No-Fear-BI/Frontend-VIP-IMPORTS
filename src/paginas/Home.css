@@ -102,8 +102,7 @@
   padding-bottom: calc(var(--espaco-secao) + var(--espaco-10));
 }
 
-.hero--sem-banner .hero__texto,
-.hero[aria-busy='true'] .hero__texto {
+.hero--sem-banner .hero__texto {
   padding-bottom: var(--espaco-secao);
 }
 
@@ -176,25 +175,6 @@
 .hero__seta svg {
   width: var(--icone-md);
   height: var(--icone-md);
-}
-
-.hero__esqueleto {
-  display: block;
-  background: var(--cor-borda-sobre-primaria);
-}
-
-.hero__esqueleto--rotulo {
-  width: 20%;
-  height: var(--espaco-3);
-}
-
-.hero__esqueleto--titulo {
-  width: 80%;
-  height: var(--texto-3xl);
-}
-
-.hero__esqueleto--curto {
-  width: 55%;
 }
 
 /* ---- Coleções ---- */

@@ -3,7 +3,8 @@ import { clienteService } from '../services/clienteService.js';
 import { favoritosService } from '../services/favoritosService.js';
 import CabecalhoSecao from '../components/CabecalhoSecao.jsx';
 import Field, { ErroGeral } from '../components/ui/Field.jsx';
-import { EsqueletoGrade, Esqueleto, EstadoErro, EstadoVazio } from '../components/Estados.jsx';
+import Carregando from '../components/Carregando.jsx';
+import { EstadoErro, EstadoVazio } from '../components/Estados.jsx';
 import FormIdentificacao from '../components/FormIdentificacao.jsx';
 import { CartaoProduto } from '../components/Produto.jsx';
 import { useSessaoCliente } from '../contexto/SessaoCliente.jsx';
@@ -26,7 +27,7 @@ export default function Conta() {
     return (
       <div className="container conta">
         {topo}
-        <Esqueleto className="esqueleto--bloco" style={{ maxWidth: 'var(--largura-formulario)' }} />
+        <Carregando rotulo="Carregando sua conta…" />
       </div>
     );
   }
@@ -139,9 +140,9 @@ function Favoritos() {
     <section aria-labelledby="titulo-favoritos">
       <CabecalhoSecao id="titulo-favoritos" rotulo="Guardadas para depois" titulo="Favoritos" />
       {carregando && !dados ? (
-        <EsqueletoGrade quantidade={3} className="grade-produtos grade-produtos--conta" />
+        <Carregando rotulo="Carregando favoritos…" />
       ) : erro ? (
-        <EstadoErro erro={erro} onTentar={recarregar} titulo="Não conseguimos carregar seus favoritos." />
+        <EstadoErro sacola erro={erro} onTentar={recarregar} titulo="Não conseguimos carregar seus favoritos." />
       ) : dados.length === 0 ? (
         <EstadoVazio
           titulo="Nenhum favorito ainda."
