@@ -1,8 +1,10 @@
 // Os três estados obrigatórios de toda tela que busca dado (CLAUDE.md):
-// carregando (esqueleto), vazio (com saída) e erro (com "Tentar de novo").
+// carregando, vazio (com saída) e erro (com "Tentar de novo"). Carregando na loja é o
+// <Carregando> (Carregando.jsx); os esqueletos daqui são do painel.
 // As classes (.estado, .estado--vazio, .estado--erro, .estado-carregando, .esqueleto*) moram em src/styles/global.css.
 
 import { IconeAlerta } from './Icones.jsx';
+import SacolaErro from './SacolaErro.jsx';
 import Button from './ui/Button.jsx';
 
 export function EstadoVazio({ titulo, texto, acao }) {
@@ -15,11 +17,12 @@ export function EstadoVazio({ titulo, texto, acao }) {
   );
 }
 
-export function EstadoErro({ erro, onTentar, titulo = 'Não conseguimos carregar esta parte.' }) {
+// `sacola`: a sacola triste animada no lugar do ícone de alerta. A loja passa; o painel fica com o ícone.
+export function EstadoErro({ erro, onTentar, titulo = 'Não conseguimos carregar esta parte.', sacola = false }) {
   const naoEncontrado = erro?.status === 404;
   return (
     <div className="estado estado--erro" role="alert">
-      <IconeAlerta className="estado__icone" />
+      {sacola ? <SacolaErro /> : <IconeAlerta className="estado__icone" />}
       <h2 className="t-headline-md">{naoEncontrado ? 'Não encontramos o que você procura.' : titulo}</h2>
       <p className="estado__texto">
         {erro?.mensagem || 'Algo deu errado do nosso lado. Tente de novo em instantes.'}

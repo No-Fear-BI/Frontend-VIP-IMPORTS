@@ -1,0 +1,107 @@
+/* Onda entre as seções da home. Só var() de tokens.css. O desenho e o desfoque estão no SVG
+   (DivisorOnda.jsx); aqui ficam tamanho, cor, máscara das pontas e o movimento. */
+
+.onda {
+  position: relative;
+  height: var(--altura-onda);
+  margin-block: var(--margem-onda);
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+  /* Pontas somem no papel, em vez de a onda bater na borda da tela. */
+  -webkit-mask-image: var(--mascara-onda);
+  mask-image: var(--mascara-onda);
+  /* A linha do tempo da rolagem é a da própria onda passando pela tela (ver .onda__desenho). */
+  view-timeline: --onda-na-tela;
+}
+
+/* Camada das três faixas: é ela que se revela com a rolagem, separada da máscara das pontas. */
+.onda__desenho {
+  position: absolute;
+  inset: 0;
+}
+
+.onda--espelhada {
+  transform: scaleX(-1);
+}
+
+/* 200% da largura: a segunda metade repete a primeira, e deslizar −50% fecha o ciclo sem emenda.
+   Só transform anima, então a onda roda no compositor e não disputa a thread principal. */
+.onda__camada {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 100%;
+  overflow: visible;
+  will-change: transform;
+  animation: onda-desliza var(--duracao-onda-faixa) linear infinite;
+  animation-delay: calc(var(--onda-fase, 0) * var(--atraso-onda) * -1);
+}
+
+.onda__camada--nevoa {
+  animation-duration: var(--duracao-onda-nevoa);
+  animation-direction: reverse;
+}
+
+.onda__camada--fio {
+  animation-duration: var(--duracao-onda-fio);
+}
+
+.onda--parada .onda__camada {
+  animation-play-state: paused;
+}
+
+.onda__cor--luz {
+  stop-color: var(--cor-onda-luz);
+}
+
+.onda__cor--corpo {
+  stop-color: var(--cor-onda-corpo);
+}
+
+/* A onda se completa com a rolagem: uma máscara de ponta esfumaçada cresce da esquerda para a
+   direita do momento em que a onda entra por baixo até o meio dela chegar ao meio da tela, e volta
+   ao rolar para cima. Sem suporte a animation-timeline (hoje, o Firefox) ou com movimento reduzido,
+   nada disso se aplica e a onda aparece inteira, como antes. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .onda__desenho {
+      -webkit-mask-image: var(--mascara-onda-avanco);
+      mask-image: var(--mascara-onda-avanco);
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      animation: onda-completa linear both;
+      animation-timeline: --onda-na-tela;
+      animation-range: entry 0% cover 50%;
+    }
+  }
+}
+
+@keyframes onda-completa {
+  from {
+    -webkit-mask-size: 0% 100%;
+    mask-size: 0% 100%;
+  }
+  to {
+    -webkit-mask-size: 135% 100%;
+    mask-size: 135% 100%;
+  }
+}
+
+@keyframes onda-desliza {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Animações desativadas no sistema: a onda fica, parada. */
+@media (prefers-reduced-motion: reduce) {
+  .onda__camada {
+    animation: none;
+    will-change: auto;
+  }
+}

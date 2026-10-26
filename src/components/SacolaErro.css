@@ -1,0 +1,206 @@
+/* Sacola triste do estado de erro (SacolaErro.jsx). Só var() de tokens.css.
+ *
+ * Um ciclo de 150 quadros a 29,97 fps, em loop. As porcentagens são os quadros do Lottie de
+ * referência divididos por 150, e a curva de cada trecho vai no quadro onde ele começa:
+ *   giro   0 → −21° (q. 0–8) → 185,2° (8–26) → 180° (26–30), parada de cabeça para baixo,
+ *          → 200° (98,8–103,8) → −5° (103,8–124,2) → 0° (124,2–127);
+ *   boca   se desenha em 36–46,6 e se apaga em 86,8–95,8;
+ *   olhos  se desenham a partir do 42 (esquerdo até 50, direito até 55) e se apagam em
+ *          86,8–96,8 (esquerdo) e 88,8–98,8 (direito).
+ * Traço que "se desenha" = stroke-dashoffset de 1 a 0 com pathLength="1"; a opacidade some com a
+ * ponta redonda quando o traço está todo apagado.
+ */
+
+.sacola-erro {
+  flex: none;
+  width: var(--tamanho-sacola-erro);
+  height: var(--tamanho-sacola-erro);
+}
+
+.sacola-erro__fundo {
+  fill: var(--cor-sacola-fundo);
+}
+
+.sacola-erro__giro {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+  animation: sacola-vira var(--duracao-sacola-erro) infinite;
+}
+
+.sacola-erro__dentro,
+.sacola-erro__corpo,
+.sacola-erro__alca {
+  stroke: var(--cor-sacola-contorno);
+  stroke-width: 2;
+  stroke-linejoin: miter;
+}
+
+.sacola-erro__dentro {
+  fill: var(--cor-sacola-dentro);
+}
+
+.sacola-erro__corpo {
+  fill: var(--cor-sacola);
+}
+
+.sacola-erro__alca {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.sacola-erro__rosto {
+  fill: none;
+  stroke: var(--cor-sacola-rosto);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1 1;
+  animation-duration: var(--duracao-sacola-erro);
+  animation-iteration-count: infinite;
+}
+
+.sacola-erro__boca {
+  animation-name: sacola-boca;
+}
+
+.sacola-erro__olho-esquerdo {
+  animation-name: sacola-olho-esquerdo;
+}
+
+.sacola-erro__olho-direito {
+  animation-name: sacola-olho-direito;
+}
+
+@keyframes sacola-vira {
+  0% {
+    transform: rotate(0deg);
+    animation-timing-function: cubic-bezier(0.167, 0.167, 0.667, 1);
+  }
+  5.333% {
+    transform: rotate(-21deg);
+    animation-timing-function: cubic-bezier(0.167, 0.167, 0.667, 1);
+  }
+  17.333% {
+    transform: rotate(185.2deg);
+    animation-timing-function: linear;
+  }
+  20%,
+  65.885% {
+    transform: rotate(180deg);
+    animation-timing-function: cubic-bezier(0.167, 0.167, 0.667, 1);
+  }
+  69.219% {
+    transform: rotate(200deg);
+    animation-timing-function: cubic-bezier(0.167, 0.167, 0.667, 1);
+  }
+  82.813% {
+    transform: rotate(-5deg);
+    animation-timing-function: cubic-bezier(0.333, 0, 0.833, 0.833);
+  }
+  84.667%,
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes sacola-boca {
+  0%,
+  23.9% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  24% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.167, 0.167, 0.667, 1);
+  }
+  31.047%,
+  57.885% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.167, 0.167, 0.667, 1);
+  }
+  63.885% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+  63.95%,
+  100% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+}
+
+@keyframes sacola-olho-esquerdo {
+  0%,
+  27.9% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  28% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.333, 0, 0.833, 0.833);
+  }
+  33.327%,
+  57.885% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.167, 0, 0.833, 0.833);
+  }
+  64.552% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+  64.6%,
+  100% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+}
+
+@keyframes sacola-olho-direito {
+  0%,
+  27.9% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  28% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.333, 0, 0.833, 0.833);
+  }
+  36.667%,
+  59.219% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.167, 0, 0.833, 0.833);
+  }
+  65.885% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+  65.95%,
+  100% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+}
+
+/* Animações desativadas no sistema: a sacola fica parada no quadro que diz "erro" — de cabeça
+   para baixo, com a cara triste. */
+@media (prefers-reduced-motion: reduce) {
+  .sacola-erro__giro,
+  .sacola-erro__rosto {
+    animation: none;
+  }
+
+  .sacola-erro__giro {
+    transform: rotate(180deg);
+  }
+
+  .sacola-erro__rosto {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}

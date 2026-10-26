@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 /**
  * Vira `true` na primeira vez que o elemento entra na tela e não volta mais a `false`.
  * Serve só para movimento disparado pelo scroll que acontece uma vez (hoje: o filete do
- * cabeçalho de seção se desenhando). Não use para fade-up de cartão ou texto.
+ * cabeçalho de seção se desenhando). Cartão de produto aparecendo na rolagem é outro hook
+ * (useAparecerNaRolagem); texto corrido não ganha fade-up.
  */
 export function useVisivelUmaVez({ margem = '0px 0px -10% 0px' } = {}) {
   const ref = useRef(null);

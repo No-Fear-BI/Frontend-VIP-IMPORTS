@@ -1,0 +1,142 @@
+/* Carregador da loja (Carregando.jsx). Só var() de tokens.css.
+ *
+ * Três quadrados no mesmo lugar: a frente por cima e dois de rastro por baixo. A frente desliza
+ * para a direita, para, volta girando 90° e para de novo; os de rastro fazem o mesmo caminho 1 e
+ * 2 quadros depois (1/24 s cada), e é a diferença que aparece como rastro nos trechos rápidos.
+ * Tempos e curvas vêm do Lottie de referência, quadro a quadro (ciclo de 46 quadros a 24 fps,
+ * tocado em 45): ida 0 → 18,4, pausa até 20,24, volta até 42,93; o giro vai de 20 a 43. Quadrado
+ * de 200 com raio 64 (32%) e percurso de 560, ou 2,8 vezes o lado.
+ */
+
+.carregador {
+  /* Lado do quadrado; cada variante troca. É ele que dita o tamanho do palco e o percurso. */
+  --carregador-lado: var(--tamanho-carregador);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaco-4);
+  width: 100%;
+  min-height: var(--altura-carregador-bloco);
+  /* Resposta rápida não pisca: o carregador só aparece se a espera passar do atraso. */
+  animation: carregador-surge var(--duracao-media) var(--curva-padrao) var(--atraso-carregador) backwards;
+}
+
+.carregador--pagina {
+  min-height: var(--altura-minima-conteudo);
+}
+
+/* Abertura do site: cobre a tela inteira e aparece na hora (a alternativa é a tela em branco). */
+.carregador--tela {
+  --carregador-lado: var(--tamanho-carregador-tela);
+  position: fixed;
+  inset: 0;
+  z-index: var(--camada-carregador);
+  min-height: 0;
+  background: var(--cor-superficie);
+  animation: none;
+}
+
+.carregador--compacto {
+  --carregador-lado: var(--tamanho-carregador-compacto);
+  display: inline-flex;
+  flex-direction: row;
+  width: auto;
+  min-height: 0;
+  gap: var(--espaco-2);
+}
+
+.carregador__palco {
+  position: relative;
+  flex: none;
+  width: calc(var(--carregador-lado) * 3.8);
+  height: var(--carregador-lado);
+}
+
+.carregador__quadrado {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--carregador-lado);
+  height: var(--carregador-lado);
+  border-radius: var(--raio-carregador);
+  background: var(--cor-carregador-frente);
+  animation:
+    carregador-desliza var(--duracao-carregador) infinite,
+    carregador-gira var(--duracao-carregador) infinite;
+}
+
+.carregador__quadrado--rastro {
+  background: var(--cor-carregador-rastro);
+  animation-delay: var(--atraso-rastro-carregador);
+}
+
+.carregador__quadrado--rastro-fim {
+  background: var(--cor-carregador-rastro-fim);
+  animation-delay: calc(2 * var(--atraso-rastro-carregador));
+}
+
+/* O texto é para leitor de tela; com movimento reduzido ele aparece (ver abaixo). */
+.carregador__rotulo {
+  position: absolute;
+  width: var(--borda-fina);
+  height: var(--borda-fina);
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@keyframes carregador-surge {
+  from {
+    opacity: 0;
+  }
+}
+
+/* A curva de cada trecho vai no quadro onde ele começa. */
+@keyframes carregador-desliza {
+  0% {
+    translate: 0;
+    animation-timing-function: cubic-bezier(1, 0, 0.435, 1);
+  }
+  40%,
+  44% {
+    translate: calc(var(--carregador-lado) * 2.8);
+    animation-timing-function: cubic-bezier(0.398, 0, 0.707, 1);
+  }
+  93.33%,
+  100% {
+    translate: 0;
+  }
+}
+
+@keyframes carregador-gira {
+  0%,
+  43.48% {
+    rotate: 0deg;
+    animation-timing-function: cubic-bezier(0.794, 0, 0.176, 1);
+  }
+  93.48%,
+  100% {
+    rotate: 90deg;
+  }
+}
+
+/* Animações desativadas no sistema: um quadrado parado e o texto "Carregando…" visível. */
+@media (prefers-reduced-motion: reduce) {
+  .carregador__quadrado {
+    animation: none;
+  }
+
+  .carregador__palco {
+    width: var(--carregador-lado);
+  }
+
+  .carregador__rotulo {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+  }
+}

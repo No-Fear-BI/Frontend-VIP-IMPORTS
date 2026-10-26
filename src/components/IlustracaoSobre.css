@@ -1,0 +1,7 @@
+/* Ilustração da página Sobre (IlustracaoSobre.jsx). Só var() de tokens.css. O SVG é do lottie-web,
+   que ocupa a caixa toda mantendo a proporção. */
+
+.ilustracao-sobre {
+  width: 100%;
+  aspect-ratio: var(--proporcao-ilustracao-sobre);
+}

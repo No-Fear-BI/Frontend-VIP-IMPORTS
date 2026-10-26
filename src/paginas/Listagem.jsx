@@ -12,7 +12,8 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { catalogoService } from '../services/catalogoService.js';
 import { ErroGeral } from '../components/ui/Field.jsx';
 import Modal from '../components/ui/Modal.jsx';
-import { EsqueletoGrade, EstadoErro, EstadoVazio } from '../components/Estados.jsx';
+import Carregando from '../components/Carregando.jsx';
+import { EstadoErro, EstadoVazio } from '../components/Estados.jsx';
 import { IconeFiltro } from '../components/Icones.jsx';
 import { CartaoProduto } from '../components/Produto.jsx';
 import { useRequisicao } from '../hooks/useRequisicao.js';
@@ -175,9 +176,9 @@ export default function Listagem({ modo, colecaoFixa }) {
 
         <section className="listagem__resultados" aria-label="Peças">
           {primeiraPagina.carregando ? (
-            <EsqueletoGrade quantidade={9} className="grade-produtos grade-produtos--listagem" />
+            <Carregando rotulo="Carregando peças…" />
           ) : primeiraPagina.erro ? (
-            <EstadoErro erro={primeiraPagina.erro} onTentar={primeiraPagina.recarregar} />
+            <EstadoErro sacola erro={primeiraPagina.erro} onTentar={primeiraPagina.recarregar} />
           ) : produtos.length === 0 ? (
             <EstadoVazio
               titulo={
@@ -226,7 +227,16 @@ export default function Listagem({ modo, colecaoFixa }) {
                     onClick={carregarMais}
                     disabled={maisPaginas.carregando}
                   >
-                    {maisPaginas.carregando ? 'Carregando…' : maisPaginas.erro ? 'Tentar de novo' : 'Carregar mais peças'}
+                    {maisPaginas.carregando ? (
+                      <>
+                        <Carregando variante="compacto" decorativo />
+                        Carregando…
+                      </>
+                    ) : maisPaginas.erro ? (
+                      'Tentar de novo'
+                    ) : (
+                      'Carregar mais peças'
+                    )}
                   </Button>
                 )}
               </div>
@@ -313,7 +323,7 @@ function PainelFiltros({
       {filtros.colecao && (
         <fieldset className="filtros__grupo">
           <legend className="t-label-caps">Categoria</legend>
-          {categorias.carregando && <p className="t-body-sm t-muted">Carregando…</p>}
+          {categorias.carregando && <Carregando variante="compacto" rotulo="Carregando categorias…" />}
           {categorias.erro && (
             <button type="button" className="link-caps" onClick={categorias.recarregar}>
               Tentar de novo
@@ -347,7 +357,7 @@ function PainelFiltros({
       {modo !== 'marca' && (
         <fieldset className="filtros__grupo">
           <legend className="t-label-caps">Marca</legend>
-          {marcas.carregando && <p className="t-body-sm t-muted">Carregando…</p>}
+          {marcas.carregando && <Carregando variante="compacto" rotulo="Carregando marcas…" />}
           {marcas.erro && (
             <button type="button" className="link-caps" onClick={marcas.recarregar}>
               Tentar de novo
@@ -371,7 +381,7 @@ function PainelFiltros({
       {/* Sem `modo !== 'marca'`: cor faz sentido até dentro da página de uma marca. */}
       <fieldset className="filtros__grupo">
         <legend className="t-label-caps">Cor</legend>
-        {cores.carregando && <p className="t-body-sm t-muted">Carregando…</p>}
+        {cores.carregando && <Carregando variante="compacto" rotulo="Carregando cores…" />}
         {cores.erro && (
           <button type="button" className="link-caps" onClick={cores.recarregar}>
             Tentar de novo
