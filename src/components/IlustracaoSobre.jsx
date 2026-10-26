@@ -81,10 +81,7 @@ function recortar(dados) {
 
 // Troca toda cor sólida (preenchimento e traço) pelo tom da marca de mesma claridade.
 function recolorir(dados) {
-  const estilo = getComputedStyle(document.documentElement);
-  const rampa = ['--cor-ilustracao-escura', '--cor-ilustracao-clara', '--cor-ilustracao-luz'].map((nome) =>
-    hexParaRgb(estilo.getPropertyValue(nome)),
-  );
+  const rampa = ['--cor-ilustracao-escura', '--cor-ilustracao-clara', '--cor-ilustracao-luz'].map(corDoToken);
 
   const formas = (itens) => {
     for (const item of itens) {
@@ -118,7 +115,14 @@ function misturar(a, b, t) {
   return a.map((v, i) => v + (b[i] - v) * p);
 }
 
-function hexParaRgb(hex) {
-  const n = parseInt(hex.trim().slice(1), 16);
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => v / 255);
+// Cor do token em [r, g, b] de 0 a 1. Quem converte é o navegador (color de um elemento de sonda,
+// que sai sempre como rgb()), e não uma leitura do texto do token: no build, o minificador do CSS
+// encurta #ffffff para #fff, e ler isso como hex de 6 dígitos dava azul (26/10/2026).
+function corDoToken(nome) {
+  const sonda = document.createElement('span');
+  sonda.style.color = `var(${nome})`;
+  document.body.appendChild(sonda);
+  const [r, g, b] = getComputedStyle(sonda).color.match(/[\d.]+/g).map(Number);
+  sonda.remove();
+  return [r, g, b].map((v) => v / 255);
 }

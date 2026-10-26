@@ -137,6 +137,6 @@ Nenhum componente da loja lê pedido. Backend: migração 0021 e `docs/para-o-fr
 ## Sobre: ilustração animada (26/10/2026)
 
 - `src/components/IlustracaoSobre.jsx` toca `src/assets/animacoes/sobre-equipe.json` (Lottie, sem mudança) com `lottie-web/build/player/lottie_light` (fixado em 5.12.2), os dois por `import()` dentro do componente: só o Sobre baixa. Não importe o `lottie-web` em outro lugar sem necessidade: o carregador e a sacola de erro são CSS puro de propósito.
-- Cores: na carga, cada cor sólida do JSON vira um tom da rampa `--cor-ilustracao-escura` → `-clara` → `-luz` pela claridade (L*). Não edite cores no JSON.
+- Cores: na carga, cada cor sólida do JSON vira um tom da rampa `--cor-ilustracao-escura` → `-clara` → `-luz` pela claridade (L*). Não edite cores no JSON. Para ler a cor de um token em JS, use um elemento de sonda com `color: var(--token)` e o `rgb()` de `getComputedStyle` (`corDoToken`); nunca interprete o texto do token: o build minifica `#ffffff` para `#fff`, e ler isso como hex de 6 dígitos deu azul em produção.
 - Recorte `RECORTE` no componente casado com o token `--proporcao-ilustracao-sobre`; ao mudar, meça o desenho em todos os quadros (a mão que acena passa da borda no quadro 71). Pausa fora da tela, `destroy()` ao desmontar, parada no primeiro quadro com `prefers-reduced-motion`.
 - Registro completo em `docs/decisoes-frontend.md`, seção 36.
