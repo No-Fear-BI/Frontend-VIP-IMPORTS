@@ -211,7 +211,7 @@
   align-items: flex-start;
   gap: var(--espaco-3);
   padding-top: var(--espaco-8);
-  border-top: var(--borda-fina) solid var(--cor-borda);
+  border-top: var(--borda-fina) solid var(--cor-separador);
 }
 
 .portao__conta p {

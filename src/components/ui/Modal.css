@@ -8,6 +8,9 @@
   color: var(--cor-texto);
   box-shadow: var(--sombra);
   overflow: auto;
+  /* O <dialog> herda do lugar onde está no HTML, mesmo aberto por cima de tudo: aberto de dentro
+     de uma célula com nowrap (ações da lista de produtos), o texto não quebrava e saía cortado. */
+  white-space: normal;
 }
 
 .modal[open] {

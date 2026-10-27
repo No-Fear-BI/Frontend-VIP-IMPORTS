@@ -40,6 +40,44 @@
   }
 }
 
+/* Botões redondos de passar fotos (docs/decisoes-frontend.md, seção 40), um de cada lado, no meio
+   da altura da foto. Redondos como todo botão (--raio-botao, seção 41). */
+.produto__palco {
+  position: relative;
+}
+
+.produto__passar {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  width: var(--altura-controle-compacto);
+  height: var(--altura-controle-compacto);
+  border: var(--borda-fina) solid var(--cor-borda-passar-foto);
+  border-radius: var(--raio-botao);
+  background: var(--cor-fundo-passar-foto);
+  color: var(--cor-sobre-primaria);
+  transition: background-color var(--duracao-rapida) var(--curva-padrao);
+}
+
+.produto__passar:hover {
+  background: var(--cor-primaria);
+}
+
+.produto__passar svg {
+  width: var(--icone-md);
+  height: var(--icone-md);
+}
+
+.produto__passar--anterior {
+  left: var(--espaco-4);
+}
+
+.produto__passar--proxima {
+  right: var(--espaco-4);
+}
+
 .produto__miniaturas {
   display: grid;
   grid-template-columns: repeat(auto-fill, var(--largura-miniatura));

@@ -102,6 +102,17 @@
   padding-bottom: calc(var(--espaco-secao) + var(--espaco-10));
 }
 
+/* No carrossel, o texto sobe para o meio da altura do banner, alinhado com as setas das laterais
+   (docs/decisoes-frontend.md, seção 43). Continua à esquerda, no container. */
+.hero__slide .hero__texto {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  translate: 0 -50%;
+  padding-bottom: 0;
+}
+
 .hero--sem-banner .hero__texto {
   padding-bottom: var(--espaco-secao);
 }
@@ -115,14 +126,18 @@
   margin-top: var(--espaco-2);
 }
 
+/* Contador e barra de tempo centralizados no pé do banner (docs/decisoes-frontend.md, seção 43).
+   As setas ficam fora desta linha, nas laterais do banner. A linha mantém a altura das setas, que
+   moravam nela, para o contador ficar na mesma altura de antes. */
 .hero__controles {
   position: absolute;
   left: 0;
   right: 0;
   bottom: var(--espaco-6);
-  margin-inline: auto;
+  min-height: var(--altura-controle-compacto);
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--espaco-2);
 }
 
@@ -136,7 +151,6 @@
   position: relative;
   width: var(--espaco-secao);
   height: var(--borda-fina);
-  margin-right: var(--espaco-4);
   background: var(--cor-borda-sobre-primaria);
   overflow: hidden;
 }
@@ -158,18 +172,39 @@
   }
 }
 
+/* O mesmo botão redondo de passar fotos do produto (Produto.css, .produto__passar): círculo verde
+   preenchido com contorno creme, que aparece sobre qualquer banner (docs/decisoes-frontend.md,
+   seção 42). */
 .hero__seta {
   display: grid;
   place-items: center;
   width: var(--altura-controle-compacto);
   height: var(--altura-controle-compacto);
-  border: var(--borda-fina) solid var(--cor-borda-sobre-primaria);
+  border: var(--borda-fina) solid var(--cor-borda-passar-foto);
+  border-radius: var(--raio-botao);
+  background: var(--cor-fundo-passar-foto);
   color: var(--cor-sobre-primaria);
-  transition: border-color var(--duracao-rapida) var(--curva-padrao);
+  transition: background-color var(--duracao-rapida) var(--curva-padrao);
 }
 
 .hero__seta:hover {
-  border-color: var(--cor-sobre-primaria);
+  background: var(--cor-primaria);
+}
+
+/* Uma em cada lateral do banner, no meio da altura, como o botão de passar fotos do produto. */
+.hero__seta--anterior,
+.hero__seta--proxima {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+}
+
+.hero__seta--anterior {
+  left: var(--espaco-6);
+}
+
+.hero__seta--proxima {
+  right: var(--espaco-6);
 }
 
 .hero__seta svg {
@@ -194,10 +229,6 @@
   .hero__controles {
     bottom: var(--espaco-4);
   }
-
-  .hero__progresso {
-    margin-right: 0;
-  }
 }
 
 @media (max-width: 767px) {
@@ -208,11 +239,13 @@
 }
 
 /* Sem foto: creme com texto verde (combinação oficial "verde sobre creme").
-   Com foto: degradê verde e texto creme. */
+   Com foto: degradê verde e texto creme.
+   Vertical, 4:5 (docs/decisoes-frontend.md, seção 45); a altura mínima é só o piso. */
 .painel-colecao {
   position: relative;
   display: grid;
   align-items: end;
+  aspect-ratio: var(--proporcao-painel-colecao);
   min-height: var(--altura-painel-colecao);
   padding: var(--espaco-10);
   overflow: hidden;
@@ -325,13 +358,39 @@
   }
 }
 
-/* Nome centralizado no cartão de marca. Borda e hover vêm do Card (ui/Card.css). */
+/* Nome centralizado no cartão de marca. A borda vem do Card (ui/Card.css). */
 .cartao-marca {
   align-items: center;
   justify-content: center;
   gap: var(--espaco-1);
   min-height: var(--altura-cartao-marca);
   text-align: center;
+}
+
+/* Troca de cor no hover e no foco (docs/decisoes-frontend.md, seção 46): o cartão enche de verde
+   e o texto fica creme, a combinação oficial creme sobre verde. `.cartao.` para passar na frente
+   da transição do Card, que só cuida da borda. */
+.cartao.cartao-marca {
+  transition:
+    background-color var(--duracao-media) var(--curva-suave),
+    border-color var(--duracao-media) var(--curva-suave),
+    color var(--duracao-media) var(--curva-suave);
+}
+
+.cartao.cartao-marca:hover,
+.cartao.cartao-marca:focus-visible {
+  background: var(--cor-primaria);
+  border-color: var(--cor-primaria);
+  color: var(--cor-sobre-primaria);
+}
+
+.cartao-marca .t-muted {
+  transition: color var(--duracao-media) var(--curva-suave);
+}
+
+.cartao-marca:hover .t-muted,
+.cartao-marca:focus-visible .t-muted {
+  color: var(--cor-sobre-primaria-suave);
 }
 
 /* ---- CTA final ---- */

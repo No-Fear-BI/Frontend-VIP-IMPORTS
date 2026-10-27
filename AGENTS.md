@@ -140,3 +140,71 @@ Nenhum componente da loja lê pedido. Backend: migração 0021 e `docs/para-o-fr
 - Cores: na carga, cada cor sólida do JSON vira um tom da rampa `--cor-ilustracao-escura` → `-clara` → `-luz` pela claridade (L*). Não edite cores no JSON. Para ler a cor de um token em JS, use um elemento de sonda com `color: var(--token)` e o `rgb()` de `getComputedStyle` (`corDoToken`); nunca interprete o texto do token: o build minifica `#ffffff` para `#fff`, e ler isso como hex de 6 dígitos deu azul em produção.
 - Recorte `RECORTE` no componente casado com o token `--proporcao-ilustracao-sobre`; ao mudar, meça o desenho em todos os quadros (a mão que acena passa da borda no quadro 71). Pausa fora da tela, `destroy()` ao desmontar, parada no primeiro quadro com `prefers-reduced-motion`.
 - Registro completo em `docs/decisoes-frontend.md`, seção 36.
+
+## Cabeçalho da loja em verde (27/10/2026)
+
+- `src/components/Cabecalho.jsx`: o `<header>` tem `faixa-primaria` (fundo `--cor-primaria`, texto `--cor-sobre-primaria`, foco em creme) e o logo é `<Logo tom="creme" />`. Não volte a pôr `background` em `.cabecalho`: o CSS do componente carrega depois do global e ganharia da `faixa-primaria`.
+- Filete inferior fixo em `--cor-borda-sobre-primaria` (não há mais estado `rolou`). Selo de contagem em creme com número verde; barra de busca sem fundo próprio, no verde do cabeçalho. A gaveta do menu do celular continua em papel, com logo verde.
+- Registro completo em `docs/decisoes-frontend.md`, seção 37.
+
+## Cabeçalho: janela de Categorias e Marcas (27/10/2026)
+
+- `src/components/MenuSuspenso.jsx` (conteúdo) + `ItemComSuspenso` em `Cabecalho.jsx` (abrir/fechar). Item com janela = `suspenso: 'marcas' | 'categorias'` no `MENU`. Fecha 200ms depois de o mouse sair (`ATRASO_FECHAR_SUSPENSO_MS`), na troca de rota e com Esc; seta para baixo abre pelo teclado.
+- Mesmos dados e destinos das páginas: marcas de `GET /marcas` → `/marcas/:slug`; categorias de `GET /colecoes/:slug/categorias` (Feminina, Masculina) → `/produtos?colecao=…&categoria=…`. "Ver todas" → `/marcas` ou `/categorias`. A busca só acontece na primeira abertura.
+- `.cabecalho__nav > ul` (com `>`): sem ele, a regra do menu pega também a lista da janela. O `<li>` com janela ocupa a altura toda do cabeçalho; é isso que encosta a janela na base dele.
+- Registro completo em `docs/decisoes-frontend.md`, seção 38.
+
+## Cartão de produto em destaque no hover (27/10/2026)
+
+- `CartaoProduto` passa `degrade` à `FotoProduto`; em `Produto.css`, o degradê do cartão é `--degrade-destaque-produto` (mais leve que `--degrade-sobre-foto`, que segue no hero/coleções/categorias) e fica invisível até `.cartao-produto:hover` (1000ms), e os filhos do cartão sobem `--deslocamento-destaque-cartao` (6px, 700ms), só em `@media (hover: hover)`. Zoom da foto e sublinhado do código também respondem ao cartão todo.
+- Use `translate` (não `transform`) e mova os filhos (não o `<article>`): `transform` brigaria com o aparecer na rolagem, e mover o próprio cartão faz o hover tremer na borda de baixo.
+- Registro completo em `docs/decisoes-frontend.md`, seção 39.
+
+## Página do produto: botões redondos de passar fotos (27/10/2026)
+
+- `paginas/Produto.jsx`: com mais de uma foto, `.produto__passar--anterior`/`--proxima` sobre a foto principal (círculo de 44px, `--cor-fundo-passar-foto` + `--cor-borda-passar-foto`, `IconeChevronEsquerda/Direita` em creme; hover em `--cor-primaria`). `passarFoto(±1)` dá a volta.
+- Os botões ficam em `.produto__palco`, FORA da `.produto__foto-principal`: dentro dela, o hover no botão dispararia a lupa da foto.
+- O círculo é exceção registrada no DESIGN.md (Shapes); não use raio `full` em outros botões.
+- Registro completo em `docs/decisoes-frontend.md`, seção 40.
+
+## Botões em formato de pílula (27/10/2026)
+
+- Todo botão com caixa visível usa `border-radius: var(--raio-botao)` (9999px: pílula no botão largo, círculo no quadrado de 44px). Já aplicado em `.botao`, `.hero__seta`, `.seletor-variacao`, `.admin-pedidos__filtro-opcao`, `.botao-icone` e `.produto__passar`. Botão novo com fundo ou contorno usa o mesmo token.
+- Continua com `var(--raio)` (reto): foto, miniatura, campo, cartão, modal, gaveta, menu suspenso, etiqueta, aviso.
+- Registro completo em `docs/decisoes-frontend.md`, seção 41.
+
+## Setas do hero iguais ao botão de passar fotos (27/10/2026)
+
+- `.hero__seta` (`paginas/Home.css`) usa os mesmos tokens e ícones do `.produto__passar`: `--cor-fundo-passar-foto`, `--cor-borda-passar-foto`, `IconeChevronEsquerda/Direita`, hover em `--cor-primaria`. Mudou um, mude o outro.
+- Registro completo em `docs/decisoes-frontend.md`, seção 42.
+
+## Hero: texto e setas no meio da altura, barra de tempo no pé (27/10/2026)
+
+- `.hero__controles` (`paginas/Home.css`) ocupa a largura toda do banner, sem `.container`, e tem só contador e barra de tempo, centralizados no pé. As setas (`.hero__seta--anterior` / `--proxima`) são filhas diretas do `.hero`, uma em cada lateral, no meio da altura. O texto do hero continua à esquerda (título com `--medida-titulo`), mas no carrossel `.hero__slide .hero__texto` fica no meio da altura (`top: 50%` + `translate`), alinhado com as setas.
+- Registro completo em `docs/decisoes-frontend.md`, seção 43.
+
+## Linhas de separação sem cor (27/10/2026)
+
+- Toda linha de separação da loja (filete `<hr>`, traço sob título de seção, `border-top`/`-bottom`/`-block` entre blocos e itens, filetes da faixa verde) usa `--cor-separador` ou `--cor-separador-sobre-primaria`, os dois `transparent`: o espaço fica, a linha não aparece. Separação nova não desenha linha; use o mesmo espaço (ou esses tokens). Contorno de caixa, barrinha de destaque à esquerda e o painel continuam como estão.
+- Registro completo em `docs/decisoes-frontend.md`, seção 44.
+
+## Cards de coleção da home em 4:5 (27/10/2026)
+
+- `.painel-colecao` (`paginas/Home.css`) usa `aspect-ratio: var(--proporcao-painel-colecao)` (4 / 5), com `--altura-painel-colecao` como piso. A imagem do card no painel (Categorias → "Imagem do card") recomenda 4:5 e mostra a prévia em 4:5; mudou a proporção do card, mude a recomendação e a prévia junto.
+- Registro completo em `docs/decisoes-frontend.md`, seção 45.
+
+## Cartão de marca troca de cor no hover (27/10/2026)
+
+- `.cartao.cartao-marca` (`paginas/Home.css`): no hover e no `:focus-visible`, fundo e borda `--cor-primaria`, nome `--cor-sobre-primaria`, contagem `--cor-sobre-primaria-suave`, em 220ms. Vale na home e em `/marcas` (mesmo `GradeMarcas`).
+- Registro completo em `docs/decisoes-frontend.md`, seção 46.
+
+## Painel: símbolos no menu (27/10/2026)
+
+- Cada grupo e cada tela do `MENU_ADMIN` (`paginas/admin/EstruturaAdmin.jsx`) tem `icone`, um componente de `components/Icones.jsx` (traço 1,25px, `currentColor`), desenhado a 16px por `.admin__icone`. Tela nova no painel ganha um `icone` também.
+- Registro completo em `docs/decisoes-frontend.md`, seção 47.
+
+## Painel: Duplicar com símbolo de cópia (27/10/2026)
+
+- `BotaoIcone` aceita `acao="duplicar"` (`IconeCopiar`); a lista de Produtos usa isso no lugar do texto. O botão "Duplicar" da tela do produto tem o desenho antes do texto.
+- `.modal` tem `white-space: normal`: o `<dialog>` herda do pai no HTML, e as ações da lista ficam numa célula com `nowrap`.
+- Registro completo em `docs/decisoes-frontend.md`, seção 48.

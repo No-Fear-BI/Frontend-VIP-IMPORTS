@@ -17,7 +17,7 @@
 }
 
 /* Zoom de 1,04 no hover. A vitrine corta o excesso. */
-.cartao-produto__link:hover .vitrine-foto img,
+.cartao-produto:hover .vitrine-foto img,
 .cartao-categoria:hover .vitrine-foto img {
   transform: scale(var(--escala-hover));
 }
@@ -54,6 +54,36 @@
 
 /* ---- Cartão de produto: sem fundo, sem borda, sem sombra ---- */
 
+/*
+ * Destaque no hover (docs/decisoes-frontend.md, seção 39): o cartão inteiro é um alvo só. Ele sobe
+ * um pouco e a foto ganha um degradê verde leve, só embaixo (--degrade-destaque-produto, mais leve
+ * que o do cartão de categoria). A subida leva 700ms e o degradê 1000ms, no ritmo do zoom da
+ * foto, para o destaque chegar devagar. Quem sobe são os filhos, não o
+ * <article>: a área do hover fica parada e o cartão não treme com o mouse perto da borda de baixo.
+ * `translate`, e não `transform`, para não disputar com o aparecer na rolagem (global.css), que
+ * anima o `transform` do próprio cartão. Só onde existe mouse: no toque, o hover gruda depois do
+ * toque e o cartão ficaria levantado ao voltar para a lista.
+ */
+.cartao-produto > * {
+  transition: translate var(--duracao-lenta) var(--curva-suave);
+}
+
+.cartao-produto .vitrine-foto__degrade {
+  background: var(--degrade-destaque-produto);
+  opacity: 0;
+  transition: opacity var(--duracao-muito-lenta) var(--curva-suave);
+}
+
+@media (hover: hover) {
+  .cartao-produto:hover > * {
+    translate: 0 calc(-1 * var(--deslocamento-destaque-cartao));
+  }
+
+  .cartao-produto:hover .vitrine-foto__degrade {
+    opacity: 1;
+  }
+}
+
 .grade-produtos {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -88,7 +118,7 @@
   margin-bottom: var(--espaco-1);
 }
 
-.cartao-produto__link:hover .t-headline-sm {
+.cartao-produto:hover .t-headline-sm {
   text-decoration: underline;
   text-decoration-thickness: var(--borda-fina);
   text-underline-offset: var(--sublinhado-afastamento);
@@ -101,7 +131,7 @@
   justify-content: space-between;
   gap: var(--espaco-2) var(--espaco-4);
   padding-top: var(--espaco-4);
-  border-top: var(--borda-fina) solid var(--cor-borda);
+  border-top: var(--borda-fina) solid var(--cor-separador);
   margin-top: auto;
 }
 

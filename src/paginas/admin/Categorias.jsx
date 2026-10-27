@@ -314,13 +314,13 @@ function FormCategoria({ categoria, categorias, onPronto }) {
           <CampoImagem
             id="categoria-card-arquivo"
             rotulo="Imagem do card"
-            proporcao="quadrada (1:1), por exemplo 1200 × 1200 px."
-            ajuda="Sem imagem, vale a imagem da categoria. No celular o card fica mais largo que alto, então deixe o assunto da foto no centro."
+            proporcao="vertical (4:5), por exemplo 1200 × 1500 px."
+            ajuda="Sem imagem, vale a imagem da categoria, que é quadrada e perde um pouco das laterais no card. Deixe o assunto da foto no centro."
             valor={cardImagem}
             onMudar={setCardImagem}
             alt={nome}
             erro={erro?.campos?.cardHomeImagemUrl}
-            classePrevia="admin-categorias__previa"
+            classePrevia="admin-categorias__previa admin-categorias__previa--card"
           />
         )}
       </fieldset>

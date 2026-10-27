@@ -1,5 +1,24 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import {
+  IconeAjustes,
+  IconeBalao,
+  IconeBrilho,
+  IconeCadeado,
+  IconeCaixa,
+  IconeCamadas,
+  IconeCartao,
+  IconeEtiqueta,
+  IconeGota,
+  IconeGrade,
+  IconeImagem,
+  IconePasta,
+  IconePessoas,
+  IconePrancheta,
+  IconePulso,
+  IconeRecibo,
+  IconeWhatsApp,
+} from '../../components/Icones.jsx';
 import Logo from '../../components/Logo.jsx';
 import Button from '../../components/ui/Button.jsx';
 import { cn } from '../../lib/cn.js';
@@ -15,43 +34,49 @@ import './EstruturaAdmin.css';
 /*
  * Menu em dois níveis, ordenado por uso: rotina diária em cima, cadastro embaixo. Grupo com um
  * item só vira link direto com o nome do GRUPO, sem submenu. `para` é o primeiro segmento depois de /admin/.
+ * `icone`: o desenho ao lado de cada opção (docs/decisoes-frontend.md, seção 47).
  */
 const MENU_ADMIN = [
   {
     id: 'operacao',
     rotulo: 'Operação',
+    icone: IconePulso,
     itens: [
-      { rotulo: 'Resumo', para: 'resumo' },
-      { rotulo: 'Revisão', para: 'revisao' },
-      { rotulo: 'Atendimento', para: 'atendimento' },
-      { rotulo: 'Pedidos', para: 'pedidos' },
-      { rotulo: 'Clientes', para: 'clientes' },
+      { rotulo: 'Resumo', para: 'resumo', icone: IconeGrade },
+      { rotulo: 'Revisão', para: 'revisao', icone: IconePrancheta },
+      { rotulo: 'Atendimento', para: 'atendimento', icone: IconeBalao },
+      { rotulo: 'Pedidos', para: 'pedidos', icone: IconeRecibo },
+      { rotulo: 'Clientes', para: 'clientes', icone: IconePessoas },
     ],
   },
   {
     id: 'cadastros',
     rotulo: 'Cadastros',
+    icone: IconePasta,
     itens: [
-      { rotulo: 'Produtos', para: 'produtos' },
-      { rotulo: 'Marcas', para: 'marcas' },
-      { rotulo: 'Cores', para: 'cores' },
-      { rotulo: 'Categorias', para: 'categorias' },
-      { rotulo: 'Banners', para: 'banners' },
-      { rotulo: 'Destaques', para: 'destaques' },
+      { rotulo: 'Produtos', para: 'produtos', icone: IconeCaixa },
+      { rotulo: 'Marcas', para: 'marcas', icone: IconeEtiqueta },
+      { rotulo: 'Cores', para: 'cores', icone: IconeGota },
+      { rotulo: 'Categorias', para: 'categorias', icone: IconeCamadas },
+      { rotulo: 'Banners', para: 'banners', icone: IconeImagem },
+      { rotulo: 'Destaques', para: 'destaques', icone: IconeBrilho },
     ],
   },
   {
     id: 'avulso',
     rotulo: 'Permissões de Acesso',
+    icone: IconeCadeado,
     itens: [{ rotulo: 'Permissões de Acesso', para: 'permissoes' }],
   },
   {
     // Configurações da loja ligadas a serviços de fora: WhatsApp e Mercado Pago do atendimento (Burnwood).
     id: 'configuracoes',
     rotulo: 'Configurações',
+    icone: IconeAjustes,
     itens: [
-      { rotulo: 'WhatsApp', para: 'whatsapp' },
-      { rotulo: 'Mercado Pago', para: 'mercadopago' },
+      // A marca do WhatsApp só aparece ao lado do texto "WhatsApp" (DESIGN.md), como aqui.
+      { rotulo: 'WhatsApp', para: 'whatsapp', icone: IconeWhatsApp },
+      { rotulo: 'Mercado Pago', para: 'mercadopago', icone: IconeCartao },
     ],
   },
 ];
@@ -80,6 +105,7 @@ function MenuAdmin() {
             return (
               <li key={grupo.id} className="admin__grupo">
                 <NavLink to={item.para} className="admin__grupo-botao t-label-caps">
+                  <grupo.icone className="admin__icone" />
                   {grupo.rotulo}
                 </NavLink>
               </li>
@@ -99,12 +125,14 @@ function MenuAdmin() {
                 aria-controls={`admin-submenu-${grupo.id}`}
                 onClick={() => setAberto(expandido ? null : grupo.id)}
               >
+                <grupo.icone className="admin__icone" />
                 {grupo.rotulo}
               </button>
               <ul id={`admin-submenu-${grupo.id}`} className="admin__submenu" hidden={!expandido}>
                 {grupo.itens.map((item) => (
                   <li key={item.para}>
                     <NavLink to={item.para} className="admin__link t-label-caps">
+                      <item.icone className="admin__icone" />
                       {item.rotulo}
                     </NavLink>
                   </li>

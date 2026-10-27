@@ -8,7 +8,7 @@ import Carregando from '../components/Carregando.jsx';
 import DivisorOnda from '../components/DivisorOnda.jsx';
 import { EstadoErro } from '../components/Estados.jsx';
 import FormIdentificacao from '../components/FormIdentificacao.jsx';
-import { IconeCoracao, IconeWhatsApp } from '../components/Icones.jsx';
+import { IconeChevronDireita, IconeChevronEsquerda, IconeCoracao, IconeWhatsApp } from '../components/Icones.jsx';
 import { CartaoProduto, Etiqueta, FotoProduto, QuantidadeProduto, rotuloCompra } from '../components/Produto.jsx';
 import SeletorVariacoes from '../components/SeletorVariacoes.jsx';
 import { useCompra } from '../contexto/CompraWhatsApp.jsx';
@@ -62,6 +62,8 @@ function DetalheProduto({ produto }) {
   const ehFavorito = favoritos.has(produto.id);
   const imagens = produto.imagens;
   const foto = imagens[fotoAtual];
+  // Passar fotos dá a volta: da última, "próxima" leva à primeira.
+  const passarFoto = (passo) => setFotoAtual((atual) => (atual + passo + imagens.length) % imagens.length);
 
   async function favoritar() {
     setErroFavorito(null);
@@ -91,9 +93,33 @@ function DetalheProduto({ produto }) {
 
       <div className="produto__grade">
         <div className="produto__galeria entra" style={{ '--ordem': 1 }}>
-          <div className="produto__foto-principal" onMouseMove={acompanharMouse}>
-            <FotoProduto url={foto?.url} alt={foto?.alt || produto.nome} carregamento="eager" />
-            {produto.status === 'esgotado' && <span className="selo-esgotado t-label-caps-sm">Encomendar</span>}
+          {/* Os botões de passar ficam fora da .produto__foto-principal de propósito: com o mouse
+              neles, a foto não está em :hover e a lupa não dispara por baixo. */}
+          <div className="produto__palco">
+            <div className="produto__foto-principal" onMouseMove={acompanharMouse}>
+              <FotoProduto url={foto?.url} alt={foto?.alt || produto.nome} carregamento="eager" />
+              {produto.status === 'esgotado' && <span className="selo-esgotado t-label-caps-sm">Encomendar</span>}
+            </div>
+            {imagens.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  className="produto__passar produto__passar--anterior"
+                  onClick={() => passarFoto(-1)}
+                  aria-label="Foto anterior"
+                >
+                  <IconeChevronEsquerda />
+                </button>
+                <button
+                  type="button"
+                  className="produto__passar produto__passar--proxima"
+                  onClick={() => passarFoto(1)}
+                  aria-label="Próxima foto"
+                >
+                  <IconeChevronDireita />
+                </button>
+              </>
+            )}
           </div>
           {imagens.length > 1 && (
             <ul className="produto__miniaturas" aria-label="Fotos da peça">

@@ -69,6 +69,19 @@ export const IconeSetaEsquerda = (props) => (
   </svg>
 );
 
+// Só a ponta da seta, para o botão redondo de passar fotos do produto.
+export const IconeChevronDireita = (props) => (
+  <svg {...base} {...props}>
+    <path d="m9.5 6 6 6-6 6" />
+  </svg>
+);
+
+export const IconeChevronEsquerda = (props) => (
+  <svg {...base} {...props}>
+    <path d="m14.5 6-6 6 6 6" />
+  </svg>
+);
+
 export const IconeSetaCima = (props) => (
   <svg {...base} {...props}>
     <path d="M12 20V5M7 10l5-5 5 5" />
@@ -96,9 +109,133 @@ export const IconeLixeira = (props) => (
   </svg>
 );
 
+// Duplicar (painel): dois quadrados sobrepostos, a cópia na frente.
+export const IconeCopiar = (props) => (
+  <svg {...base} {...props}>
+    <rect x="8.5" y="8.5" width="11.5" height="11.5" rx="1.5" />
+    <path d="M15.5 8.5v-3A1.5 1.5 0 0 0 14 4H5.5A1.5 1.5 0 0 0 4 5.5V14a1.5 1.5 0 0 0 1.5 1.5h3" />
+  </svg>
+);
+
 export const IconeFiltro = (props) => (
   <svg {...base} {...props}>
     <path d="M3.5 7h17M7 12h10M10 17h4" />
+  </svg>
+);
+
+// ---- Menu do painel (paginas/admin/EstruturaAdmin.jsx): um desenho por opção. ----
+
+export const IconePulso = (props) => (
+  <svg {...base} {...props}>
+    <path d="M3 12h4l2.5-6 5 12 2.5-6h4" />
+  </svg>
+);
+
+export const IconeGrade = (props) => (
+  <svg {...base} {...props}>
+    <rect x="4" y="4" width="6.5" height="6.5" />
+    <rect x="13.5" y="4" width="6.5" height="6.5" />
+    <rect x="4" y="13.5" width="6.5" height="6.5" />
+    <rect x="13.5" y="13.5" width="6.5" height="6.5" />
+  </svg>
+);
+
+export const IconePrancheta = (props) => (
+  <svg {...base} {...props}>
+    <path d="M8.5 5H6v15.5h12V5h-2.5" />
+    <rect x="8.5" y="3.5" width="7" height="3" />
+    <path d="m9 13.5 2 2 4-4" />
+  </svg>
+);
+
+export const IconeBalao = (props) => (
+  <svg {...base} {...props}>
+    <path d="M4.5 5.5h15v10h-8l-4 3.5v-3.5h-3z" />
+  </svg>
+);
+
+export const IconeRecibo = (props) => (
+  <svg {...base} {...props}>
+    <path d="M6 3.5h12v17l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5-2 1.5z" />
+    <path d="M9 8.5h6M9 12h6M9 15.5h3" />
+  </svg>
+);
+
+export const IconePessoas = (props) => (
+  <svg {...base} {...props}>
+    <circle cx="9" cy="8.5" r="3.25" />
+    <path d="M3.5 19.5c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5" />
+    <path d="M15 5.5a3.25 3.25 0 0 1 0 6M17 14.8c1.9.5 3.1 2.1 3.5 4.7" />
+  </svg>
+);
+
+export const IconePasta = (props) => (
+  <svg {...base} {...props}>
+    <path d="M3.5 6h6l2 2.5h9v10h-17z" />
+  </svg>
+);
+
+export const IconeCaixa = (props) => (
+  <svg {...base} {...props}>
+    <path d="M12 3.5 20 7.5v9l-8 4-8-4v-9z" />
+    <path d="m4 7.5 8 4 8-4M12 11.5v9" />
+  </svg>
+);
+
+export const IconeEtiqueta = (props) => (
+  <svg {...base} {...props}>
+    <path d="M4 4h7l9 9-7 7-9-9z" />
+    <circle cx="8" cy="8" r="1.25" />
+  </svg>
+);
+
+export const IconeGota = (props) => (
+  <svg {...base} {...props}>
+    <path d="M12 3.5c3 4 6 7.2 6 10.5a6 6 0 0 1-12 0c0-3.3 3-6.5 6-10.5z" />
+  </svg>
+);
+
+export const IconeCamadas = (props) => (
+  <svg {...base} {...props}>
+    <path d="M12 4 20.5 8.5 12 13 3.5 8.5z" />
+    <path d="m3.5 12.5 8.5 4.5 8.5-4.5M3.5 16.5 12 21l8.5-4.5" />
+  </svg>
+);
+
+export const IconeImagem = (props) => (
+  <svg {...base} {...props}>
+    <rect x="3.5" y="5" width="17" height="14" />
+    <circle cx="9" cy="10" r="1.75" />
+    <path d="m3.5 17 5-5 4 4 2.5-2.5 5.5 5.5" />
+  </svg>
+);
+
+export const IconeBrilho = (props) => (
+  <svg {...base} {...props}>
+    <path d="M11 3.5c.6 4.4 2.1 5.9 6.5 6.5-4.4.6-5.9 2.1-6.5 6.5-.6-4.4-2.1-5.9-6.5-6.5 4.4-.6 5.9-2.1 6.5-6.5z" />
+    <path d="M18.5 15v5M16 17.5h5" />
+  </svg>
+);
+
+export const IconeCadeado = (props) => (
+  <svg {...base} {...props}>
+    <rect x="5" y="10.5" width="14" height="10" />
+    <path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" />
+  </svg>
+);
+
+export const IconeAjustes = (props) => (
+  <svg {...base} {...props}>
+    <path d="M4 7h9M17 7h3M4 17h3M11 17h9" />
+    <circle cx="15" cy="7" r="2" />
+    <circle cx="9" cy="17" r="2" />
+  </svg>
+);
+
+export const IconeCartao = (props) => (
+  <svg {...base} {...props}>
+    <rect x="3" y="6" width="18" height="12" />
+    <path d="M3 10h18M6.5 14.5h3" />
   </svg>
 );
 

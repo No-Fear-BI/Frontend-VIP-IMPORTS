@@ -45,12 +45,12 @@
 
 .compra__outras {
   width: 100%;
-  border-top: var(--borda-fina) solid var(--cor-borda);
+  border-top: var(--borda-fina) solid var(--cor-separador);
 }
 
 .compra__outras li {
   padding-block: var(--espaco-2);
-  border-bottom: var(--borda-fina) solid var(--cor-borda);
+  border-bottom: var(--borda-fina) solid var(--cor-separador);
 }
 
 .compra__outras .t-codigo {

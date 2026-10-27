@@ -84,6 +84,11 @@
   aspect-ratio: 1 / 1;
 }
 
+/* Prévia da imagem do card da home na proporção do card (4:5). */
+.admin-categorias__previa--card {
+  aspect-ratio: var(--proporcao-painel-colecao);
+}
+
 .admin-categorias__aviso {
   padding-left: var(--espaco-3);
   border-left: var(--borda-grossa) solid var(--cor-primaria);

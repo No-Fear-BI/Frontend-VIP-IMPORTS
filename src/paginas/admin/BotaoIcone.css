@@ -6,6 +6,7 @@
   flex: none;
   width: var(--altura-controle-compacto);
   height: var(--altura-controle-compacto);
+  border-radius: var(--raio-botao);
   color: var(--cor-texto);
   transition:
     background-color var(--duracao-rapida) var(--curva-padrao),

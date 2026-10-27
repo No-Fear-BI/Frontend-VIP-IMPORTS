@@ -5,7 +5,7 @@ import CabecalhoSecao from '../components/CabecalhoSecao.jsx';
 import Carregando from '../components/Carregando.jsx';
 import DivisorOnda from '../components/DivisorOnda.jsx';
 import { EstadoErro, EstadoVazio } from '../components/Estados.jsx';
-import { IconeSeta, IconeSetaEsquerda, IconeWhatsApp } from '../components/Icones.jsx';
+import { IconeChevronDireita, IconeChevronEsquerda, IconeSeta, IconeWhatsApp } from '../components/Icones.jsx';
 import { CartaoProduto, FotoProduto } from '../components/Produto.jsx';
 import { IMAGEM_COLECAO_FEMININA, IMAGEM_COLECAO_MASCULINA, LINK_WHATSAPP_CONTATO } from '../config.js';
 import { useAparecerNaRolagem } from '../hooks/useAparecerNaRolagem.js';
@@ -244,22 +244,25 @@ function Hero({ banners }) {
       </div>
 
       {total > 1 && (
-        <div className="container hero__controles">
-          <span className="t-codigo hero__contador" aria-live="polite">
-            {String(atual + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
-          </span>
-          {autoplay && (
-            <span className="hero__progresso" aria-hidden>
-              <span key={atual} className="hero__progresso-barra" onAnimationEnd={() => ir(atual + 1)} />
+        <>
+          <div className="hero__controles">
+            <span className="t-codigo hero__contador" aria-live="polite">
+              {String(atual + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
             </span>
-          )}
-          <button type="button" className="hero__seta" onClick={() => ir(atual - 1)} aria-label="Banner anterior">
-            <IconeSetaEsquerda />
+            {autoplay && (
+              <span className="hero__progresso" aria-hidden>
+                <span key={atual} className="hero__progresso-barra" onAnimationEnd={() => ir(atual + 1)} />
+              </span>
+            )}
+          </div>
+          {/* Fora da linha de controles: ficam nas laterais, no meio da altura do banner. */}
+          <button type="button" className="hero__seta hero__seta--anterior" onClick={() => ir(atual - 1)} aria-label="Banner anterior">
+            <IconeChevronEsquerda />
           </button>
-          <button type="button" className="hero__seta" onClick={() => ir(atual + 1)} aria-label="Próximo banner">
-            <IconeSeta />
+          <button type="button" className="hero__seta hero__seta--proxima" onClick={() => ir(atual + 1)} aria-label="Próximo banner">
+            <IconeChevronDireita />
           </button>
-        </div>
+        </>
       )}
     </section>
   );

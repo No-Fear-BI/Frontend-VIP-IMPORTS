@@ -35,7 +35,9 @@
 }
 
 .admin__grupo-botao {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
   width: 100%;
   padding-block: var(--espaco-2);
   background: none;
@@ -48,7 +50,6 @@
 .admin__grupo-botao::after {
   content: '▾';
   display: inline-block;
-  margin-left: var(--espaco-2);
 }
 
 a.admin__grupo-botao::after {
@@ -77,9 +78,18 @@ a.admin__grupo-botao::after {
 }
 
 .admin__link {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
   padding-block: var(--espaco-2);
   color: var(--cor-sobre-primaria-suave);
+}
+
+/* Desenho ao lado de cada opção do menu (seção 47): na cor do texto, então acende junto. */
+.admin__icone {
+  flex: none;
+  width: var(--icone-sm);
+  height: var(--icone-sm);
 }
 
 .admin__link.active,

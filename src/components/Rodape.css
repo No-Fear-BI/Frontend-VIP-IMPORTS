@@ -1,7 +1,7 @@
 .rodape {
   padding-block: var(--espaco-secao) var(--espaco-6);
   /* Separa o rodapé do CTA final quando os dois verdes se encostam. */
-  border-top: var(--borda-fina) solid var(--cor-borda-sobre-primaria);
+  border-top: var(--borda-fina) solid var(--cor-separador-sobre-primaria);
 }
 
 .rodape__grade {

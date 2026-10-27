@@ -42,12 +42,27 @@
   --cor-borda: #d3d3c5;                    /* verde 20% sobre a superfície */
   --cor-borda-forte: #79806e;              /* verde 62% sobre a superfície */
 
+  /* Linhas de separação (filetes) entre seções, blocos e itens de lista, no papel e no verde:
+     apagadas a pedido do cliente em 27/10/2026. O espaço de cada uma fica (a borda ou o <hr>
+     continua com 1px, só sem cor). Para as linhas voltarem: var(--cor-borda) e
+     var(--cor-borda-sobre-primaria). */
+  --cor-separador: transparent;
+  --cor-separador-sobre-primaria: transparent;
+
   --cor-erro: #28361f;                     /* a paleta não tem vermelho: erro = ícone + frase + traço */
 
   --cor-veu: rgb(40 54 31 / 0.4);          /* atrás do modal */
   --degrade-sobre-foto: linear-gradient(to top, rgb(40 54 31 / 0.85) 0%, rgb(40 54 31 / 0.35) 45%, rgb(40 54 31 / 0) 75%);
+  /* Destaque do cartão de produto no hover: o mesmo verde, mais leve e só na metade de baixo, para
+     não escurecer a peça (no hero e nas categorias o degradê segura texto; aqui é só um toque). */
+  --degrade-destaque-produto: linear-gradient(to top, rgb(40 54 31 / 0.4) 0%, rgb(40 54 31 / 0.12) 25%, rgb(40 54 31 / 0) 50%);
   --brilho-botao-primario: linear-gradient(105deg, transparent 20%, rgb(252 234 179 / 0.22) 50%, transparent 80%);
   --brilho-botao-sobre-primaria: linear-gradient(105deg, transparent 20%, rgb(255 255 255 / 0.55) 50%, transparent 80%);
+  /* Botão redondo de passar fotos na página do produto e de passar banners no hero: verde sobre a
+     imagem, deixando ver um pouco dela, com contorno creme fino; no hover, o verde fica cheio
+     (--cor-primaria). */
+  --cor-fundo-passar-foto: rgb(40 54 31 / 0.72);  /* verde oficial 72% */
+  --cor-borda-passar-foto: rgb(252 234 179 / 0.4); /* creme oficial 40% */
 
   /* Onda entre as seções da home (components/DivisorOnda). O degradê vai de uma à outra,
      passando pelas misturas das duas; a opacidade de cada parada fica no desenho do SVG. */
@@ -170,12 +185,15 @@
   --largura-gaveta: 360px;
   --largura-miniatura: 88px;
   --largura-miniatura-grande: 140px;
+  --largura-coluna-menu: 144px;            /* coluna de nomes na janela de Marcas/Categorias do cabeçalho */
+  --largura-menu-suspenso: 240px;          /* largura mínima dessa janela (carregando, vazio, erro) */
 
   --altura-minima-conteudo: 60vh;
   --altura-cabecalho: 84px;
   --altura-cabecalho-compacta: 72px;
   --altura-hero: clamp(460px, 72vh, 720px);
-  --altura-painel-colecao: clamp(320px, 42vw, 560px);
+  --altura-painel-colecao: clamp(320px, 42vw, 560px); /* piso dos cards de coleção da home */
+  --proporcao-painel-colecao: 4 / 5;       /* cards de coleção da home: verticais (27/10/2026) */
   --altura-cartao-marca: 120px;
   --altura-carregador-bloco: 240px;        /* carregador no lugar de uma seção */
   --proporcao-ilustracao-sobre: 1570 / 1110; /* recorte da ilustração do Sobre (RECORTE em IlustracaoSobre.jsx) */
@@ -216,6 +234,10 @@
 
   --raio: 0px;                              /* "Não existe raio de 4, 8 ou 16px" — quadrado ou círculo, nada no meio */
   --raio-circulo: 9999px;
+  /* Pedido do cliente em 27/10/2026: todo botão com caixa visível (Button, setas do hero, seletor de
+     tamanho/cor, filtros e ícones de ação do painel) tem formato de pílula; o que é quadrado (44px)
+     vira círculo. Foto, campo, cartão e janela continuam com --raio. */
+  --raio-botao: 9999px;
   /* Exceção pedida pelo cliente em 26/10/2026: o quadrado do carregador mantém o canto do original
      (raio 64 num quadrado de 200). Para seguir a regra de raio 0, troque por var(--raio). */
   --raio-carregador: 32%;
@@ -281,6 +303,8 @@
 
   --deslocamento-entrada: 16px;
   --deslocamento-seta: 4px;
+  --deslocamento-menu-suspenso: 8px;       /* a janela de Marcas/Categorias desce isso ao abrir */
+  --deslocamento-destaque-cartao: 6px;     /* o cartão de produto sobe isso no hover */
   --escala-hover: 1.04;
   --escala-destaque: 1.06;
   --escala-zoom-foto: 2.2;                 /* lupa da foto principal na página do produto */
@@ -303,6 +327,8 @@
     --duracao-saida: 0ms;
     --deslocamento-entrada: 0px;
     --deslocamento-seta: 0px;
+    --deslocamento-menu-suspenso: 0px;
+    --deslocamento-destaque-cartao: 0px;
     --escala-hover: 1;
     --escala-destaque: 1;
     --escala-zoom-foto: 1;
