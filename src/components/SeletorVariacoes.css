@@ -31,7 +31,7 @@
   height: var(--altura-controle-compacto);
   padding-inline: var(--espaco-2);
   border: var(--borda-fina) solid var(--cor-borda-forte);
-  border-radius: var(--raio);
+  border-radius: var(--raio-botao);
   background: var(--cor-superficie);
   color: var(--cor-texto);
   transition:

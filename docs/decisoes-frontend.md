@@ -403,3 +403,134 @@ substitui as referências anteriores ao histórico de seleções.
 - **Sem travar.** O `lottie-web` desenha cada quadro na thread principal, então a animação pausa fora da tela (`IntersectionObserver`) e o componente destrói a animação ao sair da página. Com `prefers-reduced-motion`, fica parada no primeiro quadro. Se a biblioteca ou o JSON falharem, a página fica só com o texto.
 - **Acessibilidade.** Decorativa (`aria-hidden`): o conteúdo do Sobre é o texto.
 - **Alternativas descartadas:** recolorir o JSON à mão e guardar as cores novas nele (cor fora dos tokens); `@lottiefiles/dotlottie-web` (renderizador em WASM e canvas, mais pesado); trocar cada tom de pele por um creme único (apagaria a diferença entre as pessoas).
+
+## 37. Cabeçalho da loja em verde (27/10/2026)
+
+- **Pedido.** Inverter as cores do cabeçalho: fundo verde, letras no creme da paleta. Antes, o cabeçalho era papel (`--cor-superficie`) com texto verde.
+- **Como ficou.** O `<header>` ganha a classe `faixa-primaria` (a mesma do rodapé, do hero e do CTA final), que dá o fundo `--cor-primaria`, o texto `--cor-sobre-primaria` e o contorno de foco em creme. Menu, ícones e sublinhado do link ativo já usavam `currentColor` e viram creme sozinhos. O logo do cabeçalho passa a `tom="creme"`, uma das três combinações do manual (creme sobre verde). A gaveta do menu do celular continua em papel, com o logo verde.
+- **Filete inferior sempre visível.** Antes, o filete (`--cor-borda`) só aparecia depois de rolar, para separar o papel do cabeçalho do papel da página. Agora o verde já separa o cabeçalho do papel, e o caso que precisava de linha é o contrário: no topo da home, o cabeçalho verde encosta no hero verde. O filete fica fixo em `--cor-borda-sobre-primaria`, como o do rodapé sobre o CTA final. O estado `rolou` e o ouvinte de rolagem saíram do `Cabecalho.jsx`.
+- **Selo de contagem invertido.** Era círculo verde com número creme, que some sobre o verde. Agora é círculo creme (`--cor-sobre-primaria`) com número verde (`--cor-primaria`).
+- **Barra de busca no mesmo verde.** Abre como parte do cabeçalho (sem fundo próprio), filete de cima em `--cor-borda-sobre-primaria`, placeholder em `--cor-sobre-primaria-suave` e o traço de foco em creme. O "x" que o navegador põe dentro do campo de busca vinha azul, fora da paleta, e ficava muito visível no verde: está escondido (`::-webkit-search-cancel-button`), porque o ícone do cabeçalho e o Esc já fecham a busca.
+- **DESIGN.md.** Estrutura da home, filete do cabeçalho fixo, selo de contagem, faixa verde e regra do logo atualizados; componente `cabecalho` novo no bloco de componentes.
+- **Alternativa descartada:** manter o filete só ao rolar. Sobre o papel ele quase não aparece (verde 16% de creme sobre verde), e no topo, que é onde o verde encosta no hero, ele não existiria.
+
+## 38. Janela de Categorias e Marcas no cabeçalho (27/10/2026)
+
+- **Pedido.** Ao passar o mouse em "Marcas" e "Categorias" no cabeçalho, abrir uma janela com a lista, como na imagem de referência enviada (nomes de marca em três colunas, sob o item), com uma opção "Ver todas" que leva à página que já mostra tudo.
+- **Como ficou.** `components/MenuSuspenso.jsx` (conteúdo) e `ItemComSuspenso` em `Cabecalho.jsx` (abrir e fechar). Os itens com janela são marcados com `suspenso` no `MENU`. Uma janela aberta por vez; ao sair do item, ela espera 200ms antes de fechar (`ATRASO_FECHAR_SUSPENSO_MS`), para o mouse poder descer em diagonal até a janela sem ela sumir no caminho. Mudar de rota fecha.
+  - **Marcas:** `GET /marcas`, em ordem alfabética como a página `/marcas`; cada nome leva a `/marcas/:slug`.
+  - **Categorias:** `GET /colecoes/:slug/categorias` das duas coleções, em dois grupos (Feminina, Masculina), como a página `/categorias`; cada nome leva a `/produtos?colecao=…&categoria=…`, o mesmo destino do cartão de categoria. Grupo sem categoria não aparece.
+  - **"Ver todas →"** no pé, depois de um filete: `/marcas` e `/categorias`. O clique no próprio item do menu continua levando à página.
+- **Colunas.** Até 8 nomes por coluna, preenchendo de cima para baixo; passando disso, as colunas crescem por igual até 3 (marcas) ou 2 por grupo (categorias). Com 23 marcas, fica 8/8/7, como na referência. A conta está em `Colunas` e chega ao CSS por `--linhas-menu`.
+- **Aparência.** A mesma camada do diálogo: papel (`--cor-superficie`), filete `--cor-borda-forte`, sem sombra, mas sem véu, porque não bloqueia a página. O `<li>` do item ocupa a altura toda do cabeçalho, então a janela encosta logo abaixo do filete do cabeçalho, com os nomes alinhados ao texto do item. Entra em 220ms descendo 8px e sai em 160ms `ease-in` (os tempos do diálogo); com `prefers-reduced-motion`, aparece e some sem movimento. Tokens novos: `--largura-coluna-menu`, `--largura-menu-suspenso` (mínima, para carregando/vazio/erro) e `--deslocamento-menu-suspenso`.
+- **Busca só quando abre.** A janela fica no DOM (escondida por `visibility`, fora do foco), mas o conteúdo só monta na primeira vez que ela abre, e é aí que a busca acontece. O cabeçalho não desmonta, então o resultado vale para o resto da visita. Os três estados são em linha, como nos filtros da listagem: carregador compacto, "Nenhuma marca/categoria por enquanto." e "Não conseguimos carregar esta lista." com "Tentar de novo". A sacola de erro não cabe numa janela desse tamanho.
+- **Teclado e leitor de tela.** O item tem `aria-expanded` e `aria-controls`. Tab passa pelo item sem abrir (para não obrigar a atravessar a lista inteira); seta para baixo abre, e o Tab seguinte entra na lista. Esc fecha e devolve o foco ao item; o foco saindo do item também fecha.
+- **Só no computador.** A navegação do cabeçalho só existe acima de 1240px; abaixo disso o menu é a gaveta, que não muda.
+- **DESIGN.md.** "Duas camadas flutuam" no lugar de "a única camada que flutua", a janela na lista de Movimento e em Componentes (`menu-suspenso`, também no bloco de componentes).
+- **Alternativas descartadas:** fundo branco como na referência (o branco é a vitrine da foto e do campo; a camada flutuante do sistema é papel com filete); abrir com o foco do teclado (o Tab passaria por todas as marcas antes de chegar a "Todos"); buscar marcas e categorias ao carregar o site (duas chamadas em toda página, para quem talvez nem passe o mouse ali).
+
+## 39. Cartão de produto em destaque no hover (27/10/2026)
+
+- **Pedido.** Quando o mouse passa em qualquer produto, o cartão dá uma leve levantada e aparecem os "detalhes verdes" do cartão de categoria, que são o degradê verde subindo da base da foto (`.vitrine-foto__degrade`, `--degrade-sobre-foto`).
+- **Como ficou.** Vale para todo `CartaoProduto` (home, listagens, busca, marca, novidades, relacionados, favoritos da conta). O cartão passa `degrade` para a `FotoProduto`, e em `Produto.css` o degradê fica com opacidade 0 até o hover. No hover, os filhos do cartão sobem `--deslocamento-destaque-cartao` (6px) e o degradê aparece (tempos e degradê no ajuste do fim desta seção); ao sair, desfaz no mesmo tempo. Com `prefers-reduced-motion`, o cartão não sobe e o degradê aparece sem transição.
+- **O cartão inteiro é um alvo só.** O zoom da foto e o sublinhado do código respondiam só ao link de cima (`.cartao-produto__link:hover`); agora respondem ao cartão todo (`.cartao-produto:hover`), para não acontecer de o cartão subir, com o mouse em "Ver detalhes", sem o resto do destaque.
+- **Detalhes de implementação.**
+  - Quem sobe são os filhos do `<article>`, não ele: a área do hover fica parada, e o cartão não treme quando o mouse está perto da borda de baixo (se o cartão subisse, o mouse sairia dele, ele desceria, e assim por diante).
+  - A subida usa a propriedade `translate`, não `transform`. O aparecer na rolagem (seção 33) anima o `transform` do mesmo cartão, e uma transição de `transform` passaria por cima da animação (no CSS, transição vence animação) e encurtaria a subida de 900ms para 220ms.
+  - Só com `@media (hover: hover)`: no celular o hover gruda depois do toque, e o cartão ficaria levantado e verde ao voltar para a lista.
+- **Sem sombra.** O DESIGN.md continua sem sombra: o destaque é a subida e o degradê.
+- **Ajuste do mesmo dia: degradê mais leve e transição mais suave.** Com uma foto real (jaqueta azul-marinho em fundo branco, produto de teste `TESTE-HOVER-1` criado pelo `importar_catalogo.py` no banco local), o degradê do cartão de categoria (`--degrade-sobre-foto`, verde 85% na base, até 75% da altura) deixava a metade de baixo da peça quase verde-escura. O cliente pediu mais leve só no cartão de produto. Token novo `--degrade-destaque-produto`: verde 40% na base, 12% a um quarto da altura, transparente na metade, ou seja, um toque na faixa de baixo que não cobre a peça. O `--degrade-sobre-foto` continua igual no hero, nas coleções e nas categorias, onde segura texto. A transição também ficou mais lenta: a subida passou de 220ms para 700ms (`--duracao-lenta`) e o degradê, de 220ms para 1000ms (`--duracao-muito-lenta`), o mesmo tempo do zoom da foto, então o destaque chega junto com ele.
+
+## 40. Botões redondos de passar fotos na página do produto (27/10/2026)
+
+- **Pedido.** Um botão arredondado para passar as fotos, como na imagem de referência enviada (círculo escuro translúcido com contorno claro fino e uma ponta de seta, sobre a foto, na lateral), mas nas cores do site.
+- **Como ficou.** Em `paginas/Produto.jsx`, quando a peça tem mais de uma foto: dois botões sobre a foto principal, "Foto anterior" à esquerda e "Próxima foto" à direita, no meio da altura, a `--espaco-4` da borda. Círculo de `--altura-controle-compacto` (44px, o alvo de toque mínimo), fundo `--cor-fundo-passar-foto` (verde oficial 72%), contorno `--cor-borda-passar-foto` (creme oficial 40%), ícone novo `IconeChevronDireita`/`IconeChevronEsquerda` em `--cor-sobre-primaria`. No hover, o fundo vira `--cor-primaria` em `--duracao-rapida`. Os dois tokens de cor são novos.
+- **Dá a volta.** Da última foto, "próxima" leva à primeira, e vice-versa. As miniaturas continuam e acompanham a foto da vez.
+- **Sem lupa por baixo.** A foto principal tem lupa no hover (`acompanharMouse`). Os botões ficam num `<div className="produto__palco">`, irmãos da `.produto__foto-principal` e não dentro dela: com o mouse no botão, a foto não está em `:hover`, e a lupa não dispara.
+- **No celular também.** Lá a galeria não desliza com o dedo, então os botões são o jeito de passar sem descer até as miniaturas.
+- **DESIGN.md.** O círculo é exceção à regra de raio ("Raio `full` só em objeto que é um ponto"), registrada em Shapes, no Don't de canto arredondado e em Componentes (`passar-foto`, também no bloco de componentes).
+- **Fora do escopo:** as setas do hero continuam quadradas, com contorno; o pedido foi só para as fotos do produto. A troca de foto continua instantânea, sem animação.
+
+## 41. Botões em formato de pílula (27/10/2026)
+
+- **Pedido.** "Deixe todos os botões com borda arredondada." Primeiro o cliente escolheu cantos suaves de 8px, entre três opções (4px, 8px, pílula), e logo depois pediu pílula em todos.
+- **Como ficou.** Token novo `--raio-botao: 9999px` em `tokens.css`, aplicado a todo botão com caixa visível:
+  - `.botao` (`global.css`): todas as variantes do `Button` (principal, secundário, sobre o verde, contorno sobre o verde, texto), inclusive os links com cara de botão (`para`) e os botões de loja, conta, seleção, portão e painel.
+  - `.hero__seta` (`Home.css`): as setas do carrossel, que eram quadradas, viram círculos.
+  - `.seletor-variacao` (`SeletorVariacoes.css`): tamanho em círculo (P, M, G), cor em pílula ("Azul marinho").
+  - `.admin-pedidos__filtro-opcao` (`Pedidos.css`) e `.botao-icone` (`BotaoIcone.css`, lápis, lixeira e setas do painel; o fundo do hover fica redondo).
+  - O botão de passar fotos (seção 40) já era círculo.
+  - Botão quadrado de 44px vira círculo com o mesmo valor, porque `9999px` em caixa quadrada dá círculo e em caixa larga dá pílula.
+- **O que continua reto.** Foto, miniatura (é foto), campo de formulário, cartão, janela (modal, gaveta e menu suspenso), etiqueta do código e aviso. Link versalete e ícone sem caixa (cabeçalho, fechar) não têm forma para arredondar. Os campos ficam retos ao lado de botões redondos de propósito: o pedido foi para botões.
+- **DESIGN.md.** A regra "Quadrado e círculo, nada no meio" continua (não existe raio de 4, 8 ou 16px), mas o redondo agora vale para todo botão, não só para os pontos; Overview, Shapes, botão principal, seletor de variação, o Don't de canto arredondado e o `rounded` dos componentes `button-primary`, `button-secondary`, `button-on-dark` e `seletor-variacao` foram atualizados.
+- **Alternativa descartada:** os 8px da primeira escolha. O cliente trocou por pílula antes de fechar.
+
+## 42. Setas do hero iguais ao botão de passar fotos (27/10/2026)
+
+- **Pedido.** "O botão de passar os banners também, deixe arredondado", logo depois do botão redondo de passar fotos do produto (seção 40) e dos botões em pílula (seção 41).
+- **O que estava errado.** Com a seção 41, as setas do hero (`.hero__seta`) já tinham virado círculos, mas o contorno era `--cor-borda-sobre-primaria` (creme 16% sobre verde, um verde escuro opaco) e não tinha fundo. Sobre o banner, o círculo praticamente sumia e ficavam só as setas soltas.
+- **Como ficou.** O mesmo botão da página do produto: fundo `--cor-fundo-passar-foto` (verde 72%), contorno `--cor-borda-passar-foto` (creme 40%), ponta de seta `IconeChevronEsquerda`/`IconeChevronDireita` (no lugar das setas com haste) em `--cor-sobre-primaria`; no hover, o fundo vira `--cor-primaria`. Posição, tamanho (44px) e comportamento não mudaram: as setas continuam na linha do contador e da barra de progresso, só no desktop.
+- **Tokens.** Os dois tokens `--cor-*-passar-foto` agora servem também ao hero; o comentário em `tokens.css` diz isso. O nome ficou, para não renomear token.
+
+## 43. Hero: texto e setas no meio da altura, barra de tempo no pé (27/10/2026)
+
+- **Como ficou.** O texto do hero (legenda, título, "Ver peças") é o original, à esquerda, no container, com o título limitado a `--medida-titulo`, mas fica no meio da altura do banner, alinhado com as setas: `.hero__slide .hero__texto` é absoluto, com `top: 50%` e `translate: 0 -50%` (o `translate` não briga com a entrada do texto, que anima o `transform` dos filhos). Medido no navegador: o meio do bloco de texto e o meio das setas caem na mesma altura, a metade do banner, em todos os slides. Sem banner cadastrado (`HeroSemBanner`, sem setas), o texto fica no pé, como antes. Contador e barra de tempo ficam centralizados no pé do banner (`.hero__controles` na largura toda, sem `.container`, a `--espaco-6` do pé, `--espaco-4` no celular; a linha mantém a altura das setas, que moravam nela, para o contador ficar na mesma altura de antes). As setas saíram dessa linha e são filhas diretas do `.hero`: uma em cada lateral, no meio da altura do banner (`.hero__seta--anterior` / `--proxima`, a `--espaco-6` da borda), como o botão de passar fotos do produto. No celular as setas continuam escondidas (lá se desliza). Medido no navegador: setas a 24px das laterais, com o centro na metade exata da altura do banner, e barra de tempo no centro, embaixo; "próximo" e "anterior" dão a volta.
+- **Como se chegou aqui (todas as etapas no mesmo dia, a pedido do cliente):**
+  1. texto e controles centralizados no meio do banner, nos dois eixos, com o bloco medido pelo texto mais alto dos slides para as setas não pularem;
+  2. o mesmo bloco centralizado, mas no pé do banner ("na parte de baixo do centro"), e a medição saiu;
+  3. o título numa linha só, sem `--medida-titulo` e com `text-wrap: balance`;
+  4. setas em cada canto, barra de tempo no meio e "o texto como estava antes". O cliente confirmou que "antes" é o original, à esquerda (e não o centralizado), e escolheu as setas nos cantos de baixo, na altura da barra;
+  5. as setas foram para a outra opção oferecida: nas laterais, no meio da altura;
+  6. o texto centralizado na horizontal, com o título numa linha;
+  7. por fim: "deixa como estava antes, porém mais acima, alinhada com os botões de passar o banner". O texto voltou ao original (à esquerda, título em duas linhas) e subiu para a altura das setas. Das etapas 1, 2, 3 e 6 não sobrou nada.
+- **DESIGN.md.** A regra "alinhamento à esquerda, sempre" vale de novo para o texto do hero; a estrutura da home e o botão de passar descrevem a posição do texto e dos controles.
+- **Ponto de atenção:** o degradê do hero (`--degrade-sobre-foto`) é forte embaixo e fraco no meio, de quando o texto ficava no pé. Com o texto no meio da altura, um banner de foto clara nessa região pode deixar o título creme pouco legível. Se acontecer, o caminho é um degradê próprio do hero que escureça a faixa do texto, sem mexer no token que serve coleções e categorias.
+
+## 44. Linhas de separação apagadas, espaço mantido (27/10/2026)
+
+- **Pedido.** "Apague todas essas linhas, mas sempre que for fazer um espaçamento que teria essas linhas, não use ela, mas faça com o mesmo espaçamento." A linha do print era o filete fino em `--cor-borda` sob o título de seção.
+- **Como ficou.** Tokens novos `--cor-separador` e `--cor-separador-sobre-primaria`, os dois `transparent`. Toda linha de separação da loja passou a usar um deles, e nenhuma foi apagada do código: a borda ou o `<hr>` continua com 1px e as mesmas margens e `padding`, só sem cor. Assim o espaçamento fica exatamente igual, e para as linhas voltarem basta trocar o valor dos dois tokens (`var(--cor-borda)` e `var(--cor-borda-sobre-primaria)`).
+- **O que mudou de cor (19 lugares):**
+  - `.filete` (todo `<hr className="filete">`: página do produto, seleção, conta, contato, Sobre, menu do celular, janela de compra, rodapé) e `.cabecalho-secao__filete` (sob o título de seção; o traço que se desenha continua animando, mas não aparece);
+  - `border-top`/`-bottom`/`-block` de separação: barra "N peças / Ordenar" e títulos dos filtros (`Listagem.css`), "Ver detalhes" do cartão de produto (`Produto.css`), grade e itens da seleção (`Selecao.css`), grade da conta (`Conta.css`), "outras peças" da janela de compra (`CompraWhatsApp.css`), lista de contatos (`paginas.css`), "Ainda não possui uma conta?" do portão (`PortaoAcesso.css`), "Ver todas" do menu suspenso (`MenuSuspenso.css`);
+  - na faixa verde: o filete de baixo do cabeçalho, o de cima da barra de busca (`Cabecalho.css`) e o de cima do rodapé (`Rodape.css`).
+- **O que não mudou.** Contorno de caixa (cartão de marca, miniatura, campo, botão secundário, seletor, modal, menu suspenso), as barrinhas verticais de destaque à esquerda (erro, esgotado, aviso do portão), o traço de foco da busca e o painel (`/admin`), onde as linhas das tabelas separam dados.
+- **Conferido no navegador:** em `/`, `/todos` e `/produto/PRD-0001`, um script percorreu todos os elementos e não achou nenhuma borda horizontal nem `<hr>` com cor visível.
+- **Regra daqui em diante:** separação nova na loja não desenha linha; dá o mesmo espaço que o filete daria (ou usa `--cor-separador`, se a estrutura precisar da borda).
+- **DESIGN.md.** Elevation & Depth (o filete agora é espaço), a cor `border`, a faixa verde, o movimento do filete de seção e o Don't do dourado.
+
+## 45. Cards de coleção da home maiores, em 4:5 (27/10/2026)
+
+- **Pedido.** Aumentar os dois cards de coleção da home ("Card Esquerda" e "Card Direita": Feminina/Masculina ou a categoria que ocupa o lugar), "semelhante" a uma referência com cards verticais, mais altos que largos (cerca de 650 × 800px numa tela de 1400px).
+- **Como ficou.** `.painel-colecao` ganhou `aspect-ratio: var(--proporcao-painel-colecao)` (token novo, `4 / 5`). O `min-height: var(--altura-painel-colecao)` continua como piso. Antes, a altura era só esse `min-height` (`clamp(320px, 42vw, 560px)`), e o card ficava mais largo que alto. Medido no navegador a 1440px: os dois cards com 648 × 810px (antes, 648 × 560px). Largura, espaço entre os cards, texto e degradê não mudaram. No celular (uma coluna), o card também fica 4:5.
+- **Painel.** Em Categorias, o campo "Imagem do card" recomenda agora "vertical (4:5), por exemplo 1200 × 1500 px" (antes, quadrada), e a prévia aparece em 4:5 (`.admin-categorias__previa--card`), seguindo a regra da seção 30 (prévia na proporção recomendada). A ajuda avisa que, sem imagem própria, o card usa a imagem da categoria, que é quadrada e perde um pouco das laterais. Na base local, a imagem de teste do card "Bolsas de verão" (1200 × 1200) já mostra esse corte: vale trocar por uma 4:5.
+- **DESIGN.md.** A estrutura da home descreve os cards em 4:5 e a imagem recomendada.
+
+## 46. Cartão de marca troca de cor no hover (27/10/2026)
+
+- **Pedido.** Um efeito de troca de cor nas marcas da página Início, como numa referência em que o cartão sob o mouse fica verde-escuro com o nome claro, e os outros continuam claros.
+- **Como ficou.** `.cartao-marca` (`paginas/Home.css`): no hover e no `:focus-visible`, fundo `--cor-primaria`, borda `--cor-primaria`, nome em `--cor-sobre-primaria` e o número de peças (`.t-muted`) em `--cor-sobre-primaria-suave`, ou seja, a combinação oficial creme sobre verde. Fundo, borda e cores trocam em 220ms (`--duracao-media`, `--curva-suave`), na ida e na volta; com `prefers-reduced-motion`, a troca é instantânea (a duração vira 0 nos tokens). A regra usa `.cartao.cartao-marca` para passar na frente da transição do `Card` (`ui/Card.css`), que cuidava só da borda.
+- **Onde vale.** O mesmo `GradeMarcas` serve a home e a página `/marcas`, então o efeito aparece nas duas, como um cartão só.
+- **Conferido no navegador:** com o mouse sobre "Louis Vuitton", fundo `rgb(40, 54, 31)`, nome `rgb(252, 234, 179)` e "0 peças" `rgb(193, 184, 138)`; os outros cartões continuam com o fundo do papel.
+- **DESIGN.md.** Estrutura da home (Marcas), a lista de Movimento (220ms) e o Don't de animar só o que está na lista.
+
+## 47. Símbolos no menu do painel (27/10/2026)
+
+- **Pedido.** Pôr símbolos nas opções do menu do painel, com uma imagem de inspiração: menu lateral escuro com um ícone de traço fino à esquerda de cada opção.
+- **Como ficou.** Cada grupo e cada tela do `MENU_ADMIN` (`paginas/admin/EstruturaAdmin.jsx`) ganhou um campo `icone`, desenhado à esquerda do nome, a 16px (`--icone-sm`), com `--espaco-3` de distância, na cor do texto (`.admin__icone`): fica em creme suave e acende junto com a opção no hover e na tela atual. Os desenhos são novos, feitos à mão em `components/Icones.jsx` no mesmo traço dos outros (1,25px, `currentColor`):
+  - Operação: pulso. Resumo: grade de quatro quadrados. Revisão: prancheta com visto. Atendimento: balão de conversa. Pedidos: recibo. Clientes: duas pessoas.
+  - Cadastros: pasta. Produtos: caixa. Marcas: etiqueta. Cores: gota. Categorias: camadas. Banners: imagem. Destaques: brilho.
+  - Permissões de Acesso: cadeado.
+  - Configurações: controles deslizantes. WhatsApp: a marca oficial (`IconeWhatsApp`), que pelo DESIGN.md só aparece ao lado do texto "WhatsApp", como aqui. Mercado Pago: cartão.
+- **Layout.** O botão do grupo e o link da tela viraram `flex` (ícone + nome). A setinha do grupo (`▾`) perdeu a margem própria, porque o `gap` já separa. No celular, as abas do menu levam o ícone também. "Permissões de Acesso" agora quebra em duas linhas na lateral, com o ícone no meio da altura: o nome mais o ícone passam da largura da coluna.
+- **Fora do escopo:** o destaque de fundo da opção atual que aparece na imagem de inspiração; o menu continua marcando a tela atual só pela cor do texto.
+
+## 48. Duplicar vira símbolo de cópia no painel (27/10/2026)
+
+- **Pedido.** Onde o painel tem "Duplicar", usar um símbolo como o de uma referência: dois quadrados sobrepostos, num botão em pílula com "Duplicar" ao lado.
+- **Como ficou.** Ícone novo `IconeCopiar` (`components/Icones.jsx`, mesmo traço dos outros, com os cantos levemente arredondados como na referência).
+  - **Lista de Produtos:** o "Duplicar" em texto virou `BotaoIcone acao="duplicar"` (só o desenho, antes do lápis e da lixeira), com `rotulo` "Duplicar PRD-0001", que vira dica e `aria-label`, seguindo a regra das ações de lista (seção 31).
+  - **Tela do produto:** o botão "Duplicar" do topo ganhou o desenho antes do texto, como o "Excluir produto" com a lixeira.
+  - A confirmação ("Duplicar mesmo assim") não mudou.
+- **Correção junto:** a janela de confirmação aberta pela lista (duplicar e excluir) saía com o texto numa linha só, cortado e com rolagem lateral. O `<dialog>` herda as propriedades de texto do lugar onde está no HTML, mesmo aberto por cima de tudo, e as ações da lista ficam numa célula com `white-space: nowrap`. O `.modal` agora tem `white-space: normal` (`ui/Modal.css`). O defeito já existia antes do símbolo.
+- **Conferido no navegador** (painel local, logado): os três desenhos na linha, a dica de cada um, a janela de duplicar e a de excluir abrindo com o texto inteiro, e as duas fechando sem fazer nada.

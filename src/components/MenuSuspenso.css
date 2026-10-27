@@ -1,0 +1,98 @@
+/*
+ * Janela de Marcas/Categorias no cabeçalho. É a mesma camada do diálogo (papel, filete
+ * --cor-borda-forte, sem sombra), mas sem véu: não bloqueia a página. Fica sempre no DOM e
+ * aparece pela classe --aberto; escondida, sai do foco por `visibility`.
+ * Posição: o <li> do item ocupa a altura toda do cabeçalho (Cabecalho.css), então 100% é a base
+ * do cabeçalho; a borda fina a mais passa o filete. O recuo à esquerda alinha os nomes com o item.
+ */
+.menu-suspenso {
+  position: absolute;
+  top: calc(100% + var(--borda-fina));
+  left: calc(-1 * var(--espaco-6));
+  width: max-content;
+  min-width: var(--largura-menu-suspenso);
+  max-height: calc(100dvh - var(--altura-cabecalho) - var(--espaco-6));
+  overflow-y: auto;
+  padding: var(--espaco-6);
+  border: var(--borda-fina) solid var(--cor-borda-forte);
+  border-radius: var(--raio);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  box-shadow: var(--sombra);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(calc(-1 * var(--deslocamento-menu-suspenso)));
+  transition:
+    opacity var(--duracao-saida) var(--curva-saida),
+    transform var(--duracao-saida) var(--curva-saida),
+    visibility 0s linear var(--duracao-saida);
+}
+
+.menu-suspenso--aberto {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity var(--duracao-media) var(--curva-suave),
+    transform var(--duracao-media) var(--curva-suave),
+    visibility 0s;
+}
+
+/* O cabeçalho é .faixa-primaria: foco e texto suave voltam às cores do papel aqui dentro. */
+.menu-suspenso :focus-visible {
+  outline-color: var(--cor-primaria);
+}
+
+.menu-suspenso .t-muted {
+  color: var(--cor-texto-suave);
+}
+
+.menu-suspenso__grupos {
+  display: flex;
+  gap: var(--espaco-12);
+}
+
+.menu-suspenso__grupo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+}
+
+/* --linhas-menu vem de MenuSuspenso.jsx: até 8 por coluna, depois cresce por igual. */
+.menu-suspenso__lista {
+  display: grid;
+  grid-template-rows: repeat(var(--linhas-menu), auto);
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(var(--largura-coluna-menu), max-content);
+  column-gap: var(--espaco-10);
+  /* Desconta o respiro do primeiro e do último link, para o texto alinhar com a borda da janela. */
+  margin-block: calc(-1 * var(--espaco-1));
+}
+
+.menu-suspenso__link {
+  display: block;
+  padding-block: var(--espaco-1);
+  white-space: nowrap;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: var(--borda-fina);
+  text-underline-offset: var(--sublinhado-afastamento);
+  transition: text-decoration-color var(--duracao-rapida) var(--curva-padrao);
+}
+
+.menu-suspenso__link:hover {
+  text-decoration-color: currentColor;
+}
+
+.menu-suspenso__estado {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-2);
+}
+
+.menu-suspenso__rodape {
+  margin-top: var(--espaco-4);
+  padding-top: var(--espaco-4);
+  border-top: var(--borda-fina) solid var(--cor-separador);
+}

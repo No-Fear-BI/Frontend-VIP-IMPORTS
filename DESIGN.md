@@ -127,7 +127,7 @@ components:
     backgroundColor: "{colors.primary}"
     textColor: "{colors.on-primary}"
     typography: "{typography.button}"
-    rounded: "{rounded.none}"
+    rounded: "{rounded.full}"
     padding: 18px
     height: 52px
   button-primary-hover:
@@ -137,14 +137,14 @@ components:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.on-surface}"
     typography: "{typography.button}"
-    rounded: "{rounded.none}"
+    rounded: "{rounded.full}"
     padding: 18px
     height: 52px
   button-on-dark:
     backgroundColor: "{colors.secondary}"
     textColor: "{colors.primary}"
     typography: "{typography.button}"
-    rounded: "{rounded.none}"
+    rounded: "{rounded.full}"
     padding: 18px
     height: 52px
   link-caps:
@@ -168,9 +168,24 @@ components:
   faixa-verde-filete:
     backgroundColor: "{colors.rule-on-primary}"
     height: 1px
-  selo-contagem:
+  cabecalho:
     backgroundColor: "{colors.primary}"
     textColor: "{colors.on-primary}"
+    typography: "{typography.label-caps}"
+  passar-foto:
+    backgroundColor: "{colors.primary}"
+    textColor: "{colors.on-primary}"
+    rounded: "{rounded.full}"
+    size: 44px
+  menu-suspenso:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.on-surface}"
+    typography: "{typography.body-sm}"
+    rounded: "{rounded.none}"
+    padding: 24px
+  selo-contagem:
+    backgroundColor: "{colors.secondary}"
+    textColor: "{colors.primary}"
     typography: "{typography.label-caps-sm}"
     rounded: "{rounded.full}"
     size: 18px
@@ -178,7 +193,7 @@ components:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.on-surface}"
     typography: "{typography.codigo}"
-    rounded: "{rounded.none}"
+    rounded: "{rounded.full}"
     height: 44px
   seletor-variacao-ativo:
     backgroundColor: "{colors.primary}"
@@ -213,7 +228,7 @@ A VIP Imports vende peças de grife importadas sem carrinho de pagamento: o site
 
 A direção é **Editorial de moda cruzado com etiqueta de alfaiataria**. De um lado, a revista (The Gentlewoman, Apartamento, a Harper's Bazaar de Brodovitch): título serifado grande, rótulo versalete espaçado, filete fino no lugar de caixa, cor usada em faixa cheia e não em pontinhos. Do outro, a etiqueta de papel pendurada na peça: o creme do manual da marca é literalmente o "papel de etiqueta", e o código do produto (`X030`) é tratado como o número escrito nessa etiqueta, não como um dado de sistema.
 
-A pegada de **exclusividade** vem de retenção, não de enfeite. Não há preço, não há contador de desconto nem selo de "mais vendido". Não há sombra, gradiente colorido ou canto arredondado. Cada peça tem uma moldura branca, como um objeto em vitrine, e o texto fala como atendimento de loja, não como e-commerce ("Valor confirmado pelo atendimento.", "Consultar valores no WhatsApp"). A sensação no primeiro segundo deve ser: *loja pequena, que atende por hora marcada*.
+A pegada de **exclusividade** vem de retenção, não de enfeite. Não há preço, não há contador de desconto nem selo de "mais vendido". Não há sombra nem gradiente colorido, e canto arredondado só existe nos botões (pílula, pedido de 27/10/2026). Cada peça tem uma moldura branca, como um objeto em vitrine, e o texto fala como atendimento de loja, não como e-commerce ("Valor confirmado pelo atendimento.", "Consultar valores no WhatsApp"). A sensação no primeiro segundo deve ser: *loja pequena, que atende por hora marcada*.
 
 **O que esta direção abandona, de propósito: densidade.** A grade mostra quatro peças por linha no desktop e duas no celular, com espaço generoso entre elas. Um atacadista mostraria o dobro. A troca compra a leitura de boutique, que é o que justifica atendimento individual. Para quem já sabe o que quer, busca e filtros resolvem, sem apertar a grade.
 
@@ -232,7 +247,7 @@ Existe **um só modo, claro**, com faixas verdes cheias fazendo o papel de "escu
 - **On-surface-muted (#606955) — Verde 74% sobre papel.** Metadado: marca em versalete sobre o título, categoria, "Valor confirmado pelo atendimento.", legendas. 5,5:1 sobre o papel, 5,75:1 sobre a vitrine e 4,8:1 sobre o creme, então pode ir em qualquer fundo claro do sistema.
 - **On-primary-muted (#C1B88A) — Creme 72% sobre verde.** O metadado equivalente dentro de uma faixa verde (legenda versalete acima do título do hero, colunas do rodapé). 6,4:1 sobre o verde.
 - **Rule-on-primary (#4A5337) — Creme 16% sobre verde.** Filete dentro de faixa verde.
-- **Border (#D3D3C5) — Verde 20% sobre papel.** O filete de 1px que separa seções, linhas de lista e colunas do rodapé. É decorativo e estrutural, nunca a única indicação de um controle.
+- **Border (#D3D3C5) — Verde 20% sobre papel.** Contorno de caixa: cartão de marca, miniatura, campo desativado. Era também a cor do filete que separava seções e linhas de lista, que desde 27/10/2026 fica sem cor (ver Elevation & Depth). Nunca a única indicação de um controle.
 - **Border-strong (#79806E) — Verde 62% sobre papel.** Contorno de input, de seletor de tamanho/cor e do botão secundário. 3,9:1 sobre o papel, acima do 3:1 exigido para componente de interface.
 - **Error (#28361F) — O próprio verde.** **Não existe vermelho na marca, e erro não ganha cor.** O erro é *dito*, não pintado: ícone de alerta + mensagem escrita + filete de 2px em verde no lado esquerdo do bloco ou abaixo do campo. Em vez de ser uma falha, isso é a regra de acessibilidade levada ao fim: estado nunca depende só de cor. O token existe para que nenhum agente, precisando de uma cor de erro, invente `#EF4444`.
 
@@ -264,12 +279,12 @@ Grade de **12 colunas**, gutter de 24px, margem externa de 48px no desktop e 20p
 **Ritmo de seção variado, não uniforme.** Seções que se completam ficam próximas (`spacing.xl` 40px entre destaques e os banners de coleção). Mudança de assunto ganha respiro (`spacing.3xl` 104px antes do CTA final). Faixa verde encosta nas bordas da tela (sangria total), e seção de papel respeita o container.
 
 **Estrutura da home**, na ordem da referência (vip-imports.base44.app), que já corresponde ao que `GET /home` devolve:
-1. Barra fina verde no topo (aviso de atendimento) + cabeçalho em papel com os itens de menu (Início, Feminino, Masculino, Categorias, Marcas, Todos, Novidades, Sobre, Contato) e os ícones de busca, conta e seleção à direita.
-2. **Hero em carrossel** (`banners`, até 4): foto cheia, texto sobre um degradê **só de verde** (verde 0% → 85% de baixo para cima, nunca preto), legenda versalete em `on-primary-muted` acima de título Bodoni em creme.
+1. Barra fina verde no topo (aviso de atendimento) + cabeçalho em verde (texto, ícones e logo em creme; era em papel até 27/10/2026) com os itens de menu (Início, Feminino, Masculino, Categorias, Marcas, Todos, Novidades, Sobre, Contato) e os ícones de busca, conta e seleção à direita. Categorias e Marcas abrem uma janela ao passar o mouse (ver Componentes, `menu-suspenso`).
+2. **Hero em carrossel** (`banners`, até 4): foto cheia, texto sobre um degradê **só de verde** (verde 0% → 85% de baixo para cima, nunca preto), legenda versalete em `on-primary-muted` acima de título Bodoni em creme. Desde 27/10/2026: legenda, título e link continuam à esquerda (no container), mas **no meio da altura do banner, alinhados com as setas**; as setas ficam **uma em cada lateral, no meio da altura** (24px da borda); e contador e barra de tempo ficam **centralizados no pé do banner**. Sem banner cadastrado, o texto fica no pé, como antes.
 3. **Destaques** (`destaques`, até 12): grade de 4 colunas de produto isolado na vitrine branca.
-4. **Duas coleções lado a lado** (Feminina / Masculina): foto cheia, degradê verde, link versalete sublinhado.
+4. **Duas coleções lado a lado** (Feminina / Masculina, ou a categoria que ocupa o card): foto cheia, degradê verde, link versalete sublinhado. Cards **verticais, em 4:5** (27/10/2026; antes eram mais largos que altos, até 560px de altura), com o texto no pé. Imagem recomendada no painel: 4:5, por exemplo 1200 × 1500 px.
 5. **Categorias em destaque** (`categoriasDestaque`, até 8): foto quadrada + nome em Bodoni + coleção em versalete `on-surface-muted`.
-6. **Marcas** (`marcas`): cartões de filete fino com o nome centralizado.
+6. **Marcas** (`marcas`): cartões de filete fino com o nome centralizado. No hover (e no foco do teclado), o cartão **troca de cor**: enche de verde (`primary`), o nome fica creme (`on-primary`) e o número de peças, `on-primary-muted` (27/10/2026). Vale também na página `/marcas`, que usa o mesmo cartão.
 7. **CTA final** em faixa verde: dois botões (ação principal em creme + "Falar no WhatsApp" em contorno creme).
 8. Rodapé em verde: colunas de coleções / navegação / contato.
 
@@ -281,10 +296,10 @@ Grade de **12 colunas**, gutter de 24px, margem externa de 48px no desktop e 20p
 
 A profundidade vem de três recursos:
 1. **Plano tonal:** a vitrine branca sobre o papel, e o papel sobre o verde. São três planos e só três.
-2. **Filete de 1px** em `border`: separa seções, linhas de lista e colunas. Divide, não cerca. O filete é o motivo gráfico tirado do próprio logo, que separa "VIP" de "IMPORTS" com uma linha fina, e por isso aparece com esse papel no cabeçalho, entre título e conteúdo de seção e no topo do rodapé.
+2. **Filete de 1px, sem cor** (desde 27/10/2026, a pedido do cliente): as linhas que separavam seções, blocos e itens de lista (sob o título de seção, na barra da listagem, nos títulos dos filtros, acima do "Ver detalhes" do cartão, entre itens da seleção, no cabeçalho, no rodapé, no menu suspenso) **não aparecem mais, mas o espaço delas fica**: a borda ou o `<hr>` continua com 1px e as mesmas margens, só sem cor (`--cor-separador` e `--cor-separador-sobre-primaria`, ambos `transparent`). Quem separa agora é o espaço. Separação nova segue a mesma regra: dê o espaço que o filete teria, sem desenhar a linha. Para as linhas voltarem, basta trocar o valor desses dois tokens.
 3. **Espaço:** o principal agrupador. Itens relacionados a 8–16px, grupos diferentes a 40px ou mais.
 
-**A única camada que flutua** é a sobreposição de diálogo (identificação por e-mail, confirmação de envio, gaveta de filtros no celular). Ela ganha um véu de verde 40% (`rgba(40, 54, 31, 0.4)`, sem blur) atrás e um filete de 1px em `border-strong` em volta. É uma borda onde nada mais tem borda, e ela marca a camada no lugar da sombra. O cabeçalho fixo, ao rolar a página, ganha só um filete inferior em `border`.
+**Duas camadas flutuam, e só elas.** A sobreposição de diálogo (identificação por e-mail, confirmação de envio, gaveta de filtros no celular) ganha um véu de verde 40% (`rgba(40, 54, 31, 0.4)`, sem blur) atrás e um filete de 1px em `border-strong` em volta. É uma borda onde nada mais tem borda, e ela marca a camada no lugar da sombra. A outra é a janela de Categorias e Marcas no cabeçalho (`menu-suspenso`): o mesmo papel e o mesmo filete `border-strong`, sem véu, porque não bloqueia a página. O cabeçalho fixo é faixa verde e tem sempre um filete inferior em `rule-on-primary`, que o separa do hero quando os dois verdes se encostam; sobre o papel, o próprio verde já marca a borda.
 
 **Movimento.** O movimento imita o ritmo de uma vitrine sendo arrumada: lento, com desaceleração longa e sem quicar. As durações e as duas curvas abaixo são as únicas permitidas.
 
@@ -294,10 +309,11 @@ Curvas:
 
 Durações e onde cada uma é usada:
 - **120ms `ease-out`**: mudança de estado (cor de botão, seletor de variação, sublinhado de link).
-- **220ms `vitrine`**: diálogo e gaveta entrando; saem em 160ms `ease-in`. Também a seta do link versalete deslizando 4px para a direita no hover e o "pulo" do selo de contagem quando uma peça entra na seleção (escala 1 → 1,25 → 1).
+- **220ms `vitrine`**: diálogo e gaveta entrando; saem em 160ms `ease-in`. A janela de Categorias e Marcas do cabeçalho também: desce 8px e aparece em 220ms, some em 160ms `ease-in`. E a **troca de cor do cartão de marca** no hover (papel → verde, texto verde → creme), que vai e volta em 220ms. Também a seta do link versalete deslizando 4px para a direita no hover e o "pulo" do selo de contagem quando uma peça entra na seleção (escala 1 → 1,25 → 1).
 - **700ms `vitrine`**: o **brilho do botão**, uma faixa diagonal translúcida que atravessa o botão cheio no hover (creme 22% sobre o botão verde, branco 55% sobre o botão creme; **nunca dourado**). Também a **transição entre slides do hero**, que **desliza** (cada slide se move em `translateX`; o que sai vai para um lado e o que entra vem do outro). No celular o slide segue o dedo enquanto se arrasta, sem transição; ao soltar, assenta nesta mesma curva e duração. As setas existem só no desktop; no celular a navegação é deslizar (contador e linha de progresso ficam).
-- **900ms `vitrine`**: o **filete do cabeçalho de seção se desenha** da esquerda para a direita (escala X de 0 a 1) na primeira vez que a seção aparece na tela. É o motivo do logo (a linha entre "VIP" e "IMPORTS") sendo traçado. Uma vez só por visita à página; não se desenha de novo ao rolar de volta.
+- **900ms `vitrine`**: o **filete do cabeçalho de seção se desenha** da esquerda para a direita (escala X de 0 a 1) na primeira vez que a seção aparece na tela. É o motivo do logo (a linha entre "VIP" e "IMPORTS") sendo traçado. Uma vez só por visita à página; não se desenha de novo ao rolar de volta. Desde 27/10/2026 o filete está sem cor (ver Elevation & Depth), então o movimento continua no código mas não aparece; volta junto com a linha.
 - **1000ms `vitrine`**: **zoom da foto no hover**, escala 1,04, dentro da vitrine (`overflow: hidden`). Vale para foto de produto, de categoria e de coleção. Ao sair, volta no mesmo tempo.
+- **700ms e 1000ms `vitrine`**: o **destaque do cartão de produto no hover** (pedido de 27/10/2026). O cartão inteiro sobe 6px em 700ms e, em 1000ms (junto com o zoom da foto), aparece um degradê verde leve só na metade de baixo da foto (`--degrade-destaque-produto`: verde 40% na base, some na metade), mais o sublinhado do código. Ao sair, desfaz no mesmo tempo. Só onde existe mouse.
 - **1200ms `vitrine`, 160ms entre peças**: o **texto do slide do hero** entrando (legenda, título e link sobem 16px e aparecem, um depois do outro) e a **entrada das páginas internas** (ver abaixo), no mesmo ritmo: lento de propósito, para a página se arrumar sem pressa.
 - **7000ms linear**: o **zoom lento do hero** (escala 1,06 → 1 enquanto o slide está ativo) e a **linha de progresso** sob o contador "01 / 03", que se enche durante o tempo do slide e para quando o carrossel pausa.
 - **48s, 72s e 120s linear, em loop**: a **onda entre seções** (pedido de 26/10/2026). Três faixas em curva, desfocadas nas bordas, em degradê creme → verde (as duas cores oficiais e as misturas entre elas; a névoa de trás é só creme, porque verde desfocado sobre o papel vira cinza e lê como sombra). Cada faixa desliza uma largura de tela no seu tempo, a névoa no sentido contrário, e as pontas somem no papel. Na home, fica entre Destaques e Coleções e entre Categorias e Marcas (entre Coleções e Categorias não tem, a pedido de 26/10/2026); na página do produto, acima de "Você Também Pode Gostar", e some junto com a seção quando não há sugestão; em `/categorias`, entre Feminina e Masculina. Ao rolar para baixo, a onda **se completa**: vai se desenhando da esquerda para a direita, com a ponta esfumaçada, desde que entra pelo pé da tela até o meio dela chegar ao meio da tela, e se desfaz ao rolar de volta. Sem suporte a `animation-timeline` no navegador (hoje, o Firefox) ou com movimento reduzido, aparece inteira. No deslize só `transform` anima, e a onda pausa fora da tela. Implementação: `components/DivisorOnda.jsx`.
@@ -312,9 +328,9 @@ O que **não** anima: texto corrido aparecendo no scroll, cartão de produto ou 
 
 ## Shapes
 
-**Quadrado e círculo, nada no meio.** Raio `0` em tudo que é estrutura: foto, botão, input, cartão de marca, diálogo, etiqueta, seletor de tamanho. Raio `full` só em objeto que é um **ponto**: o selo de contagem da seleção no ícone do cabeçalho, a amostra de cor no seletor de cor e o **ilhós** da etiqueta (o furinho redondo por onde passaria o cordão).
+**Quadrado e círculo, nada no meio.** Raio `0` em tudo que é estrutura: foto, input, cartão de marca, diálogo, etiqueta, janela do menu. Raio `full` em objeto que é um **ponto** (o selo de contagem da seleção no ícone do cabeçalho, a amostra de cor no seletor de cor e o **ilhós** da etiqueta, o furinho redondo por onde passaria o cordão) e, desde 27/10/2026, a pedido do cliente, em **todo botão com caixa visível**: o botão largo vira **pílula** (pontas em meio círculo) e o botão quadrado de 44px vira **círculo**. Vale para os botões principal, secundário e sobre o verde, as setas do hero, o seletor de tamanho e cor, o botão de passar fotos, os filtros de Pedidos e os ícones de ação do painel. Token: `--raio-botao`. Link versalete e ícone sem caixa (cabeçalho, fechar) não têm forma para arredondar; miniatura de foto é foto, fica reta.
 
-Não existe raio de 4, 8 ou 16px. Canto arredondado é o sotaque de app de consumo, e o registro aqui é de papel cortado e vitrine.
+Não existe raio de 4, 8 ou 16px: é reto ou é redondo. Fora dos botões, o registro continua de papel cortado e vitrine.
 
 **Exceção única: o carregador.** Os quadrados dele mantêm o canto do Lottie original (raio de 32% do lado), a pedido do cliente em 26/10/2026. É um objeto em movimento, não estrutura; nada mais ganha raio por causa dele. Para seguir a regra, `--raio-carregador` passa a `var(--raio)`.
 
@@ -322,11 +338,11 @@ Não existe raio de 4, 8 ou 16px. Canto arredondado é o sotaque de app de consu
 
 **Bordas** (sem sub-token no schema, normativas mesmo assim): 1px `border` para filete; 1px `border-strong` para input, seletor e botão secundário; **2px `primary`** para foco (`outline` com 2px de afastamento) e para o traço de erro. O foco em verde tem 12:1 sobre o papel e aparece em todo elemento interativo com `:focus-visible`.
 
-**Ícones:** traço de 1,25px, 20px no cabeçalho e 16px dentro de botão, sempre em `currentColor`, desenhados à mão como SVG inline (lupa, sacola, pessoa, coração, alerta). O ícone do WhatsApp é a marca oficial em monocromático `currentColor` e só aparece ao lado do texto "WhatsApp", nunca sozinho.
+**Ícones:** traço de 1,25px, 20px no cabeçalho e 16px dentro de botão e no menu do painel, sempre em `currentColor`, desenhados à mão como SVG inline (lupa, sacola, pessoa, coração, alerta). No menu lateral do painel, cada opção tem o seu desenho à esquerda do nome (27/10/2026), e ele acende junto com o texto. O ícone do WhatsApp é a marca oficial em monocromático `currentColor` e só aparece ao lado do texto "WhatsApp", nunca sozinho.
 
 ## Components
 
-**Botão principal (`button-primary`).** Verde cheio, texto creme em `button` (versalete 13px, +0,12em), 52px de altura, raio 0. É a ação que termina em conversa: **"Consultar valores no WhatsApp"** no produto, "Enviar seleção pelo WhatsApp" na seleção, "Continuar" na identificação. Hover em `primary-hover` com o brilho diagonal atravessando (ver Movimento), sem mudar tamanho nem ganhar sombra; ao pressionar, escala 0,985. Carregando: o texto dá lugar a "Abrindo o WhatsApp…" e o botão fica desabilitado, sem spinner girando.
+**Botão principal (`button-primary`).** Verde cheio, texto creme em `button` (versalete 13px, +0,12em), 52px de altura, em pílula. É a ação que termina em conversa: **"Consultar valores no WhatsApp"** no produto, "Enviar seleção pelo WhatsApp" na seleção, "Continuar" na identificação. Hover em `primary-hover` com o brilho diagonal atravessando (ver Movimento), sem mudar tamanho nem ganhar sombra; ao pressionar, escala 0,985. Carregando: o texto dá lugar a "Abrindo o WhatsApp…" e o botão fica desabilitado, sem spinner girando.
 
 **Botão secundário (`button-secondary`).** Papel com contorno de 1px `border-strong` e texto verde. Ações de apoio: "Ver seleção", "Tentar de novo", "Limpar filtros". Hover: o contorno vai para `primary`.
 
@@ -334,19 +350,23 @@ Não existe raio de 4, 8 ou 16px. Canto arredondado é o sotaque de app de consu
 
 **Link versalete (`link-caps`).** "Ver detalhes →", "Ver tudo →", "Coleção Feminina →". Texto em `label-caps` com sublinhado de 1px afastado 4px da linha de base. No hover o sublinhado engrossa para 2px e a seta desliza 4px para a direita; a cor não muda.
 
-**Cartão de produto.** Não é cartão: não tem fundo, borda nem sombra. De cima para baixo: foto 4:5 na `vitrine-foto`; marca em `text-meta` (versalete 11px, `on-surface-muted`); "Código X030" em `headline-sm`; categoria em `body-sm` `on-surface-muted`; "Valor confirmado pelo atendimento." em `body-sm` `on-surface-muted`; e o link "Ver detalhes →". **O cartão não tem botão de compra**: a compra começa na página do produto. Produto `esgotado`: sobre a foto, no canto superior esquerdo, uma etiqueta papel com "Esgotado" em versalete; a foto não perde saturação. No hover do cartão, a foto dá o zoom de 1,04 em 1s dentro da vitrine. Na página do produto, o botão de compra vira "Consultar disponibilidade", e o fluxo segue igual, porque esgotado continua sendo vitrine e o atendimento decide. **Não existe preço em lugar nenhum**, nem campo "a partir de".
+**Cartão de produto.** Não é cartão: não tem fundo, borda nem sombra. No hover, o cartão todo é um alvo só: sobe 6px, a foto ganha um degradê verde leve na metade de baixo (`--degrade-destaque-produto`, mais leve que o do cartão de categoria, para não escurecer a peça) e dá o zoom de 1,04, e o código ganha sublinhado (ver Movimento). De cima para baixo: foto 4:5 na `vitrine-foto`; marca em `text-meta` (versalete 11px, `on-surface-muted`); "Código X030" em `headline-sm`; categoria em `body-sm` `on-surface-muted`; "Valor confirmado pelo atendimento." em `body-sm` `on-surface-muted`; e o link "Ver detalhes →". **O cartão não tem botão de compra**: a compra começa na página do produto. Produto `esgotado`: sobre a foto, no canto superior esquerdo, uma etiqueta papel com "Esgotado" em versalete; a foto não perde saturação. No hover do cartão, a foto dá o zoom de 1,04 em 1s dentro da vitrine. Na página do produto, o botão de compra vira "Consultar disponibilidade", e o fluxo segue igual, porque esgotado continua sendo vitrine e o atendimento decide. **Não existe preço em lugar nenhum**, nem campo "a partir de".
 
 **Etiqueta (`etiqueta`).** Código do produto sobre creme com ilhós. Ver Shapes.
 
-**Faixa verde (`faixa-verde`, `faixa-verde-meta`, `faixa-verde-filete`).** Hero, CTA final e rodapé. Título Bodoni em creme, legenda versalete em `on-primary-muted`, filetes em `rule-on-primary`.
+**Faixa verde (`faixa-verde`, `faixa-verde-meta`, `faixa-verde-filete`).** Cabeçalho, hero, CTA final e rodapé. Título Bodoni em creme, legenda versalete em `on-primary-muted`. Os filetes da faixa verde também estão sem cor desde 27/10/2026 (o espaço fica).
 
-**Seletor de variação (`seletor-variacao`, `seletor-variacao-ativo`).** Tamanho: quadrados de 44px com contorno `border-strong` e `codigo` centralizado; o ativo fica verde cheio com texto creme. Cor: a mesma caixa com o nome da cor escrito (a API manda "Preto", não um hex, e o sistema não inventa amostra de cor que não conhece). Variação `disponivel: false`: texto com risco no meio, `aria-disabled`, e não é selecionável. São dois grupos separados, "Tamanho" e "Cor", e **nenhum é obrigatório para comprar**: sem escolha, a conversa do WhatsApp resolve.
+**Seletor de variação (`seletor-variacao`, `seletor-variacao-ativo`).** Tamanho: círculos de 44px com contorno `border-strong` e `codigo` centralizado; o ativo fica verde cheio com texto creme. Cor: a mesma caixa, em pílula, com o nome da cor escrito (a API manda "Preto", não um hex, e o sistema não inventa amostra de cor que não conhece). Variação `disponivel: false`: texto com risco no meio, `aria-disabled`, e não é selecionável. São dois grupos separados, "Tamanho" e "Cor", e **nenhum é obrigatório para comprar**: sem escolha, a conversa do WhatsApp resolve.
 
 **Campo (`input`, `input-error`).** Fundo vitrine, contorno 1px `border-strong`, raio 0, 52px, `body-md` em 16px (abaixo disso o iOS dá zoom no campo). O rótulo fica acima do campo em `label-caps`, nunca como placeholder. Erro: o contorno vira 2px `primary`, e abaixo aparece ícone de alerta + mensagem de `erro.campos[campo]` em `body-sm`. **Sem vermelho.**
 
 **Aviso (`aviso`).** Mensagem temporária no pé da tela ("Peça adicionada à seleção", "2 itens não estão mais disponíveis"). Verde cheio, texto papel, raio 0, some em 5s, com `role="status"`.
 
-**Selo de contagem (`selo-contagem`).** Círculo verde de 18px no ícone da seleção, número em creme. Some quando a seleção está vazia; não mostra "0". Quando o número sobe, o selo dá um pulo curto (escala 1,25 em 220ms), que confirma que a peça entrou.
+**Selo de contagem (`selo-contagem`).** Círculo creme de 18px no ícone da seleção, número em verde (o selo fica sobre o cabeçalho verde). Some quando a seleção está vazia; não mostra "0". Quando o número sobe, o selo dá um pulo curto (escala 1,25 em 220ms), que confirma que a peça entrou.
+
+**Menu suspenso (`menu-suspenso`).** Ao passar o mouse em Categorias ou Marcas no cabeçalho, abre uma janela logo abaixo dele, com os nomes alinhados ao item. Fundo papel, filete 1px `border-strong`, raio 0, sem sombra e sem véu, padding 24px. Os nomes vêm em `body-sm`, de cima para baixo e coluna por coluna, até 8 por coluna (marcas em até 3 colunas, em ordem alfabética; categorias em dois grupos, Feminina e Masculina, com o nome do grupo em `label-caps-sm` `on-surface-muted` e até 2 colunas cada). Sublinhado fino no hover, como os itens do cabeçalho. No pé, depois de um filete `border`, o link versalete "Ver todas →" leva à página (`/marcas`, `/categorias`). O clique no item continua levando à página. A lista só é buscada na primeira vez que a janela abre; enquanto isso, carregador compacto; vazio e erro são uma frase em linha (erro com "Tentar de novo"). Só existe no cabeçalho de computador (acima de 1240px); no celular o menu é a gaveta. Teclado: seta para baixo no item abre, Tab entra, Esc fecha e devolve o foco. Implementação: `components/MenuSuspenso.jsx`.
+
+**Botão de passar fotos (`passar-foto`).** Na página do produto com mais de uma foto, dois círculos de 44px sobre a foto principal, um de cada lado, no meio da altura e a 16px da borda: "Foto anterior" e "Próxima foto". Verde 72% (deixa ver um pouco da foto), contorno 1px de creme 40%, ponta de seta (›) em creme, 20px, traço do ícone de sempre. No hover, o verde fica cheio (`primary`), em 120ms. Dá a volta (da última foto, "próxima" leva à primeira) e anda junto com as miniaturas. Com o mouse no botão, a lupa da foto não dispara. Aparece também no celular, onde a galeria não desliza. Implementação: `paginas/Produto.jsx`. **As setas do hero são o mesmo botão** (27/10/2026): mesmo círculo, mesmas cores e mesma ponta de seta, uma em cada lateral do banner, no meio da altura, só no desktop (`.hero__seta`, `paginas/Home.css`).
 
 **Carregador (`carregador`).** Na loja, toda espera por dado mostra o carregador (ver Movimento), no lugar onde o conteúdo vai entrar. Abertura do site: tela cheia no papel, quadrado de 36px, desde antes do JavaScript (o mesmo HTML está no `index.html`) até a resposta do acesso. Página inteira (home, produto): quadrado de 24px no meio de uma área de 60vh, com cabeçalho e rodapé no lugar; a home tem um só, porque `GET /home` traz tudo de uma vez. Seção (listagem, categorias, marcas, relacionados, favoritos, seleção): 24px numa área de 240px. Em linha (filtros, "Carregar mais peças", tamanhos e cores na janela de compra, "Abrindo o WhatsApp…"): quadrado de 10px; no botão, ao lado de "Carregando…". Fora da abertura, só aparece se a espera passar de 200ms, para resposta rápida não piscar. Cada um tem um texto para leitor de tela ("Carregando peças…"). Implementação: `components/Carregando.jsx`.
 
@@ -359,19 +379,19 @@ Não existe raio de 4, 8 ou 16px. Canto arredondado é o sotaque de app de consu
 ## Do's and Don'ts
 
 - **Não use nenhuma cor fora das 13 desta lista.** Precisa de um tom novo? Ele é uma mistura das três oficiais e entra aqui primeiro, com a proporção anotada, antes de ir para `tokens.css`. Hex solto em componente é proibido.
-- **Não use dourado, mostarda, vermelho ou cinza neutro**, nem "só num detalhe". A referência base44 usa dourado nos botões e divisores; aqui esse papel é do verde cheio (botão) e do filete `border` (divisor).
+- **Não use dourado, mostarda, vermelho ou cinza neutro**, nem "só num detalhe". A referência base44 usa dourado nos botões e divisores; aqui esse papel é do verde cheio (botão) e do espaço (divisor; o filete está sem cor).
 - **Use no máximo duas faixas verdes de sangria total por página** (o rodapé não conta). Com três, o verde deixa de ser destaque e vira fundo.
 - **Não mostre preço, desconto, parcela ou "a partir de".** O texto fixo é "Valor confirmado pelo atendimento."
 - **Todo botão de compra diz "Consultar valores no WhatsApp"** (ou "Consultar disponibilidade" para esgotado). Nunca "Comprar", "Adicionar ao carrinho" ou "Finalizar pedido": não existe checkout.
 - **Não use Bodoni Moda abaixo de 20px nem em texto corrido.** Descrição, legenda e aviso vão em Jost.
 - **Não use Jost em peso diferente de 400 e 600.** Se um título não está chamando atenção, ele precisa de mais espaço acima, não de negrito.
 - **Não centralize texto.** Nem título de seção, nem estado vazio, nem diálogo. Exceções: nome no cartão de marca e wordmark no cabeçalho do celular.
-- **Não arredonde canto.** Raio é 0 ou círculo. Se algo parece pedir 8px, a resposta é 0.
+- **Não arredonde canto fora dos botões.** Raio é 0 ou redondo. Botão é pílula (ou círculo, se for quadrado); foto, campo, cartão e janela são retos. Se algo parece pedir 8px, a resposta é 0.
 - **Não use sombra**, nem para "destacar" cartão no hover. A única camada com separação visual é o diálogo, e ela usa véu verde + filete.
 - **Não pinte erro.** Erro é ícone (na loja, a sacola triste; no campo de formulário, sempre o ícone) + frase + traço de 2px em verde, sempre com a mensagem que a API mandou em `erro.mensagem`/`erro.campos`.
 - **Não recorte foto de produto.** 4:5 com `object-fit: contain` sobre a vitrine branca. Produto sem capa (`capa: null`) mostra a vitrine vazia com "Foto em breve" em `text-meta`, sem imagem genérica.
-- **Anime só o que está na lista de Movimento**: entrada do cabeçalho, hero (deslizar entre slides com arraste, zoom lento, texto subindo, linha de progresso), filete de seção se desenhando, zoom de 1,04 na foto, brilho do botão cheio, seta do link, pulo do selo, a entrada das páginas internas, a onda entre seções (home, produto e categorias), o cartão de produto ou de categoria aparecendo na rolagem, o carregador, a sacola triste do erro e a ilustração do Sobre. Não aplique fade-up em texto corrido nem em outro tipo de cartão (marca, coleção), não use parallax e não crie outra onda nem gradiente animado fora desse divisor.
+- **Anime só o que está na lista de Movimento**: entrada do cabeçalho, hero (deslizar entre slides com arraste, zoom lento, texto subindo, linha de progresso), filete de seção se desenhando, zoom de 1,04 na foto, brilho do botão cheio, seta do link, pulo do selo, a janela de Categorias e Marcas, a troca de cor do cartão de marca, o cartão de produto subindo no hover, a entrada das páginas internas, a onda entre seções (home, produto e categorias), o cartão de produto ou de categoria aparecendo na rolagem, o carregador, a sacola triste do erro e a ilustração do Sobre. Não aplique fade-up em texto corrido nem em outro tipo de cartão (marca, coleção), não use parallax e não crie outra onda nem gradiente animado fora desse divisor.
 - **O brilho do botão é creme ou branco translúcido, nunca dourado.** A referência base44 usa dourado; aqui a mesma faixa diagonal usa a paleta oficial.
 - **Todo degradê sobre foto é de verde para transparente.** Nunca de preto, nunca com dois tons.
 - **Use versalete sempre com espaçamento positivo** (`label-caps` +0,16em, `label-caps-sm` +0,14em). Caixa-alta sem tracking é proibida.
-- **Use só as três combinações de logo do manual:** branco sobre verde, verde sobre creme e creme sobre verde. No cabeçalho em papel, o logo vai em verde. O selo circular "use vip imports" é para rede social e não entra no cabeçalho.
+- **Use só as três combinações de logo do manual:** branco sobre verde, verde sobre creme e creme sobre verde. No cabeçalho, que é verde, o logo vai em creme; na gaveta do menu do celular, que é papel, vai em verde. O selo circular "use vip imports" é para rede social e não entra no cabeçalho.

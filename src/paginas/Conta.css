@@ -16,7 +16,7 @@
   gap: var(--espaco-secao);
   align-items: start;
   padding-top: var(--espaco-6);
-  border-top: var(--borda-fina) solid var(--cor-borda);
+  border-top: var(--borda-fina) solid var(--cor-separador);
 }
 
 .conta__dados {

@@ -26,7 +26,7 @@ import CampoQuantidade, { quantidadeValida, quantidadeParaApi } from './CampoQua
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Esqueleto, EstadoErro } from '../../components/Estados.jsx';
 import { FotoProduto } from '../../components/Produto.jsx';
-import { IconeFechar, IconeLixeira } from '../../components/Icones.jsx';
+import { IconeCopiar, IconeFechar, IconeLixeira } from '../../components/Icones.jsx';
 import Button from '../../components/ui/Button.jsx';
 import Field, { ErroGeral, LegendaObrigatorio, MarcaObrigatorio } from '../../components/ui/Field.jsx';
 import Modal from '../../components/ui/Modal.jsx';
@@ -175,6 +175,7 @@ function ProdutoCarregado({ inicial, aviso }) {
               produtoId={produto.id}
               render={(abrir) => (
                 <Button variante="secundaria" onClick={abrir}>
+                  <IconeCopiar />
                   Duplicar
                 </Button>
               )}

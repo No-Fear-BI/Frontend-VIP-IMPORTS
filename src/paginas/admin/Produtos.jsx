@@ -248,9 +248,7 @@ export default function AdminProdutos() {
                     <BotaoDuplicar
                       produtoId={produto.id}
                       render={(abrir) => (
-                        <button type="button" className="link-caps" onClick={abrir}>
-                          Duplicar
-                        </button>
+                        <BotaoIcone acao="duplicar" rotulo={`Duplicar ${produto.codigo}`} onClick={abrir} />
                       )}
                     />
                     <BotaoIcone

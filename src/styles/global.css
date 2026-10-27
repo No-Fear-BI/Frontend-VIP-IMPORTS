@@ -211,7 +211,7 @@ button {
   min-height: var(--altura-controle);
   padding-inline: var(--espaco-6);
   border: var(--borda-fina) solid transparent;
-  border-radius: var(--raio);
+  border-radius: var(--raio-botao);
   font-family: var(--fonte-texto);
   font-size: var(--texto-botao);
   font-weight: var(--peso-forte);
@@ -429,15 +429,17 @@ a:hover > .link-caps svg {
 
 /* ---------- Filete ---------- */
 
+/* Sem cor desde 27/10/2026 (--cor-separador): o filete continua ocupando o seu lugar, para o
+   espaçamento ficar o mesmo, mas não aparece. */
 .filete {
   height: var(--borda-fina);
   border: 0;
   margin: 0;
-  background: var(--cor-borda);
+  background: var(--cor-separador);
 }
 
 .faixa-primaria .filete {
-  background: var(--cor-borda-sobre-primaria);
+  background: var(--cor-separador-sobre-primaria);
 }
 
 /* ---------- Os três estados de toda tela que busca dado ----------

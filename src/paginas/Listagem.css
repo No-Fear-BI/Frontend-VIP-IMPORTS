@@ -9,7 +9,7 @@
   gap: var(--espaco-4);
   padding-block: var(--espaco-4);
   margin-bottom: var(--espaco-10);
-  border-block: var(--borda-fina) solid var(--cor-borda);
+  border-block: var(--borda-fina) solid var(--cor-separador);
 }
 
 .listagem__abrir-filtros {
@@ -52,7 +52,7 @@
   gap: var(--espaco-4);
   margin-top: var(--espaco-secao);
   padding-top: var(--espaco-6);
-  border-top: var(--borda-fina) solid var(--cor-borda);
+  border-top: var(--borda-fina) solid var(--cor-separador);
 }
 
 @media (max-width: 1023px) {
@@ -116,7 +116,7 @@
   padding: 0 0 var(--espaco-2);
   margin-bottom: var(--espaco-2);
   width: 100%;
-  border-bottom: var(--borda-fina) solid var(--cor-borda);
+  border-bottom: var(--borda-fina) solid var(--cor-separador);
 }
 
 .filtros__limpar {

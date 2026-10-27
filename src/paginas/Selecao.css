@@ -16,7 +16,7 @@
   gap: var(--espaco-secao);
   align-items: start;
   padding-top: var(--espaco-6);
-  border-top: var(--borda-fina) solid var(--cor-borda);
+  border-top: var(--borda-fina) solid var(--cor-separador);
 }
 
 .selecao__lista {
@@ -29,7 +29,7 @@
   grid-template-columns: var(--largura-miniatura-grande) minmax(0, 1fr);
   gap: var(--espaco-6);
   padding-block: var(--espaco-6);
-  border-bottom: var(--borda-fina) solid var(--cor-borda);
+  border-bottom: var(--borda-fina) solid var(--cor-separador);
 }
 
 .item-selecao:first-child {

@@ -48,7 +48,7 @@ export function QuantidadeProduto({ produto }) {
 }
 
 // Abaixo da dobra, o cartão aparece quando a rolagem chega nele (hooks/useAparecerNaRolagem.js,
-// CSS em global.css).
+// CSS em global.css). O degradê da foto só aparece no hover (Produto.css).
 export function CartaoProduto({ produto, carregamento }) {
   const destino = `/produto/${encodeURIComponent(produto.codigo)}`;
   const ref = useAparecerNaRolagem();
@@ -56,7 +56,7 @@ export function CartaoProduto({ produto, carregamento }) {
     <Card ref={ref} como="article" className="cartao-produto">
       <Link to={destino} className="cartao-produto__link">
         <div className="cartao-produto__foto">
-          <FotoProduto url={produto.capa?.url} alt={produto.capa?.alt || produto.nome} carregamento={carregamento} />
+          <FotoProduto url={produto.capa?.url} alt={produto.capa?.alt || produto.nome} carregamento={carregamento} degrade />
           {produto.status === 'esgotado' && <span className="selo-esgotado t-label-caps-sm">Encomendar</span>}
         </div>
         <p className="t-label-caps-sm t-muted cartao-produto__marca">{produto.marca.nome}</p>
