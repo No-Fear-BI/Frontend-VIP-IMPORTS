@@ -110,7 +110,7 @@ Nenhum componente da loja lê pedido. Backend: migração 0021 e `docs/para-o-fr
 
 - `src/components/DivisorOnda.jsx` na home, entre Destaques/Coleções e Categorias/Marcas — acima de Categorias não tem, a pedido —, e na página do produto, acima de "Você Também Pode Gostar" (renderizada dentro de `Relacionados`, some com a seção), e em `/categorias` entre Feminina e Masculina (cada bloco da página tem o próprio `.container`, para a onda ir de ponta a ponta) (`espelhada` e `fase` variam o desenho). Três faixas de SVG em degradê creme → verde, desfocadas, em loop lento.
 - Só `transform` anima: cada SVG tem 200% da largura e o desenho se repete na metade, então `translateX` até −50% fecha o ciclo sem repintar. Nunca anime o `d` do caminho. Pausa fora da tela; com `prefers-reduced-motion` fica parada.
-- Ao rolar, a onda se completa da esquerda para a direita (máscara em `.onda__desenho` com `animation-timeline: --onda-na-tela`, nomeada na `.onda`). Não troque por `view()` anônimo no filho: o `overflow: hidden` da `.onda` faria ele medir a rolagem dentro dela.
+- A onda aparece sempre inteira, sem depender da rolagem: o efeito de se completar ao rolar saiu em 28/10/2026, a pedido (seção 49). Não ligue movimento da onda à rolagem.
 - Só nesses lugares: o `DESIGN.md` continua proibindo qualquer outra onda ou gradiente animado.
 - Registro completo em `docs/decisoes-frontend.md`, seção 32.
 

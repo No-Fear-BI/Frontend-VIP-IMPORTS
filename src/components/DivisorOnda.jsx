@@ -12,8 +12,7 @@ import './DivisorOnda.css';
  * e o resto é composição, sem recalcular caminho nem desfoque a cada quadro. Fora da tela a
  * animação pausa; com prefers-reduced-motion a onda fica parada (DivisorOnda.css).
  *
- * Além disso, a onda se completa com a rolagem: vai se desenhando da esquerda para a direita
- * enquanto sobe na tela e fica inteira quando chega ao meio (CSS, animation-timeline).
+ * A onda aparece sempre inteira: não depende da rolagem (seção 49).
  */
 
 // Unidades do viewBox. O SVG estica para 200% da largura e --altura-onda de altura
@@ -107,41 +106,39 @@ export default function DivisorOnda({ espelhada = false, fase = 0 }) {
       style={{ '--onda-fase': fase }}
       aria-hidden
     >
-      <div className="onda__desenho">
-        {CAMADAS.map((camada) => {
-          const degrade = `${id}-${camada.nome}-degrade`;
-          const desfoque = `${id}-${camada.nome}-desfoque`;
-          return (
-            <svg
-              key={camada.nome}
-              className={`onda__camada onda__camada--${camada.nome}`}
-              viewBox={`0 0 ${LARGURA} ${ALTURA}`}
-              preserveAspectRatio="none"
-              focusable="false"
-            >
-              <defs>
-                <linearGradient
-                  id={degrade}
-                  gradientUnits="userSpaceOnUse"
-                  x1="0"
-                  y1="0"
-                  x2={PERIODO}
-                  y2="0"
-                  spreadMethod="repeat"
-                >
-                  {camada.degrade.map(([posicao, cor, opacidade]) => (
-                    <stop key={posicao} offset={posicao} className={`onda__cor--${cor}`} stopOpacity={opacidade} />
-                  ))}
-                </linearGradient>
-                <filter id={desfoque} x="-5%" y="-100%" width="110%" height="300%">
-                  <feGaussianBlur stdDeviation={camada.desfoque} />
-                </filter>
-              </defs>
-              <path d={camada.caminho} fill={`url(#${degrade})`} filter={`url(#${desfoque})`} />
-            </svg>
-          );
-        })}
-      </div>
+      {CAMADAS.map((camada) => {
+        const degrade = `${id}-${camada.nome}-degrade`;
+        const desfoque = `${id}-${camada.nome}-desfoque`;
+        return (
+          <svg
+            key={camada.nome}
+            className={`onda__camada onda__camada--${camada.nome}`}
+            viewBox={`0 0 ${LARGURA} ${ALTURA}`}
+            preserveAspectRatio="none"
+            focusable="false"
+          >
+            <defs>
+              <linearGradient
+                id={degrade}
+                gradientUnits="userSpaceOnUse"
+                x1="0"
+                y1="0"
+                x2={PERIODO}
+                y2="0"
+                spreadMethod="repeat"
+              >
+                {camada.degrade.map(([posicao, cor, opacidade]) => (
+                  <stop key={posicao} offset={posicao} className={`onda__cor--${cor}`} stopOpacity={opacidade} />
+                ))}
+              </linearGradient>
+              <filter id={desfoque} x="-5%" y="-100%" width="110%" height="300%">
+                <feGaussianBlur stdDeviation={camada.desfoque} />
+              </filter>
+            </defs>
+            <path d={camada.caminho} fill={`url(#${degrade})`} filter={`url(#${desfoque})`} />
+          </svg>
+        );
+      })}
     </div>
   );
 }
