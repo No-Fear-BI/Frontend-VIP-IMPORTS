@@ -69,8 +69,6 @@
   --cor-onda-luz: #fceab3;                 /* creme oficial: o trecho claro da onda */
   --cor-onda-corpo: #28361f;               /* verde oficial: o trecho cheio da onda */
   --mascara-onda: linear-gradient(to right, transparent 0%, #000 18%, #000 82%, transparent 100%);
-  /* Ponta da onda enquanto ela se completa com a rolagem: o último quarto some aos poucos. */
-  --mascara-onda-avanco: linear-gradient(to right, #000 75%, transparent 100%);
 
   /* Carregador (components/Carregando): o quadrado da frente e os dois do rastro, do mais
      forte ao mais claro, sobre o papel. */
