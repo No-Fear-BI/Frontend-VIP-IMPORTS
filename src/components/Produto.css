@@ -57,15 +57,16 @@
 /*
  * Destaque no hover (docs/decisoes-frontend.md, seção 39): o cartão inteiro é um alvo só. Ele sobe
  * um pouco e a foto ganha um degradê verde leve, só embaixo (--degrade-destaque-produto, mais leve
- * que o do cartão de categoria). A subida leva 700ms e o degradê 1000ms, no ritmo do zoom da
- * foto, para o destaque chegar devagar. Quem sobe são os filhos, não o
+ * que o do cartão de categoria). Tudo no hover do cartão começa e termina junto (seção 50): subida,
+ * degradê, zoom da foto, as duas linhas e a seta, em --duracao-muito-lenta (1000ms, o tempo do zoom
+ * da foto no site inteiro) na --curva-suave, sem atraso. Quem sobe são os filhos, não o
  * <article>: a área do hover fica parada e o cartão não treme com o mouse perto da borda de baixo.
  * `translate`, e não `transform`, para não disputar com o aparecer na rolagem (global.css), que
  * anima o `transform` do próprio cartão. Só onde existe mouse: no toque, o hover gruda depois do
  * toque e o cartão ficaria levantado ao voltar para a lista.
  */
 .cartao-produto > * {
-  transition: translate var(--duracao-lenta) var(--curva-suave);
+  transition: translate var(--duracao-muito-lenta) var(--curva-suave);
 }
 
 .cartao-produto .vitrine-foto__degrade {
@@ -118,10 +119,62 @@
   margin-bottom: var(--espaco-1);
 }
 
-.cartao-produto:hover .t-headline-sm {
-  text-decoration: underline;
-  text-decoration-thickness: var(--borda-fina);
-  text-underline-offset: var(--sublinhado-afastamento);
+/*
+ * Sublinhado que se desenha (docs/decisoes-frontend.md, seção 50): no hover do cartão, uma linha
+ * verde de 1px atravessa o código e o "Ver detalhes →" (seta inclusa) ao mesmo tempo, da esquerda
+ * para a direita, como o filete do logo entre "VIP" e "IMPORTS", e a seta desliza junto. Mesma
+ * duração e curva do resto do destaque (acima), para tudo chegar junto. Ao sair, recolhe para a esquerda
+ * pelo mesmo caminho: se o mouse sai no meio, a linha volta de onde está, sem pular. O código pode
+ * quebrar em duas linhas no celular, por isso o traço dele é um fundo (background-size), que segue
+ * a quebra; o do link é um ::after em scaleX. Sem mouse, o código fica sem linha e o link com ela
+ * parada, como os outros links versalete. O padding (metade do afastamento) desce o traço do código
+ * para não encostar na perna do "g" sem colar na categoria abaixo; padding vertical em <span> não
+ * mexe na altura da linha.
+ */
+.cartao-produto__codigo {
+  padding-bottom: calc(var(--sublinhado-afastamento) / 2);
+  background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 0% var(--borda-fina);
+  transition: background-size var(--duracao-muito-lenta) var(--curva-suave);
+}
+
+.cartao-produto .link-caps {
+  position: relative;
+  text-decoration: none;
+}
+
+.cartao-produto .link-caps::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(-1 * var(--sublinhado-afastamento));
+  height: var(--borda-fina);
+  background: currentColor;
+  transform-origin: left;
+  transition: transform var(--duracao-muito-lenta) var(--curva-suave);
+}
+
+/* A seta do link versalete tem o próprio tempo (220ms, global.css); no cartão, anda com o resto. */
+.cartao-produto .link-caps svg {
+  transition: transform var(--duracao-muito-lenta) var(--curva-suave);
+}
+
+@media (hover: hover) {
+  .cartao-produto .link-caps::after {
+    transform: scaleX(0);
+  }
+
+  .cartao-produto:hover .cartao-produto__codigo {
+    background-size: 100% var(--borda-fina);
+  }
+
+  .cartao-produto:hover .link-caps::after {
+    transform: none;
+  }
+
+  .cartao-produto:hover .link-caps svg {
+    transform: translateX(var(--deslocamento-seta));
+  }
 }
 
 .cartao-produto__acoes {

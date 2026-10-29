@@ -156,7 +156,7 @@ Nenhum componente da loja lê pedido. Backend: migração 0021 e `docs/para-o-fr
 
 ## Cartão de produto em destaque no hover (27/10/2026)
 
-- `CartaoProduto` passa `degrade` à `FotoProduto`; em `Produto.css`, o degradê do cartão é `--degrade-destaque-produto` (mais leve que `--degrade-sobre-foto`, que segue no hero/coleções/categorias) e fica invisível até `.cartao-produto:hover` (1000ms), e os filhos do cartão sobem `--deslocamento-destaque-cartao` (6px, 700ms), só em `@media (hover: hover)`. Zoom da foto e sublinhado do código também respondem ao cartão todo.
+- `CartaoProduto` passa `degrade` à `FotoProduto`; em `Produto.css`, o degradê do cartão é `--degrade-destaque-produto` (mais leve que `--degrade-sobre-foto`, que segue no hero/coleções/categorias) e fica invisível até `.cartao-produto:hover`, e os filhos do cartão sobem `--deslocamento-destaque-cartao` (6px), só em `@media (hover: hover)`. Tudo no hover do cartão leva `--duracao-muito-lenta` (1000ms), sem atraso (seção 50). Zoom da foto e sublinhado do código também respondem ao cartão todo.
 - Use `translate` (não `transform`) e mova os filhos (não o `<article>`): `transform` brigaria com o aparecer na rolagem, e mover o próprio cartão faz o hover tremer na borda de baixo.
 - Registro completo em `docs/decisoes-frontend.md`, seção 39.
 
@@ -208,3 +208,15 @@ Nenhum componente da loja lê pedido. Backend: migração 0021 e `docs/para-o-fr
 - `BotaoIcone` aceita `acao="duplicar"` (`IconeCopiar`); a lista de Produtos usa isso no lugar do texto. O botão "Duplicar" da tela do produto tem o desenho antes do texto.
 - `.modal` tem `white-space: normal`: o `<dialog>` herda do pai no HTML, e as ações da lista ficam numa célula com `nowrap`.
 - Registro completo em `docs/decisoes-frontend.md`, seção 48.
+
+## Cartão de produto: sublinhado que se desenha (28/10/2026)
+
+- `components/Produto.jsx`: o código fica em `<span className="cartao-produto__codigo">`. Em `Produto.css`, no `.cartao-produto:hover` (só `@media (hover: hover)`), o traço do código (fundo, `background-size` 0% → 100%, segue a quebra de linha) e o `::after` do `.link-caps` do cartão (`scaleX` 0 → 1) se desenham juntos, da esquerda para a direita; a seta do link anda no hover do cartão todo. Subida, zoom, degradê, linhas e seta: todos em `--duracao-muito-lenta` na `--curva-suave`, sem `transition-delay`. Peça nova no hover do cartão segue o mesmo tempo, senão sai de sincronia. `transform-origin` fixo à esquerda: a linha recolhe pelo mesmo caminho, sem pular.
+- No cartão, `.link-caps` tem `text-decoration: none`; sem mouse, o `::after` fica inteiro (linha parada). Não mexa no `.link-caps` global por causa disso.
+- Registro completo em `docs/decisoes-frontend.md`, seção 50.
+
+## Pequenas animações nos filtros e no rodapé (28/10/2026)
+
+- `paginas/Listagem.css`: `.opcao-filtro__texto` (com `justify-self: start`) tem o traço em fundo (`background-size` 0% → 100%, `--duracao-sublinhado`) no `.opcao-filtro:hover`; o marcador ganha contorno `--cor-primaria` no hover, `scale(var(--escala-marcador-pressionado))` no `:active` e um `::after` verde que cresce do centro na `.opcao-filtro--ativa`. Hover só em `@media (hover: hover)`.
+- `components/Rodape.css`: `.rodape__coluna a` com o mesmo traço (creme) no hover e no `:focus-visible`; no `:active`, `--cor-pressionado-sobre-primaria` e traço `--borda-grossa` em `--duracao-rapida`. `.rodape__whats` tem margem negativa que devolve o padding do traço (é `inline-flex`).
+- Registro completo em `docs/decisoes-frontend.md`, seção 51.

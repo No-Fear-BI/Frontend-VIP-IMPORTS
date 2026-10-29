@@ -32,6 +32,14 @@
   font-size: var(--texto-sm);
   letter-spacing: 0;
   text-transform: none;
+  cursor: pointer;
+  transition: border-color var(--duracao-rapida) var(--curva-padrao);
+}
+
+@media (hover: hover) {
+  .listagem__ordem select:hover {
+    border-color: var(--cor-primaria);
+  }
 }
 
 .listagem__corpo {
@@ -139,20 +147,45 @@
   pointer-events: none;
 }
 
+/*
+ * Pequenas animações da opção de filtro (docs/decisoes-frontend.md, seção 51). No hover: o
+ * contorno do quadrado fica verde e um traço de 1px se desenha da esquerda para a direita sob o
+ * nome (o gesto do cartão de produto), recolhendo pelo mesmo lado ao sair. No clique, o quadrado
+ * afunda um pouco; ao marcar, o verde enche o quadrado a partir do centro, e ao desmarcar encolhe
+ * de volta. O hover só onde existe mouse (no toque ele gruda); o resto vale para o toque também.
+ */
+
 /* Marcador quadrado (raio 0). Ativo = verde cheio. */
 .opcao-filtro__marcador {
+  position: relative;
   width: var(--icone-sm);
   height: var(--icone-sm);
   border: var(--borda-fina) solid var(--cor-borda-forte);
   background: var(--cor-fundo-foto);
   transition:
-    background-color var(--duracao-rapida) var(--curva-padrao),
-    border-color var(--duracao-rapida) var(--curva-padrao);
+    border-color var(--duracao-rapida) var(--curva-padrao),
+    transform var(--duracao-rapida) var(--curva-padrao);
+}
+
+.opcao-filtro__marcador::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--cor-primaria);
+  transform: scale(0);
+  transition: transform var(--duracao-media) var(--curva-suave);
 }
 
 .opcao-filtro--ativa .opcao-filtro__marcador {
-  background: var(--cor-primaria);
   border-color: var(--cor-primaria);
+}
+
+.opcao-filtro--ativa .opcao-filtro__marcador::after {
+  transform: none;
+}
+
+.opcao-filtro:active .opcao-filtro__marcador {
+  transform: scale(var(--escala-marcador-pressionado));
 }
 
 .opcao-filtro input:focus-visible + .opcao-filtro__marcador {
@@ -160,7 +193,19 @@
   outline-offset: var(--foco-afastamento);
 }
 
-.opcao-filtro:hover .opcao-filtro__texto {
-  text-decoration: underline;
-  text-underline-offset: var(--sublinhado-afastamento);
+/* `start`: sem ele, o texto ocupa a coluna toda e o traço passaria do nome. */
+.opcao-filtro__texto {
+  justify-self: start;
+  background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 0% var(--borda-fina);
+  transition: background-size var(--duracao-sublinhado) var(--curva-suave);
+}
+
+@media (hover: hover) {
+  .opcao-filtro:hover .opcao-filtro__marcador {
+    border-color: var(--cor-primaria);
+  }
+
+  .opcao-filtro:hover .opcao-filtro__texto {
+    background-size: 100% var(--borda-fina);
+  }
 }
