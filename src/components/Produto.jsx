@@ -60,7 +60,9 @@ export function CartaoProduto({ produto, carregamento }) {
           {produto.status === 'esgotado' && <span className="selo-esgotado t-label-caps-sm">Encomendar</span>}
         </div>
         <p className="t-label-caps-sm t-muted cartao-produto__marca">{produto.marca.nome}</p>
-        <h3 className="t-headline-sm">Código {produto.codigo}</h3>
+        <h3 className="t-headline-sm">
+          <span className="cartao-produto__codigo">Código {produto.codigo}</span>
+        </h3>
         <p className="t-body-sm t-muted">{produto.categoria.nome}</p>
         <QuantidadeProduto produto={produto} />
       </Link>

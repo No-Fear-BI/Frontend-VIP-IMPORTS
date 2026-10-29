@@ -30,22 +30,45 @@
   gap: var(--espaco-2);
 }
 
+/*
+ * Links do rodapé (docs/decisoes-frontend.md, seção 51). No hover (e no foco pelo teclado), um
+ * traço creme se desenha da esquerda para a direita, o gesto do cartão de produto, e recolhe pelo
+ * mesmo lado ao sair. No clique, enquanto o botão (ou o dedo) estiver apertado, o link e o traço
+ * viram branco oficial e o traço engrossa para 2px, rápido. O traço é um fundo, e não
+ * text-decoration, porque é o fundo que anima a largura; e ele segue a quebra de linha. O padding
+ * (metade do afastamento) desce o traço sem mexer na altura da linha, porque o link é inline.
+ */
 .rodape__coluna a {
   font-size: var(--texto-sm);
-  text-decoration: underline;
-  text-decoration-color: transparent;
-  text-underline-offset: var(--sublinhado-afastamento);
-  transition: text-decoration-color var(--duracao-rapida) var(--curva-padrao);
+  padding-bottom: calc(var(--sublinhado-afastamento) / 2);
+  background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 0% var(--borda-fina);
+  transition:
+    background-size var(--duracao-sublinhado) var(--curva-suave),
+    color var(--duracao-rapida) var(--curva-padrao);
 }
 
-.rodape__coluna a:hover {
-  text-decoration-color: currentColor;
+.rodape__coluna a:focus-visible {
+  background-size: 100% var(--borda-fina);
 }
 
+@media (hover: hover) {
+  .rodape__coluna a:hover {
+    background-size: 100% var(--borda-fina);
+  }
+}
+
+.rodape__coluna a:active {
+  color: var(--cor-pressionado-sobre-primaria);
+  background-size: 100% var(--borda-grossa);
+  transition-duration: var(--duracao-rapida);
+}
+
+/* O padding do traço (acima) cresce a caixa do inline-flex; a margem negativa devolve o espaço. */
 .rodape__whats {
   display: inline-flex;
   align-items: center;
   gap: var(--espaco-2);
+  margin-bottom: calc(-1 * var(--sublinhado-afastamento) / 2);
 }
 
 .rodape__whats svg {

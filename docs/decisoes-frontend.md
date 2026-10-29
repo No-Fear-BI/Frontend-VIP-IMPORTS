@@ -541,3 +541,32 @@ substitui as referências anteriores ao histórico de seleções.
 - **O que saiu.** O efeito da seção 32 em que a onda se desenhava da esquerda para a direita conforme a rolagem: a máscara de `.onda__desenho`, o `view-timeline` da `.onda`, a animação `onda-completa` e o token `--mascara-onda-avanco`. O invólucro `.onda__desenho` só existia para essa máscara e também saiu; as três faixas voltaram a ser filhas diretas da `.onda`.
 - **O que fica.** O deslize lento das três faixas em loop (48s, 72s, 120s), as pontas esfumaçadas (`--mascara-onda`), a pausa fora da tela e a onda parada com `prefers-reduced-motion`. Os lugares da onda não mudaram.
 - **Daqui para a frente:** nada da onda depende da rolagem.
+
+## 50. Sublinhado que se desenha no cartão de produto (28/10/2026)
+
+- **Pedido.** Uma animação da linha aparecendo e sublinhando o código do produto e o "Ver detalhes" quando o mouse passa no cartão, como a linha sob "Ver detalhes" da referência base44, mas nas cores da marca (sem o dourado de lá).
+- **Como ficou.** No hover do cartão (o cartão todo continua sendo um alvo só, seção 39), uma linha verde de 1px (`currentColor`, que no cartão é `--cor-texto`) se desenha da esquerda para a direita sob "Código X030" e sob "Ver detalhes →", com a seta inclusa. Ao sair, as duas linhas recolhem juntas para a esquerda. É o mesmo gesto do filete do logo entre "VIP" e "IMPORTS".
+- **Recolhe pelo mesmo lado.** Entrar pela esquerda e sair pela direita (trocar o `transform-origin` no meio) faria a linha pular de lado quando o mouse sai antes do fim. Com a origem fixa, a linha volta de onde estiver.
+- **Duas técnicas, mesma linha.** O código está num `<span className="cartao-produto__codigo">` e o traço dele é um fundo (`linear-gradient` + `background-size` de 0% a 100%), porque o código é editável no painel e pode quebrar em duas linhas no celular: o fundo segue a quebra. O "Ver detalhes" é um `::after` em `scaleX` (só `transform` anima). O span tem `padding-bottom` de metade do `--sublinhado-afastamento`: sem ele a linha encostava na perna do "g"; com o afastamento inteiro, quase encostava na categoria.
+- **Em repouso.** O código fica sem linha (já era assim). No computador, o "Ver detalhes" do cartão também fica sem linha até o hover; a seta e o versalete seguem dizendo que é link. Sem mouse (`@media (hover: hover)` falso), o "Ver detalhes" mantém a linha parada, como os outros links versalete, e o código fica sem linha (no toque, o hover gruda depois do toque).
+- **Movimento reduzido.** Os tokens de duração já zeram: as linhas aparecem e somem sem se desenhar.
+- **Fora do escopo:** os outros links versalete do site (seções da home, coleções, cabeçalho) e o cartão de categoria continuam como estavam.
+- **Ajuste do mesmo dia: tudo sincronizado.** Na primeira versão as linhas levavam 700ms e a do "Ver detalhes" saía 90ms depois da do código; a subida do cartão também levava 700ms, o zoom e o degradê da foto 1000ms, e a seta só andava (em 220ms) com o mouse em cima do próprio link. O cliente achou as animações fora de sincronia. Agora as sete peças do hover (subida da área da foto e do texto, subida das ações, zoom, degradê, as duas linhas e a seta) usam `--duracao-muito-lenta` (1000ms) na `--curva-suave`, sem atraso, e a seta anda no hover do cartão todo. Medido no navegador com `transitionrun`/`transitionend`: as sete começam no mesmo quadro e terminam juntas. A régua é 1000ms porque é o tempo do zoom da foto no site inteiro (categoria e coleção também); trazer tudo para 700ms deixaria o zoom do cartão de produto diferente do das outras fotos. Isto substitui os 700ms da subida da seção 39.
+- **Alternativa descartada por ora:** deixar no "Ver detalhes" um trilho fraco em repouso (`--cor-borda`) com a linha verde se desenhando por cima. Pode lembrar os filetes que o cliente apagou na seção 44.
+
+## 51. Pequenas animações nos filtros da listagem e nos links do rodapé (28/10/2026)
+
+- **Pedido.** "Pequenas animações" ao passar o mouse nas opções de filtro da pesquisa de produtos e ao clicar nos links do rodapé, na paleta da marca.
+- **Filtros (`paginas/Listagem.css`, valem na lateral e na gaveta do celular).**
+  - Hover na opção: o contorno do quadrado vai de `--cor-borda-forte` para `--cor-primaria` (120ms) e um traço verde de 1px se desenha sob o nome, da esquerda para a direita, em `--duracao-sublinhado` (400ms, token novo) na `--curva-suave`; ao sair, recolhe pelo mesmo lado. É o gesto do sublinhado do cartão de produto (seção 50), mais curto porque a opção é pequena e o mouse passa por várias seguidas. Substitui o sublinhado seco que existia.
+  - Clique: o quadrado afunda para `--escala-marcador-pressionado` (0,8, token novo) enquanto o botão está apertado.
+  - Marcar e desmarcar: o verde enche o quadrado a partir do centro (`::after` em `scale` 0 → 1, 220ms na `--curva-suave`) e encolhe de volta ao desmarcar. Antes a cor só trocava.
+  - "Ordenar": o contorno do `<select>` fica verde no hover, como o botão secundário.
+  - O texto da opção ganhou `justify-self: start`: sem ele, o traço passaria do nome até a contagem.
+- **Rodapé (`components/Rodape.css`).**
+  - Hover e foco pelo teclado: o mesmo traço, em creme (`currentColor`), 400ms. Substitui o sublinhado que só trocava de cor.
+  - Clique: enquanto o botão (ou o dedo) está apertado, o link e o traço viram branco oficial (`--cor-pressionado-sobre-primaria`, token novo; branco sobre verde é uma das combinações do manual) e o traço engrossa para 2px, em 120ms. No celular é a única resposta, já que lá não existe hover.
+  - O link do WhatsApp é `inline-flex`; o padding do traço crescia a caixa em 2px, e uma margem negativa igual devolve o espaço (medido: a coluna ficou com as mesmas alturas de antes).
+- **Hover só onde existe mouse** (`@media (hover: hover)`), como no cartão de produto: no toque ele gruda. Clique, marcar e foco valem em qualquer aparelho.
+- **Movimento reduzido.** `--duracao-sublinhado` vai a 0ms e `--escala-marcador-pressionado` a 1 junto com os outros tokens: tudo muda sem se mover.
+- **Fora do escopo:** os itens do cabeçalho e os outros links da loja continuam com o sublinhado que só troca de cor.

@@ -27,6 +27,7 @@
   --cor-primaria-hover: #414c31;           /* verde 88% + creme 12% */
   --cor-sobre-primaria: #fceab3;           /* creme oficial: texto e ícone sobre a primária */
   --cor-sobre-primaria-suave: #c1b88a;     /* creme 72% sobre verde */
+  --cor-pressionado-sobre-primaria: #ffffff; /* branco oficial: link do rodapé enquanto é clicado */
   --cor-borda-sobre-primaria: #4a5337;     /* creme 16% sobre verde */
 
   --cor-secundaria: #fceab3;               /* creme oficial */
@@ -274,6 +275,7 @@
      1000ms para o zoom da foto no hover. Fiquei com o valor do zoom, que aparece bem mais vezes
      na tela; o filete se desenha 100ms mais devagar do que o especificado. */
   --duracao-muito-lenta: 1000ms;
+  --duracao-sublinhado: 400ms;             /* traço que se desenha sob o filtro e o link do rodapé no hover */
   --duracao-carrossel: 7000ms;             /* tempo de cada slide do hero */
   /* Uma volta da onda = a faixa desliza uma largura de tela. Três tempos diferentes para as
      camadas se cruzarem sem repetir o mesmo desenho; a névoa vai no sentido contrário. */
@@ -308,6 +310,7 @@
   --escala-zoom-foto: 2.2;                 /* lupa da foto principal na página do produto */
   --escala-pulo: 1.25;
   --escala-pressionado: 0.985;
+  --escala-marcador-pressionado: 0.8;      /* quadrado do filtro afundando no clique */
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -319,6 +322,7 @@
     --duracao-portao-painel: 0ms;
     --deslocamento-portao-painel: 0px;
     --duracao-muito-lenta: 0ms;
+    --duracao-sublinhado: 0ms;
     --duracao-entrada-pagina: 0ms;
     --duracao-aparece-rolagem: 0ms;
     --deslocamento-aparece-rolagem: 0px;
@@ -331,5 +335,6 @@
     --escala-destaque: 1;
     --escala-zoom-foto: 1;
     --escala-pulo: 1;
+    --escala-marcador-pressionado: 1;
   }
 }
